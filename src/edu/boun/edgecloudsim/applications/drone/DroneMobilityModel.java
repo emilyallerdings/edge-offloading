@@ -38,7 +38,8 @@ public class DroneMobilityModel extends MobilityModel {
 		Element location = (Element) ((Element) datacenterList.item(0)).getElementsByTagName("location").item(0);
 		int x_pos = Integer.parseInt(location.getElementsByTagName("x_pos").item(0).getTextContent());
 		lengthOfSegment = x_pos * 2; //assume that all segments have the same length
-		int totalLengthOfRoad = lengthOfSegment * datacenterList.getLength();
+		int totalLengthOfRoad_x = lengthOfSegment * 5;
+		int totalLengthOfRoad_y = lengthOfSegment * 8;
 
 		//prepare locationTypes array to store attractiveness level of the locations
 		locationTypes = new int[5][8];
@@ -64,8 +65,8 @@ public class DroneMobilityModel extends MobilityModel {
 		initialLocationIndexArray = new int[numberOfMobileDevices][2];
 		timeToReachNextLocationArray = new double[numberOfMobileDevices];
 		for (int i = 0; i < numberOfMobileDevices; i++) {
-			initialPositionArray[i][0] = SimUtils.getRandomNumber(0, totalLengthOfRoad - 1);
-			initialPositionArray[i][1] = SimUtils.getRandomNumber(0, totalLengthOfRoad - 1);
+			initialPositionArray[i][0] = SimUtils.getRandomNumber(0, totalLengthOfRoad_x - 1);
+			initialPositionArray[i][1] = SimUtils.getRandomNumber(0, totalLengthOfRoad_y - 1);
 			initialLocationIndexArray[i][0] = initialPositionArray[i][0] / lengthOfSegment;
 			initialLocationIndexArray[i][1] = initialPositionArray[i][1] / lengthOfSegment;
 			timeToReachNextLocationArray[i] = ((double) 3.6 *
