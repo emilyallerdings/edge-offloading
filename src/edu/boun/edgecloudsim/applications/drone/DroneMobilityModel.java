@@ -1,5 +1,7 @@
 package edu.boun.edgecloudsim.applications.drone;
 
+import edu.boun.edgecloudsim.utils.SimLogger;
+import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -10,17 +12,24 @@ import edu.boun.edgecloudsim.mobility.MobilityModel;
 import edu.boun.edgecloudsim.utils.Location;
 import edu.boun.edgecloudsim.utils.SimUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 public class DroneMobilityModel extends MobilityModel {
 	private final double SPEED_FOR_PLACES[] = {20, 40, 60}; //km per hour
 
+	private List<TreeMap<Double, Location>> treeMapArray;
+
 	private int lengthOfSegment;
 	private double totalTimeForLoop; //seconds
-	private int[][] locationTypes;
+	private int[] locationTypes;
 
 	//prepare following arrays to decrease computation on getLocation() function
 	//NOTE: if the number of clients is high, keeping following values in RAM
 	//      may be expensive. In that case sacrifice computational resources!
-	private int[][] initialLocationIndexArray;
+	private int[] initialLocationIndexArray;
 	private int[][] initialPositionArray; //in meters unit
 	private double[] timeToDriveLocationArray;//in seconds unit
 	private double[] timeToReachNextLocationArray; //in seconds unit
@@ -29,85 +38,87 @@ public class DroneMobilityModel extends MobilityModel {
 		super(_numberOfMobileDevices, _simulationTime);
 		// TODO Auto-generated constructor stub
 	}
-
 	@Override
 	public void initialize() {
-		//Find total length of the road
+		treeMapArray = new ArrayList<TreeMap<Double, Location>>();
+
+		ExponentialDistribution[] expRngList = new ExponentialDistribution[SimSettings.getInstance().getNumOfEdgeDatacenters()];
+
+		//create random number generator for each place
 		Document doc = SimSettings.getInstance().getEdgeDevicesDocument();
 		NodeList datacenterList = doc.getElementsByTagName("datacenter");
-		Element location = (Element) ((Element) datacenterList.item(0)).getElementsByTagName("location").item(0);
-		int x_pos = Integer.parseInt(location.getElementsByTagName("x_pos").item(0).getTextContent());
-		lengthOfSegment = x_pos * 2; //assume that all segments have the same length
-		int totalLengthOfRoad_x = lengthOfSegment * 5;
-		int totalLengthOfRoad_y = lengthOfSegment * 8;
+		for (int i = 0; i < datacenterList.getLength(); i++) {
+			Node datacenterNode = datacenterList.item(i);
+			Element datacenterElement = (Element) datacenterNode;
+			Element location = (Element)datacenterElement.getElementsByTagName("location").item(0);
+			String attractiveness = location.getElementsByTagName("attractiveness").item(0).getTextContent();
+			int placeTypeIndex = Integer.parseInt(attractiveness);
 
-		//prepare locationTypes array to store attractiveness level of the locations
-		locationTypes = new int[5][8];
-		timeToDriveLocationArray = new double[datacenterList.getLength()];
-		for (int i = 0; i < 5; i++) {
-			for (int j = 0; j < 8; j++) {
-				Node datacenterNode = datacenterList.item(i);
-				Element datacenterElement = (Element) datacenterNode;
-				Element locationElement = (Element) datacenterElement.getElementsByTagName("location").item(0);
-				locationTypes[i][j] = Integer.parseInt(locationElement.getElementsByTagName("attractiveness").item(0).getTextContent());
+			expRngList[i] = new ExponentialDistribution(SimSettings.getInstance().getMobilityLookUpTable()[placeTypeIndex]);
+		}
 
-				//(3600 * lengthOfSegment) / (SPEED_FOR_PLACES[x] * 1000);
-				timeToDriveLocationArray[i] = ((double) 3.6 * (double) lengthOfSegment) /
-						(SPEED_FOR_PLACES[locationTypes[i][j]]);
+		//initialize tree maps and position of mobile devices
+		for(int i=0; i<numberOfMobileDevices; i++) {
+			treeMapArray.add(i, new TreeMap<Double, Location>());
 
-				//find the time required to loop in the road
-				totalTimeForLoop += timeToDriveLocationArray[i];
+			int randDatacenterId = SimUtils.getRandomNumber(0, SimSettings.getInstance().getNumOfEdgeDatacenters()-1);
+			Node datacenterNode = datacenterList.item(randDatacenterId);
+			Element datacenterElement = (Element) datacenterNode;
+			Element location = (Element)datacenterElement.getElementsByTagName("location").item(0);
+			String attractiveness = location.getElementsByTagName("attractiveness").item(0).getTextContent();
+			int placeTypeIndex = Integer.parseInt(attractiveness);
+			int wlan_id = Integer.parseInt(location.getElementsByTagName("wlan_id").item(0).getTextContent());
+			int x_pos = Integer.parseInt(location.getElementsByTagName("x_pos").item(0).getTextContent());
+			int y_pos = Integer.parseInt(location.getElementsByTagName("y_pos").item(0).getTextContent());
+
+			//start locating user shortly after the simulation started (e.g. 10 seconds)
+			treeMapArray.get(i).put(SimSettings.CLIENT_ACTIVITY_START_TIME, new Location(placeTypeIndex, wlan_id, x_pos, y_pos));
+		}
+
+		for(int i=0; i<numberOfMobileDevices; i++) {
+			TreeMap<Double, Location> treeMap = treeMapArray.get(i);
+
+			while(treeMap.lastKey() < SimSettings.getInstance().getSimulationTime()) {
+				boolean placeFound = false;
+				int currentLocationId = treeMap.lastEntry().getValue().getServingWlanId();
+				double waitingTime = expRngList[currentLocationId].sample();
+
+				while(placeFound == false){
+					int newDatacenterId = SimUtils.getRandomNumber(0,SimSettings.getInstance().getNumOfEdgeDatacenters()-1);
+					if(newDatacenterId != currentLocationId){
+						placeFound = true;
+						Node datacenterNode = datacenterList.item(newDatacenterId);
+						Element datacenterElement = (Element) datacenterNode;
+						Element location = (Element)datacenterElement.getElementsByTagName("location").item(0);
+						String attractiveness = location.getElementsByTagName("attractiveness").item(0).getTextContent();
+						int placeTypeIndex = Integer.parseInt(attractiveness);
+						int wlan_id = Integer.parseInt(location.getElementsByTagName("wlan_id").item(0).getTextContent());
+						int x_pos = Integer.parseInt(location.getElementsByTagName("x_pos").item(0).getTextContent());
+						int y_pos = Integer.parseInt(location.getElementsByTagName("y_pos").item(0).getTextContent());
+
+						treeMap.put(treeMap.lastKey()+waitingTime, new Location(placeTypeIndex, wlan_id, x_pos, y_pos));
+					}
+				}
+				if(!placeFound){
+					SimLogger.printLine("impossible is occurred! location cannot be assigned to the device!");
+					System.exit(1);
+				}
 			}
 		}
 
-		//assign a random x position as an initial position for each device
-		initialPositionArray = new int[numberOfMobileDevices][2];
-		initialLocationIndexArray = new int[numberOfMobileDevices][2];
-		timeToReachNextLocationArray = new double[numberOfMobileDevices];
-		for (int i = 0; i < numberOfMobileDevices; i++) {
-			initialPositionArray[i][0] = SimUtils.getRandomNumber(0, totalLengthOfRoad_x - 1);
-			initialPositionArray[i][1] = SimUtils.getRandomNumber(0, totalLengthOfRoad_y - 1);
-			initialLocationIndexArray[i][0] = initialPositionArray[i][0] / lengthOfSegment;
-			initialLocationIndexArray[i][1] = initialPositionArray[i][1] / lengthOfSegment;
-			timeToReachNextLocationArray[i] = ((double) 3.6 *
-					((double) (lengthOfSegment - (initialPositionArray[i][0] % lengthOfSegment))
-							+ (double) ((lengthOfSegment - (initialPositionArray[i][1] % lengthOfSegment))))) /
-					(SPEED_FOR_PLACES[locationTypes[initialLocationIndexArray[i][0]][initialLocationIndexArray[i][1]]]);
-		}
 	}
 
 	@Override
 	public Location getLocation(int deviceId, double time) {
-		int ofset_x = 0, ofset_y = 0;
-		double remainingTime = 0;
+		TreeMap<Double, Location> treeMap = treeMapArray.get(deviceId);
 
-		int locationIndex_x = initialLocationIndexArray[deviceId][0];
-		int locationIndex_y = initialLocationIndexArray[deviceId][1];
-		double timeToReachNextLocation = timeToReachNextLocationArray[deviceId];
+		Map.Entry<Double, Location> e = treeMap.floorEntry(time);
 
-		if(time < timeToReachNextLocation){
-			ofset_x = initialPositionArray[deviceId][0];
-			ofset_y = initialPositionArray[deviceId][1];
-			remainingTime = time;
-		}
-		else{
-			remainingTime = (time - timeToReachNextLocation) % totalTimeForLoop;
-			locationIndex_x = (locationIndex_x + 1) % 5;
-			locationIndex_y = (locationIndex_y + 1) % 8;
-
-			while(remainingTime > timeToDriveLocationArray[locationIndex_x]) {
-				remainingTime -= timeToDriveLocationArray[locationIndex_x];
-				locationIndex_x =  (locationIndex_x + 1) % 5;
-				locationIndex_y =  (locationIndex_y + 1) % 8;
-			}
-
-			ofset_x = locationIndex_x * lengthOfSegment;
+		if(e == null){
+			SimLogger.printLine("impossible is occurred! no location is found for the device '" + deviceId + "' at " + time);
+			System.exit(1);
 		}
 
-		int x_pos = (int) (ofset_x + ( (SPEED_FOR_PLACES[locationTypes[locationIndex_x][locationIndex_y]] * remainingTime) / (double)3.6));
-		int y_pos = (int) (ofset_y + ( (SPEED_FOR_PLACES[locationTypes[locationIndex_x][locationIndex_y]] * remainingTime) / (double)3.6));
-		int locationIndex =  locationIndex_x + locationIndex_y;
-		return new Location(locationTypes[locationIndex_x][locationIndex_y], locationIndex, x_pos, y_pos);
+		return e.getValue();
 	}
-
 }

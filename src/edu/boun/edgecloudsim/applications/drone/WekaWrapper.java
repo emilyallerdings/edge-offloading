@@ -70,7 +70,7 @@ public class WekaWrapper {
 	 * - SMO
 	 * - LibSVM
 	 * - MultilayerPerceptron
-	 * 
+	 *
 	 * Possible Values for RegressionType:
 	 * - LinearRegression
 	 * - SMOreg
@@ -194,7 +194,7 @@ public class WekaWrapper {
 		return dataRaw.get(0);
 	}
 
-	public Instance getClassificationData(String relation, double[] values, String[] attributes, double[] meanVals, double[] stdVals) {		
+	public Instance getClassificationData(String relation, double[] values, String[] attributes, double[] meanVals, double[] stdVals) {
 		ArrayList<Attribute> atts = new ArrayList<Attribute>();
 		ArrayList<String> classVal = new ArrayList<String>();
 		for(int i=0; i<CLASSIFIER_CLASSES.length; i++)

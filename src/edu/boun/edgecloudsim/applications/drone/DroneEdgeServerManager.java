@@ -23,7 +23,6 @@ import org.w3c.dom.NodeList;
 
 import edu.boun.edgecloudsim.core.SimManager;
 import edu.boun.edgecloudsim.core.SimSettings;
-import edu.boun.edgecloudsim.edge_server.EdgeHost;
 import edu.boun.edgecloudsim.edge_server.EdgeServerManager;
 import edu.boun.edgecloudsim.edge_server.EdgeVM;
 import edu.boun.edgecloudsim.edge_server.EdgeVmAllocationPolicy_Custom;
@@ -134,7 +133,7 @@ public class DroneEdgeServerManager extends EdgeServerManager{
 		double costPerMem = Double.parseDouble(datacenterElement.getElementsByTagName("costPerMem").item(0).getTextContent());
 		double costPerStorage = Double.parseDouble(datacenterElement.getElementsByTagName("costPerStorage").item(0).getTextContent());
 
-		List<EdgeHost> hostList=createHosts(datacenterElement);
+		List<DroneEdgeHost> hostList=createHosts(datacenterElement);
 
 		String name = "EdgeDatacenter_" + Integer.toString(index);
 		double time_zone = 3.0;         // time zone this resource located
@@ -156,11 +155,11 @@ public class DroneEdgeServerManager extends EdgeServerManager{
 		return datacenter;
 	}
 
-	private List<EdgeHost> createHosts(Element datacenterElement){
+	private List<DroneEdgeHost> createHosts(Element datacenterElement){
 
 		// Here are the steps needed to create a PowerDatacenter:
 		// 1. We need to create a list to store one or more Machines
-		List<EdgeHost> hostList = new ArrayList<EdgeHost>();
+		List<DroneEdgeHost> hostList = new ArrayList<DroneEdgeHost>();
 
 		Element location = (Element)datacenterElement.getElementsByTagName("location").item(0);
 		String attractiveness = location.getElementsByTagName("attractiveness").item(0).getTextContent();
@@ -179,6 +178,7 @@ public class DroneEdgeServerManager extends EdgeServerManager{
 			int ram = Integer.parseInt(hostElement.getElementsByTagName("ram").item(0).getTextContent());
 			long storage = Long.parseLong(hostElement.getElementsByTagName("storage").item(0).getTextContent());
 			long bandwidth = SimSettings.getInstance().getWlanBandwidth() / hostNodeList.getLength();
+			boolean edgeType = Boolean.parseBoolean(hostElement.getElementsByTagName("type").item(0).getTextContent());
 
 			// 2. A Machine contains one or more PEs or CPUs/Cores. Therefore, should
 			//    create a list to store these PEs before creating
@@ -192,13 +192,14 @@ public class DroneEdgeServerManager extends EdgeServerManager{
 			}
 
 			//4. Create Hosts with its id and list of PEs and add them to the list of machines
-			EdgeHost host = new EdgeHost(
+			DroneEdgeHost host = new DroneEdgeHost(
 					hostIdCounter,
 					new RamProvisionerSimple(ram),
 					new BwProvisionerSimple(bandwidth), //kbps
 					storage,
 					peList,
-					new VmSchedulerSpaceShared(peList)
+					new VmSchedulerSpaceShared(peList),
+					edgeType
 					);
 
 			host.setPlace(new Location(placeTypeIndex, wlan_id, x_pos, y_pos));

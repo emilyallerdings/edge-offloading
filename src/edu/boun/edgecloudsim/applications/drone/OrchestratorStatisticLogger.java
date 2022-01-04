@@ -34,7 +34,7 @@ public class OrchestratorStatisticLogger {
 
 	class StatisticWrapper {
 		StatItem edgeStat;
-		StatItem cloudViaRsuStat;
+		StatItem droneStat;
 		StatItem cloudViaGsmStat;
 
 		double getFailureRate(int targetDatacenter) {
@@ -45,7 +45,7 @@ public class OrchestratorStatisticLogger {
 				failureRate = edgeStat.getFailureRate();
 				break;
 			case DroneEdgeOrchestrator.CLOUD_DATACENTER_VIA_RSU:
-				failureRate = cloudViaRsuStat.getFailureRate();
+				failureRate = droneStat.getFailureRate();
 				break;
 			case DroneEdgeOrchestrator.CLOUD_DATACENTER_VIA_GSM:
 				failureRate = cloudViaGsmStat.getFailureRate();
@@ -67,7 +67,7 @@ public class OrchestratorStatisticLogger {
 				serviceTime = edgeStat.getAvgServiceTime();
 				break;
 			case DroneEdgeOrchestrator.CLOUD_DATACENTER_VIA_RSU:
-				serviceTime = cloudViaRsuStat.getAvgServiceTime();
+				serviceTime = droneStat.getAvgServiceTime();
 				break;
 			case DroneEdgeOrchestrator.CLOUD_DATACENTER_VIA_GSM:
 				serviceTime = cloudViaGsmStat.getAvgServiceTime();
@@ -84,7 +84,7 @@ public class OrchestratorStatisticLogger {
 
 	public OrchestratorStatisticLogger() {
 		statForCurrentWindow = new StatisticWrapper();		
-		statForCurrentWindow.cloudViaRsuStat = new StatItem();
+		statForCurrentWindow.droneStat = new StatItem();
 		statForCurrentWindow.cloudViaGsmStat = new StatItem();
 		statForCurrentWindow.edgeStat = new StatItem();
 
@@ -92,7 +92,7 @@ public class OrchestratorStatisticLogger {
 		for(int i = 0; i< NUMBER_OF_HISTORY_WINDOW; i++){
 			statForPreviousWindow[i] = new StatisticWrapper();
 
-			statForPreviousWindow[i].cloudViaRsuStat = new StatItem();
+			statForPreviousWindow[i].droneStat = new StatItem();
 			statForPreviousWindow[i].cloudViaGsmStat = new StatItem();
 			statForPreviousWindow[i].edgeStat = new StatItem();
 		}
@@ -114,7 +114,7 @@ public class OrchestratorStatisticLogger {
 			statItem = statForCurrentWindow.edgeStat;
 			break;
 		case DroneEdgeOrchestrator.CLOUD_DATACENTER_VIA_RSU:
-			statItem = statForCurrentWindow.cloudViaRsuStat;
+			statItem = statForCurrentWindow.droneStat;
 			break;
 		case DroneEdgeOrchestrator.CLOUD_DATACENTER_VIA_GSM:
 			statItem = statForCurrentWindow.cloudViaGsmStat;
@@ -156,9 +156,9 @@ public class OrchestratorStatisticLogger {
 
 	public void switchNewStatWindow() {
 		for(int i = NUMBER_OF_HISTORY_WINDOW -2; i>=0; i--){
-			statForPreviousWindow[i+1].cloudViaRsuStat.numOfCompletedTasks = statForPreviousWindow[i].cloudViaRsuStat.numOfCompletedTasks;
-			statForPreviousWindow[i+1].cloudViaRsuStat.numOfFailedTasks = statForPreviousWindow[i].cloudViaRsuStat.numOfFailedTasks;
-			statForPreviousWindow[i+1].cloudViaRsuStat.totalServiceTime = statForPreviousWindow[i].cloudViaRsuStat.totalServiceTime;
+			statForPreviousWindow[i+1].droneStat.numOfCompletedTasks = statForPreviousWindow[i].droneStat.numOfCompletedTasks;
+			statForPreviousWindow[i+1].droneStat.numOfFailedTasks = statForPreviousWindow[i].droneStat.numOfFailedTasks;
+			statForPreviousWindow[i+1].droneStat.totalServiceTime = statForPreviousWindow[i].droneStat.totalServiceTime;
 
 			statForPreviousWindow[i+1].cloudViaGsmStat.numOfCompletedTasks = statForPreviousWindow[i].cloudViaGsmStat.numOfCompletedTasks;
 			statForPreviousWindow[i+1].cloudViaGsmStat.numOfFailedTasks = statForPreviousWindow[i].cloudViaGsmStat.numOfFailedTasks;
@@ -169,12 +169,12 @@ public class OrchestratorStatisticLogger {
 			statForPreviousWindow[i+1].edgeStat.totalServiceTime = statForPreviousWindow[i].edgeStat.totalServiceTime;
 		}
 
-		statForPreviousWindow[0].cloudViaRsuStat.numOfCompletedTasks = statForCurrentWindow.cloudViaRsuStat.numOfCompletedTasks;
-		statForPreviousWindow[0].cloudViaRsuStat.numOfFailedTasks = statForCurrentWindow.cloudViaRsuStat.numOfFailedTasks;
-		statForPreviousWindow[0].cloudViaRsuStat.totalServiceTime = statForCurrentWindow.cloudViaRsuStat.totalServiceTime;
-		statForCurrentWindow.cloudViaRsuStat.numOfCompletedTasks = 0;
-		statForCurrentWindow.cloudViaRsuStat.numOfFailedTasks = 0;
-		statForCurrentWindow.cloudViaRsuStat.totalServiceTime = 0;
+		statForPreviousWindow[0].droneStat.numOfCompletedTasks = statForCurrentWindow.droneStat.numOfCompletedTasks;
+		statForPreviousWindow[0].droneStat.numOfFailedTasks = statForCurrentWindow.droneStat.numOfFailedTasks;
+		statForPreviousWindow[0].droneStat.totalServiceTime = statForCurrentWindow.droneStat.totalServiceTime;
+		statForCurrentWindow.droneStat.numOfCompletedTasks = 0;
+		statForCurrentWindow.droneStat.numOfFailedTasks = 0;
+		statForCurrentWindow.droneStat.totalServiceTime = 0;
 
 		statForPreviousWindow[0].cloudViaGsmStat.numOfCompletedTasks = statForCurrentWindow.cloudViaGsmStat.numOfCompletedTasks;
 		statForPreviousWindow[0].cloudViaGsmStat.numOfFailedTasks = statForCurrentWindow.cloudViaGsmStat.numOfFailedTasks;

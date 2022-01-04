@@ -111,7 +111,7 @@ public class DroneEdgeOrchestrator extends EdgeOrchestrator {
 							task.getCloudletLength(), wlanUploadDelay,
 							wlanDownloadDelay, avgEdgeUtilization});
 
-			boolean predictedResultForCloudViaRSU = weka.handleClassification(CLOUD_DATACENTER_VIA_RSU,
+			boolean predictedResultForDrone = weka.handleClassification(CLOUD_DATACENTER_VIA_RSU,
 					new double[] {trainerLogger.getOffloadStat(CLOUD_DATACENTER_VIA_RSU-1),
 							wanUploadDelay, wanDownloadDelay});
 
@@ -120,22 +120,22 @@ public class DroneEdgeOrchestrator extends EdgeOrchestrator {
 							gsmUploadDelay, gsmDownloadDelay});
 
 			double predictedServiceTimeForEdge = Double.MAX_VALUE;
-			double predictedServiceTimeForCloudViaRSU = Double.MAX_VALUE;
+			double predictedServiceTimeForDrone = Double.MAX_VALUE;
 			double predictedServiceTimeForCloudViaGSM = Double.MAX_VALUE;
 
 			if(predictedResultForEdge)
 				predictedServiceTimeForEdge = weka.handleRegression(EDGE_DATACENTER,
 						new double[] {task.getCloudletLength(), avgEdgeUtilization});
 
-			if(predictedResultForCloudViaRSU)
-				predictedServiceTimeForCloudViaRSU = weka.handleRegression(CLOUD_DATACENTER_VIA_RSU,
+			if(predictedResultForDrone)
+				predictedServiceTimeForDrone = weka.handleRegression(CLOUD_DATACENTER_VIA_RSU,
 						new double[] {task.getCloudletLength(), wanUploadDelay, wanDownloadDelay});
 
 			if(predictedResultForCloudViaGSM)
 				predictedServiceTimeForCloudViaGSM = weka.handleRegression(CLOUD_DATACENTER_VIA_GSM,
 						new double[] {task.getCloudletLength(), gsmUploadDelay, gsmDownloadDelay});
 
-			if(!predictedResultForEdge && !predictedResultForCloudViaRSU && !predictedResultForCloudViaGSM) {
+			if(!predictedResultForEdge && !predictedResultForDrone && !predictedResultForCloudViaGSM) {
 				double probabilities[] = {0.33, 0.34, 0.33};
 
 				double randomNumber = SimUtils.getRandomDoubleNumber(0, 1);
@@ -155,11 +155,11 @@ public class DroneEdgeOrchestrator extends EdgeOrchestrator {
 					System.exit(1);
 				}
 			}
-			else if(predictedServiceTimeForEdge <= Math.min(predictedServiceTimeForCloudViaRSU, predictedServiceTimeForCloudViaGSM))
+			else if(predictedServiceTimeForEdge <= Math.min(predictedServiceTimeForDrone, predictedServiceTimeForCloudViaGSM))
 				result = EDGE_DATACENTER;
-			else if(predictedServiceTimeForCloudViaRSU <= Math.min(predictedServiceTimeForEdge, predictedServiceTimeForCloudViaGSM))
+			else if(predictedServiceTimeForDrone <= Math.min(predictedServiceTimeForEdge, predictedServiceTimeForCloudViaGSM))
 				result = CLOUD_DATACENTER_VIA_RSU;
-			else if(predictedServiceTimeForCloudViaGSM <= Math.min(predictedServiceTimeForEdge, predictedServiceTimeForCloudViaRSU))
+			else if(predictedServiceTimeForCloudViaGSM <= Math.min(predictedServiceTimeForEdge, predictedServiceTimeForDrone))
 				result = CLOUD_DATACENTER_VIA_GSM;
 			else{
 				SimLogger.printLine("Impossible occurred in AI based algorithm! Terminating simulation...");

@@ -17,7 +17,6 @@ import edu.boun.edgecloudsim.core.SimSettings.NETWORK_DELAY_TYPES;
 import edu.boun.edgecloudsim.core.SimSettings.VM_TYPES;
 import edu.boun.edgecloudsim.edge_client.MobileDeviceManager;
 import edu.boun.edgecloudsim.edge_client.Task;
-import edu.boun.edgecloudsim.edge_server.EdgeHost;
 import edu.boun.edgecloudsim.edge_server.EdgeVM;
 import edu.boun.edgecloudsim.utils.TaskProperty;
 import edu.boun.edgecloudsim.utils.Location;
@@ -185,7 +184,7 @@ public class DroneMobileDeviceManager extends MobileDeviceManager {
 		}
 		case SET_DELAY_LOG:
 		{
-			int[] indices = {0,6,10};
+			int[] indices = {0,4,8};
 			double apUploadDelays[] = new double[indices.length];
 			double apDownloadDelays[] = new double[indices.length];
 			for(int i=0; i<indices.length; i++){
@@ -238,7 +237,7 @@ public class DroneMobileDeviceManager extends MobileDeviceManager {
 				getCloudletList().clear();
 
 				if(selectedVM instanceof EdgeVM) {
-					EdgeHost host = (EdgeHost)(selectedVM.getHost());
+					DroneEdgeHost host = (DroneEdgeHost)(selectedVM.getHost());
 
 					//if nearest edge device is selected
 					if(host.getLocation().getServingWlanId() == task.getSubmittedLocation().getServingWlanId())

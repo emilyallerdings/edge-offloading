@@ -121,7 +121,7 @@ public class OrchestratorTrainerLogger {
 			line = "EDGE";
 			break;
 		case DroneEdgeOrchestrator.CLOUD_DATACENTER_VIA_RSU:
-			line = "CLOUD_VIA_RSU";
+			line = "CLOUD_DATACENTER_VIA_RSU";
 			break;
 		case DroneEdgeOrchestrator.CLOUD_DATACENTER_VIA_GSM:
 			line = "CLOUD_VIA_GSM";

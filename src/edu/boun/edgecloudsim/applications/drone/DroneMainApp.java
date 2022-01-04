@@ -124,8 +124,6 @@ public class DroneMainApp {
 			System.exit(1);
 		}
 
-
-
 		Date ScenarioEndDate = Calendar.getInstance().getTime();
 		now = df.format(ScenarioEndDate);
 		SimLogger.printLine("Scenario finished at " + now +  ". It took " + SimUtils.getTimeDifference(ScenarioStartDate,ScenarioEndDate));
