@@ -12,3 +12,7 @@ python data_convertor.py config.json cloud_gsm classifier train
 python data_convertor.py config.json cloud_gsm classifier test
 python data_convertor.py config.json cloud_gsm regression train
 python data_convertor.py config.json cloud_gsm regression test 
+python data_convertor.py config.json drone classifier train
+python data_convertor.py config.json drone classifier test
+python data_convertor.py config.json drone regression train
+python data_convertor.py config.json drone regression test

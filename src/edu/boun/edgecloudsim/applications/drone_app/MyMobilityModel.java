@@ -29,6 +29,8 @@ public class MyMobilityModel extends MobilityModel {
 		for (int i = 0; i < numberOfMobileDevices; i++) {
 			int x_pos = SimUtils.getRandomNumber(0, x_bound);
 			int y_pos = SimUtils.getRandomNumber(0, y_bound);
+
+			//TODO: This is hard-coded! It's better to get these values from the edge device in the region.
 			int wlan_id = (x_pos-1)/1000 + ((y_pos-1)/1000) * 3 ;
 			int placeTypeIndex = (x_pos-1)/1000;
 			location[i] = new Location(placeTypeIndex, wlan_id, x_pos, y_pos);

@@ -4,7 +4,7 @@ import sys
 
 if len (sys.argv) != 5:
     print('invalid arguments. Usage:')
-    print('python data_conventor.py config.json [edge|cloud_rsu|cloud_gsm] [classifier|regression] [train|test]')
+    print('python data_conventor.py config.json [edge|cloud_rsu|cloud_gsm|drone] [classifier|regression] [train|test]')
     sys.exit(1)
     
 with open(sys.argv[1]) as json_data_file:
@@ -27,9 +27,11 @@ def getDecisionColumnName(target):
     if target == "edge":
         COLUMN_NAME  = "EDGE"
     elif target == "cloud_rsu":
-        COLUMN_NAME  = "CLOUD_VIA_RSU"
+        COLUMN_NAME  = "CLOUD_DATACENTER_VIA_RSU"
     elif target == "cloud_gsm":
-        COLUMN_NAME  = "CLOUD_VIA_GSM"
+        COLUMN_NAME  = "CLOUD_DATACENTER_VIA_GSM"
+   elif target == "drone":
+        COLUMN_NAME  = "DRONE"
     return COLUMN_NAME
 
 def getClassifierColumns(target):
@@ -39,6 +41,8 @@ def getClassifierColumns(target):
         result  = ["NumOffloadedTask", "WANUploadDelay", "WANDownloadDelay", "Result"]
     elif target == "cloud_gsm":
         result  = ["NumOffloadedTask", "GSMUploadDelay", "GSMDownloadDelay", "Result"]
+    elif target == "drone":
+        result  = ["NumOffloadedTask", "TaskLength", "WLANUploadDelay", "WLANDownloadDelay", "AvgEdgeUtilization", "Result"]
     return result
 
 def getRegressionColumns(target):
@@ -48,6 +52,8 @@ def getRegressionColumns(target):
         result = ["TaskLength", "WANUploadDelay", "WANDownloadDelay", "ServiceTime"]
     elif target == "cloud_gsm":
         result = ["TaskLength", "GSMUploadDelay", "GSMDownloadDelay", "ServiceTime"]
+    elif target == "drone":
+        result = ["TaskLength", "AvgEdgeUtilization", "ServiceTime"]
     return result
 
 def znorm(column):

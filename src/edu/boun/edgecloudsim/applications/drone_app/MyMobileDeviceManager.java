@@ -122,89 +122,26 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 			}
 		}
 		else if(task.getAssociatedDatacenterId() == MyEdgeOrchestrator.EDGE_DATACENTER) {
-			Location currentLocation = SimManager.getInstance().getMobilityModel().getLocation(task.getMobileDeviceId(),CloudSim.clock());
-			if(task.getSubmittedLocation().getServingWlanId() == currentLocation.getServingWlanId())
-			{
-				NETWORK_DELAY_TYPES delayType = NETWORK_DELAY_TYPES.WLAN_DELAY;
-				double wlanDelay = networkModel.getDownloadDelay(delayType, task);
-				if(wlanDelay > 0)
-				{
-					Location futureLocation = SimManager.getInstance().getMobilityModel().getLocation(task.getMobileDeviceId(),CloudSim.clock()+wlanDelay);
-					if(task.getSubmittedLocation().getServingWlanId() == futureLocation.getServingWlanId())
-					{
-						SimLogger.getInstance().setDownloadDelay(task.getCloudletId(), wlanDelay, delayType);
-						schedule(getId(), wlanDelay, RESPONSE_RECEIVED_BY_MOBILE_DEVICE, task);
-					}
-					else
-					{
-						SimLogger.getInstance().failedDueToMobility(task.getCloudletId(), CloudSim.clock());
-						//no need to record failed task due to the mobility
-						//edgeOrchestrator.taskFailed(task);
-					}
-				}
-				else
-				{
-					SimLogger.getInstance().failedDueToBandwidth(task.getCloudletId(), CloudSim.clock(), delayType);
-					edgeOrchestrator.taskFailed(task);
-				}
+			NETWORK_DELAY_TYPES delayType = NETWORK_DELAY_TYPES.WLAN_DELAY;
+			double wlanDelay = networkModel.getDownloadDelay(delayType, task);
+			if (wlanDelay > 0) {
+				SimLogger.getInstance().setDownloadDelay(task.getCloudletId(), wlanDelay, delayType);
+				schedule(getId(), wlanDelay, RESPONSE_RECEIVED_BY_MOBILE_DEVICE, task);
+			} else {
+				SimLogger.getInstance().failedDueToBandwidth(task.getCloudletId(), CloudSim.clock(), delayType);
+				edgeOrchestrator.taskFailed(task);
 			}
-			else
-			{
-				NETWORK_DELAY_TYPES delayType = NETWORK_DELAY_TYPES.MAN_DELAY;
-				double manDelay = networkModel.getDownloadDelay(delayType, task);
-				if(manDelay > 0)
-				{
-					SimLogger.getInstance().setDownloadDelay(task.getCloudletId(), manDelay, delayType);
-					schedule(getId(), manDelay, RESPONSE_RECEIVED_BY_EDGE_DEVICE_TO_RELAY_MOBILE_DEVICE, task);
-				}
-				else
-				{
-					SimLogger.getInstance().failedDueToBandwidth(task.getCloudletId(), CloudSim.clock(), delayType);
-					edgeOrchestrator.taskFailed(task);
-				}
-			}
+
 		}
 		else if(task.getAssociatedDatacenterId() == MyEdgeOrchestrator.DRONE_DATACENTER) {
-			Location currentLocation = SimManager.getInstance().getMobilityModel().getLocation(task.getMobileDeviceId(),CloudSim.clock());
-			if(task.getSubmittedLocation().getServingWlanId() == currentLocation.getServingWlanId())
-			{
-				NETWORK_DELAY_TYPES delayType = NETWORK_DELAY_TYPES.WLAN_DELAY;
-				double wlanDelay = networkModel.getDownloadDelay(delayType, task);
-				if(wlanDelay > 0)
-				{
-					Location futureLocation = SimManager.getInstance().getMobilityModel().getLocation(task.getMobileDeviceId(),CloudSim.clock()+wlanDelay);
-					if(task.getSubmittedLocation().getServingWlanId() == futureLocation.getServingWlanId())
-					{
-						SimLogger.getInstance().setDownloadDelay(task.getCloudletId(), wlanDelay, delayType);
-						schedule(getId(), wlanDelay, RESPONSE_RECEIVED_BY_MOBILE_DEVICE, task);
-					}
-					else
-					{
-						SimLogger.getInstance().failedDueToMobility(task.getCloudletId(), CloudSim.clock());
-						//no need to record failed task due to the mobility
-						//edgeOrchestrator.taskFailed(task);
-					}
-				}
-				else
-				{
-					SimLogger.getInstance().failedDueToBandwidth(task.getCloudletId(), CloudSim.clock(), delayType);
-					edgeOrchestrator.taskFailed(task);
-				}
-			}
-			else
-			{
-				NETWORK_DELAY_TYPES delayType = NETWORK_DELAY_TYPES.MAN_DELAY;
-				double manDelay = networkModel.getDownloadDelay(delayType, task);
-				if(manDelay > 0)
-				{
-					SimLogger.getInstance().setDownloadDelay(task.getCloudletId(), manDelay, delayType);
-					schedule(getId(), manDelay, RESPONSE_RECEIVED_BY_DRONE_TO_RELAY_MOBILE_DEVICE, task);
-				}
-				else
-				{
-					SimLogger.getInstance().failedDueToBandwidth(task.getCloudletId(), CloudSim.clock(), delayType);
-					edgeOrchestrator.taskFailed(task);
-				}
+			NETWORK_DELAY_TYPES delayType = NETWORK_DELAY_TYPES.WLAN_DELAY;
+			double wlanDelay = networkModel.getDownloadDelay(delayType, task);
+			if (wlanDelay > 0) {
+				SimLogger.getInstance().setDownloadDelay(task.getCloudletId(), wlanDelay, delayType);
+				schedule(getId(), wlanDelay, RESPONSE_RECEIVED_BY_MOBILE_DEVICE, task);
+			} else {
+				SimLogger.getInstance().failedDueToBandwidth(task.getCloudletId(), CloudSim.clock(), delayType);
+				edgeOrchestrator.taskFailed(task);
 			}
 		}
 		else {
@@ -286,7 +223,7 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 
 					if (selectedVM instanceof DroneVM) {
 						DroneHost host = (DroneHost)(selectedVM.getHost());
-						if (host.getLocation().getServingWlanId() == task.getSubmittedLocation().getServingWlanId())
+						if (host.getLocation(CloudSim.clock()).getServingWlanId() == task.getSubmittedLocation().getServingWlanId())
 							nextEvent = REQUEST_RECEIVED_BY_DRONE;
 						else
 							nextEvent = REQUEST_RECEIVED_BY_DRONE_TO_RELAY_NEIGHBOR;
@@ -387,21 +324,7 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 			}
 			case RESPONSE_RECEIVED_BY_EDGE_DEVICE: {
 				Task task = (Task) ev.getData();
-				Location currentLocation = SimManager.getInstance().getMobilityModel().getLocation(task.getMobileDeviceId(), CloudSim.clock());
-				if (task.getSubmittedLocation().getServingWlanId() == currentLocation.getServingWlanId()) {
 					scheduleNow(getId(), RESPONSE_RECEIVED_BY_EDGE_DEVICE_TO_RELAY_MOBILE_DEVICE, task);
-				} else {
-					NETWORK_DELAY_TYPES delayType = NETWORK_DELAY_TYPES.MAN_DELAY;
-					double manDelay = networkModel.getDownloadDelay(delayType, task);
-					if (manDelay > 0) {
-						SimLogger.getInstance().setDownloadDelay(task.getCloudletId(), manDelay, delayType);
-						schedule(getId(), manDelay, RESPONSE_RECEIVED_BY_EDGE_DEVICE_TO_RELAY_MOBILE_DEVICE, task);
-					} else {
-						SimLogger.getInstance().failedDueToBandwidth(task.getCloudletId(), CloudSim.clock(), delayType);
-						edgeOrchestrator.taskFailed(task);
-					}
-				}
-
 				break;
 			}
 			case RESPONSE_RECEIVED_BY_EDGE_DEVICE_TO_RELAY_MOBILE_DEVICE:
@@ -413,17 +336,8 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 				double wlanDelay = networkModel.getDownloadDelay(delayType, task);
 
 				if (wlanDelay > 0) {
-					Location currentLocation = SimManager.getInstance().getMobilityModel().getLocation(task.getMobileDeviceId(), CloudSim.clock());
-					Location futureLocation = SimManager.getInstance().getMobilityModel().getLocation(task.getMobileDeviceId(), CloudSim.clock() + wlanDelay);
-
-					if (currentLocation.getServingWlanId() == futureLocation.getServingWlanId()) {
 						SimLogger.getInstance().setDownloadDelay(task.getCloudletId(), wlanDelay, delayType);
 						schedule(getId(), wlanDelay, RESPONSE_RECEIVED_BY_MOBILE_DEVICE, task);
-					} else {
-						SimLogger.getInstance().failedDueToMobility(task.getCloudletId(), CloudSim.clock());
-						//no need to record failed task due to the mobility
-						//edgeOrchestrator.taskFailed(task);
-					}
 				} else {
 					SimLogger.getInstance().failedDueToBandwidth(task.getCloudletId(), CloudSim.clock(), delayType);
 					edgeOrchestrator.taskFailed(task);
@@ -456,20 +370,7 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 			}
 			case REQUEST_RECEIVED_BY_DRONE: {
 				Task task = (Task) ev.getData();
-				Location currentLocation = SimManager.getInstance().getMobilityModel().getLocation(task.getMobileDeviceId(), CloudSim.clock());
-				if (task.getSubmittedLocation().getServingWlanId() == currentLocation.getServingWlanId()) {
 					scheduleNow(getId(), RESPONSE_RECEIVED_BY_DRONE_TO_RELAY_MOBILE_DEVICE, task);
-				} else {
-					NETWORK_DELAY_TYPES delayType = NETWORK_DELAY_TYPES.MAN_DELAY;
-					double manDelay = networkModel.getDownloadDelay(delayType, task);
-					if (manDelay > 0) {
-						SimLogger.getInstance().setDownloadDelay(task.getCloudletId(), manDelay, delayType);
-						schedule(getId(), manDelay, RESPONSE_RECEIVED_BY_DRONE_TO_RELAY_MOBILE_DEVICE, task);
-					} else {
-						SimLogger.getInstance().failedDueToBandwidth(task.getCloudletId(), CloudSim.clock(), delayType);
-						edgeOrchestrator.taskFailed(task);
-					}
-				}
 				break;
 			}
 			default:

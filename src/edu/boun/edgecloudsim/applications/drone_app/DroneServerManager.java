@@ -86,43 +86,7 @@ public class DroneServerManager extends EdgeServerManager {
     }
 
     public void createVmList(int brockerId) {
-//        int hostCounter=0;
-//        int vmCounter=0;
-//
-//        //Create VMs for each hosts
-//        Document doc = SimSettings.getInstance().getDronesDocument();
-//        NodeList datacenterList = doc.getElementsByTagName("datacenter");
-//        for (int i = 0; i < datacenterList.getLength(); i++) {
-//            Node datacenterNode = datacenterList.item(i);
-//            Element datacenterElement = (Element) datacenterNode;
-//            NodeList hostNodeList = datacenterElement.getElementsByTagName("host");
-//            for (int j = 0; j < hostNodeList.getLength(); j++) {
-//
-//                vmList.add(hostCounter, new ArrayList<DroneVM>());
-//
-//                Node hostNode = hostNodeList.item(j);
-//                Element hostElement = (Element) hostNode;
-//                NodeList vmNodeList = hostElement.getElementsByTagName("VM");
-//                for (int k = 0; k < vmNodeList.getLength(); k++) {
-//                    Node vmNode = vmNodeList.item(k);
-//                    Element vmElement = (Element) vmNode;
-//
-//                    String vmm = vmElement.getAttribute("vmm");
-//                    int numOfCores = Integer.parseInt(vmElement.getElementsByTagName("core").item(0).getTextContent());
-//                    double mips = Double.parseDouble(vmElement.getElementsByTagName("mips").item(0).getTextContent());
-//                    int ram = Integer.parseInt(vmElement.getElementsByTagName("ram").item(0).getTextContent());
-//                    long storage = Long.parseLong(vmElement.getElementsByTagName("storage").item(0).getTextContent());
-//                    long bandwidth = SimSettings.getInstance().getWlanBandwidth() / (hostNodeList.getLength()+vmNodeList.getLength());
-//
-//                    //VM Parameters
-//                    DroneVM vm = new DroneVM(vmCounter, brockerId, mips, numOfCores, ram, bandwidth, storage, vmm, new CloudletSchedulerTimeShared());
-//                    vmList.get(hostCounter).add(vm);
-//                    vmCounter++;
-//                }
-//
-//                hostCounter++;
-//            }
-//        }
+        // VMs are created alongside the hosts. So this method has no implementation
     }
 
     public void terminateDatacenters() {

@@ -1,6 +1,5 @@
 package edu.boun.edgecloudsim.applications.drone_app;
 
-import edu.boun.edgecloudsim.core.SimManager;
 import edu.boun.edgecloudsim.core.SimSettings;
 import org.cloudbus.cloudsim.Host;
 import edu.boun.edgecloudsim.utils.Location;
@@ -61,7 +60,7 @@ public class DroneHost extends Host {
         }
 
         // wlanid specifies the sub-area in the whole area which is used to choose the closest edge device.
-        // We use getClosestDrone method in the MobilityModel class. Yet, here we find the new sub-area that dron has entered by moving.
+        // We use getClosestDrone method in the MobilityModel class. Yet, here we find the new sub-area that drone has entered by moving.
         int WlanId = (x - 1) / 1000 + ((y - 1) / 1000) * 3;
         int placeTypeIndex = (x - 1) / 1000;
         Location futureLocation = new Location(placeTypeIndex, WlanId, x, y);
