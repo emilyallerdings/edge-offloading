@@ -1,4 +1,4 @@
-package edu.boun.edgecloudsim.applications.drone;
+package edu.boun.edgecloudsim.applications.drone_app;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -23,15 +23,16 @@ import org.w3c.dom.NodeList;
 
 import edu.boun.edgecloudsim.core.SimManager;
 import edu.boun.edgecloudsim.core.SimSettings;
+import edu.boun.edgecloudsim.edge_server.EdgeHost;
 import edu.boun.edgecloudsim.edge_server.EdgeServerManager;
 import edu.boun.edgecloudsim.edge_server.EdgeVM;
 import edu.boun.edgecloudsim.edge_server.EdgeVmAllocationPolicy_Custom;
 import edu.boun.edgecloudsim.utils.Location;
 
-public class DroneEdgeServerManager extends EdgeServerManager{
+public class MyEdgeServerManager extends EdgeServerManager{
 	private int hostIdCounter;
 
-	public DroneEdgeServerManager() {
+	public MyEdgeServerManager() {
 		hostIdCounter = 0;
 	}
 
@@ -74,7 +75,7 @@ public class DroneEdgeServerManager extends EdgeServerManager{
 				Element hostElement = (Element) hostNode;
 				NodeList vmNodeList = hostElement.getElementsByTagName("VM");
 				for (int k = 0; k < vmNodeList.getLength(); k++) {
-					Node vmNode = vmNodeList.item(k);					
+					Node vmNode = vmNodeList.item(k);
 					Element vmElement = (Element) vmNode;
 
 					String vmm = vmElement.getAttribute("vmm");
@@ -84,7 +85,7 @@ public class DroneEdgeServerManager extends EdgeServerManager{
 					long storage = Long.parseLong(vmElement.getElementsByTagName("storage").item(0).getTextContent());
 					long bandwidth = SimSettings.getInstance().getWlanBandwidth() / (hostNodeList.getLength()+vmNodeList.getLength());
 
-					//VM Parameters		
+					//VM Parameters
 					EdgeVM vm = new EdgeVM(vmCounter, brockerId, mips, numOfCores, ram, bandwidth, storage, vmm, new CloudletSchedulerTimeShared());
 					vmList.get(hostCounter).add(vm);
 					vmCounter++;
@@ -133,7 +134,7 @@ public class DroneEdgeServerManager extends EdgeServerManager{
 		double costPerMem = Double.parseDouble(datacenterElement.getElementsByTagName("costPerMem").item(0).getTextContent());
 		double costPerStorage = Double.parseDouble(datacenterElement.getElementsByTagName("costPerStorage").item(0).getTextContent());
 
-		List<DroneEdgeHost> hostList=createHosts(datacenterElement);
+		List<EdgeHost> hostList=createHosts(datacenterElement);
 
 		String name = "EdgeDatacenter_" + Integer.toString(index);
 		double time_zone = 3.0;         // time zone this resource located
@@ -155,11 +156,11 @@ public class DroneEdgeServerManager extends EdgeServerManager{
 		return datacenter;
 	}
 
-	private List<DroneEdgeHost> createHosts(Element datacenterElement){
+	private List<EdgeHost> createHosts(Element datacenterElement){
 
 		// Here are the steps needed to create a PowerDatacenter:
 		// 1. We need to create a list to store one or more Machines
-		List<DroneEdgeHost> hostList = new ArrayList<DroneEdgeHost>();
+		List<EdgeHost> hostList = new ArrayList<EdgeHost>();
 
 		Element location = (Element)datacenterElement.getElementsByTagName("location").item(0);
 		String attractiveness = location.getElementsByTagName("attractiveness").item(0).getTextContent();
@@ -178,7 +179,6 @@ public class DroneEdgeServerManager extends EdgeServerManager{
 			int ram = Integer.parseInt(hostElement.getElementsByTagName("ram").item(0).getTextContent());
 			long storage = Long.parseLong(hostElement.getElementsByTagName("storage").item(0).getTextContent());
 			long bandwidth = SimSettings.getInstance().getWlanBandwidth() / hostNodeList.getLength();
-			boolean edgeType = Boolean.parseBoolean(hostElement.getElementsByTagName("type").item(0).getTextContent());
 
 			// 2. A Machine contains one or more PEs or CPUs/Cores. Therefore, should
 			//    create a list to store these PEs before creating
@@ -192,15 +192,14 @@ public class DroneEdgeServerManager extends EdgeServerManager{
 			}
 
 			//4. Create Hosts with its id and list of PEs and add them to the list of machines
-			DroneEdgeHost host = new DroneEdgeHost(
+			EdgeHost host = new EdgeHost(
 					hostIdCounter,
 					new RamProvisionerSimple(ram),
 					new BwProvisionerSimple(bandwidth), //kbps
 					storage,
 					peList,
-					new VmSchedulerSpaceShared(peList),
-					edgeType
-					);
+					new VmSchedulerSpaceShared(peList)
+			);
 
 			host.setPlace(new Location(placeTypeIndex, wlan_id, x_pos, y_pos));
 			hostList.add(host);

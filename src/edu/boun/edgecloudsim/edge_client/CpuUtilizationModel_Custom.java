@@ -54,6 +54,8 @@ public class CpuUtilizationModel_Custom implements UtilizationModel {
 			index = 10;
 		else if(_vmType == SimSettings.VM_TYPES.MOBILE_VM)
 			index = 11;
+		else if(_vmType == SimSettings.VM_TYPES.DRONE_VM)
+			index = 12;
 		else{
 			SimLogger.printLine("Unknown VM Type! Terminating simulation...");
 			System.exit(1);

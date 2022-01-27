@@ -1,4 +1,4 @@
-package edu.boun.edgecloudsim.applications.drone;
+package edu.boun.edgecloudsim.applications.drone_app;
 
 import edu.boun.edgecloudsim.cloud_server.CloudServerManager;
 import edu.boun.edgecloudsim.cloud_server.DefaultCloudServerManager;
@@ -11,16 +11,16 @@ import edu.boun.edgecloudsim.mobility.MobilityModel;
 import edu.boun.edgecloudsim.task_generator.LoadGeneratorModel;
 import edu.boun.edgecloudsim.network.NetworkModel;
 
-public class DroneScenarioFactory implements ScenarioFactory {
+public class MyScenarioFactory implements ScenarioFactory {
 	private int numOfMobileDevice;
 	private double simulationTime;
 	private String orchestratorPolicy;
 	private String simScenario;
 
-	DroneScenarioFactory(int _numOfMobileDevice,
-						 double _simulationTime,
-						 String _orchestratorPolicy,
-						 String _simScenario){
+	MyScenarioFactory(int _numOfMobileDevice,
+					  double _simulationTime,
+					  String _orchestratorPolicy,
+					  String _simScenario){
 		orchestratorPolicy = _orchestratorPolicy;
 		numOfMobileDevice = _numOfMobileDevice;
 		simulationTime = _simulationTime;
@@ -29,28 +29,33 @@ public class DroneScenarioFactory implements ScenarioFactory {
 
 	@Override
 	public LoadGeneratorModel getLoadGeneratorModel() {
-		return new DroneLoadGenerator(numOfMobileDevice, simulationTime, simScenario);
+		return new MyLoadGenerator(numOfMobileDevice, simulationTime, simScenario);
 	}
 
 	@Override
 	public EdgeOrchestrator getEdgeOrchestrator() {
-		return new DroneEdgeOrchestrator(numOfMobileDevice, orchestratorPolicy, simScenario);
+		return new MyEdgeOrchestrator(numOfMobileDevice, orchestratorPolicy, simScenario);
 	}
 
 	@Override
 	public MobilityModel getMobilityModel() {
-		return new DroneMobilityModel(numOfMobileDevice,simulationTime);
+		return new MyMobilityModel(numOfMobileDevice,simulationTime);
 	}
 
 	@Override
 	public NetworkModel getNetworkModel() {
-		return new DroneNetworkModel(numOfMobileDevice, simScenario, orchestratorPolicy);
+		return new MyNetworkModel(numOfMobileDevice, simScenario, orchestratorPolicy);
 	}
 
 	@Override
 	public EdgeServerManager getEdgeServerManager() {
-		return new DroneEdgeServerManager();
+		return new MyEdgeServerManager();
 	}
+
+	public EdgeServerManager getDroneServerManager() {
+		return new DroneServerManager();
+	}
+
 	@Override
 	public CloudServerManager getCloudServerManager() {
 		return new DefaultCloudServerManager();
@@ -58,11 +63,11 @@ public class DroneScenarioFactory implements ScenarioFactory {
 
 	@Override
 	public MobileDeviceManager getMobileDeviceManager() throws Exception {
-		return new DroneMobileDeviceManager();
+		return new MyMobileDeviceManager();
 	}
 
 	@Override
 	public MobileServerManager getMobileServerManager() {
-		return new DroneMobileServerManager(numOfMobileDevice);
+		return new MyMobileServerManager(numOfMobileDevice);
 	}
 }

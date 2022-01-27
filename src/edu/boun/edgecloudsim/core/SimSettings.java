@@ -32,11 +32,12 @@ import edu.boun.edgecloudsim.utils.SimLogger;
 public class SimSettings {
 	private static SimSettings instance = null;
 	private Document edgeDevicesDoc = null;
+	private Document dronesDoc = null;
 
 	public static final double CLIENT_ACTIVITY_START_TIME = 10;
 
 	//enumarations for the VM types
-	public static enum VM_TYPES { MOBILE_VM, EDGE_VM, CLOUD_VM }
+	public static enum VM_TYPES { MOBILE_VM, EDGE_VM, CLOUD_VM, DRONE_VM }
 
 	//enumarations for the VM types
 	public static enum NETWORK_DELAY_TYPES { WLAN_DELAY, MAN_DELAY, WAN_DELAY, GSM_DELAY }
@@ -46,6 +47,7 @@ public class SimSettings {
 	public static final int MOBILE_DATACENTER_ID = 1001;
 	public static final int EDGE_ORCHESTRATOR_ID = 1002;
 	public static final int GENERIC_EDGE_DEVICE_ID = 1003;
+	public static final int DRONE_ORCHESTRATOR_ID = 1004;
 
 	//delimiter for output file.
 	public static final String DELIMITER = ";";
@@ -67,6 +69,10 @@ public class SimSettings {
 	private int NUM_OF_EDGE_HOSTS;
 	private int NUM_OF_EDGE_VMS;
 	private int NUM_OF_PLACE_TYPES;
+
+	private int NUM_OF_DRONE_DATACENTERS;
+	private int NUM_OF_DRONE_HOSTS;
+	private int NUM_OF_DRONE_VMS;
 
 	private double WAN_PROPAGATION_DELAY; //seconds unit in properties file
 	private double GSM_PROPAGATION_DELAY; //seconds unit in properties file
@@ -128,11 +134,16 @@ public class SimSettings {
 		return instance;
 	}
 
-	/**
-	 * Reads configuration file and stores information to local variables
-	 * @param propertiesFile
-	 * @return
-	 */
+	public boolean initialize(String propertiesFile, String edgeDevicesFile, String dronesFile, String applicationsFile) {
+		boolean result = initialize(propertiesFile, edgeDevicesFile, applicationsFile);
+		parseDronesXML(dronesFile);
+		return result;
+	}
+		/**
+         * Reads configuration file and stores information to local variables
+         * @param propertiesFile
+         * @return
+         */
 	public boolean initialize(String propertiesFile, String edgeDevicesFile, String applicationsFile){
 		boolean result = false;
 		InputStream input = null;
@@ -223,6 +234,9 @@ public class SimSettings {
 		return edgeDevicesDoc;
 	}
 
+	public Document getDronesDocument(){
+		return dronesDoc;
+	}
 
 	/**
 	 * returns simulation time (in seconds unit) from properties file
@@ -376,6 +390,10 @@ public class SimSettings {
 	{
 		return NUM_OF_EDGE_DATACENTERS;
 	}
+	public int getNumOfDroneDatacenters()
+	{
+		return NUM_OF_DRONE_DATACENTERS;
+	}
 
 	/**
 	 * returns the number of edge hosts running on the datacenters
@@ -385,12 +403,21 @@ public class SimSettings {
 		return NUM_OF_EDGE_HOSTS;
 	}
 
+	public int getNumOfDroneHosts()
+	{
+		return NUM_OF_DRONE_HOSTS;
+	}
+
 	/**
 	 * returns the number of edge VMs running on the hosts
 	 */
 	public int getNumOfEdgeVMs()
 	{
 		return NUM_OF_EDGE_VMS;
+	}
+	public int getNumOfDroneVMs()
+	{
+		return NUM_OF_DRONE_VMS;
 	}
 
 	/**
@@ -630,6 +657,7 @@ public class SimSettings {
 					"vm_utilization_on_edge", //vm utilization on edge vm [0-100]
 					"vm_utilization_on_cloud", //vm utilization on cloud vm [0-100]
 					"vm_utilization_on_mobile", //vm utilization on mobile vm [0-100]
+					"vm_utilization_on_drone",
 			"delay_sensitivity"}; //delay_sensitivity [0-1]
 
 			String optionalAttributes[] = {
@@ -663,7 +691,7 @@ public class SimSettings {
 				}
 			}
 		} catch (Exception e) {
-			SimLogger.printLine("Edge Devices XML cannot be parsed! Terminating simulation...");
+			SimLogger.printLine("Application XML cannot be parsed! Terminating simulation...");
 			e.printStackTrace();
 			System.exit(1);
 		}
@@ -731,6 +759,68 @@ public class SimSettings {
 
 		} catch (Exception e) {
 			SimLogger.printLine("Edge Devices XML cannot be parsed! Terminating simulation...");
+			e.printStackTrace();
+			System.exit(1);
+		}
+	}
+
+	private void parseDronesXML(String filePath)
+	{
+		try {
+			File devicesFile = new File(filePath);
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			dronesDoc = dBuilder.parse(devicesFile);
+			dronesDoc.getDocumentElement().normalize();
+
+			NodeList datacenterList = dronesDoc.getElementsByTagName("datacenter");
+			for (int i = 0; i < datacenterList.getLength(); i++) {
+				NUM_OF_DRONE_DATACENTERS++;
+				Node datacenterNode = datacenterList.item(i);
+
+				Element datacenterElement = (Element) datacenterNode;
+				isAttributePresent(datacenterElement, "arch");
+				isAttributePresent(datacenterElement, "os");
+				isAttributePresent(datacenterElement, "vmm");
+				isElementPresent(datacenterElement, "costPerBw");
+				isElementPresent(datacenterElement, "costPerSec");
+				isElementPresent(datacenterElement, "costPerMem");
+				isElementPresent(datacenterElement, "costPerStorage");
+
+				Element location = (Element)datacenterElement.getElementsByTagName("location").item(0);
+				isElementPresent(location, "attractiveness");
+				isElementPresent(location, "wlan_id");
+				isElementPresent(location, "x_pos");
+				isElementPresent(location, "y_pos");
+
+				NodeList hostList = datacenterElement.getElementsByTagName("host");
+				for (int j = 0; j < hostList.getLength(); j++) {
+					NUM_OF_DRONE_HOSTS++;
+					Node hostNode = hostList.item(j);
+
+					Element hostElement = (Element) hostNode;
+					isElementPresent(hostElement, "core");
+					isElementPresent(hostElement, "mips");
+					isElementPresent(hostElement, "ram");
+					isElementPresent(hostElement, "storage");
+
+					NodeList vmList = hostElement.getElementsByTagName("VM");
+					for (int k = 0; k < vmList.getLength(); k++) {
+						NUM_OF_DRONE_VMS++;
+						Node vmNode = vmList.item(k);
+
+						Element vmElement = (Element) vmNode;
+						isAttributePresent(vmElement, "vmm");
+						isElementPresent(vmElement, "core");
+						isElementPresent(vmElement, "mips");
+						isElementPresent(vmElement, "ram");
+						isElementPresent(vmElement, "storage");
+					}
+				}
+			}
+
+		} catch (Exception e) {
+			SimLogger.printLine("Drone Devices XML cannot be parsed! Terminating simulation...");
 			e.printStackTrace();
 			System.exit(1);
 		}

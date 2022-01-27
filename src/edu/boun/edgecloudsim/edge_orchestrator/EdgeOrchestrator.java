@@ -48,5 +48,5 @@ public abstract class EdgeOrchestrator extends SimEntity{
 	/*
 	 * returns proper VM from the edge orchestrator point of view
 	 */
-	public abstract Vm getVmToOffload(Task task, int deviceId);
+	public abstract Vm 	getVmToOffload(Task task, int deviceId);
 }

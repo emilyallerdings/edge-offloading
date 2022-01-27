@@ -1,4 +1,4 @@
-package edu.boun.edgecloudsim.applications.drone;
+package edu.boun.edgecloudsim.applications.drone_app;
 
 import org.cloudbus.cloudsim.core.CloudSim;
 
@@ -9,7 +9,7 @@ import edu.boun.edgecloudsim.network.NetworkModel;
 import edu.boun.edgecloudsim.utils.Location;
 import edu.boun.edgecloudsim.utils.SimLogger;
 
-public class DroneNetworkModel extends NetworkModel {
+public class MyNetworkModel extends NetworkModel {
 	public static double maxWlanDelay = 0;
 	public static double maxWanDelay = 0;
 	public static double maxGsmDelay = 0;
@@ -111,7 +111,7 @@ public class DroneNetworkModel extends NetworkModel {
 	private MMPPWrapper gsmMMPPForDownload;
 	private MMPPWrapper gsmMMPPForUpload;
 
-	public DroneNetworkModel(int _numberOfMobileDevices, String _simScenario, String _orchestratorPolicy) {
+	public MyNetworkModel(int _numberOfMobileDevices, String _simScenario, String _orchestratorPolicy) {
 		super(_numberOfMobileDevices, _simScenario);
 		lastMM1QueeuUpdateTime = SimSettings.CLIENT_ACTIVITY_START_TIME;
 	}

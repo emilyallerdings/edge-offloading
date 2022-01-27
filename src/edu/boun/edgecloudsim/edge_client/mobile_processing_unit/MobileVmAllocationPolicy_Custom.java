@@ -52,7 +52,7 @@ public class MobileVmAllocationPolicy_Custom extends VmAllocationPolicy {
 		boolean result = false;
 
 		if (!getVmTable().containsKey(vm.getUid()) && vm instanceof MobileVM) { // if this vm was not created
-			int hostIndex = vm.getId() - SimSettings.getInstance().getNumOfEdgeVMs() - SimSettings.getInstance().getNumOfCloudVMs();
+			int hostIndex = vm.getId() - SimSettings.getInstance().getNumOfEdgeVMs() - SimSettings.getInstance().getNumOfCloudVMs() - SimSettings.getInstance().getNumOfDroneVMs();
 			
 			if(DataCenterIndex == SimSettings.MOBILE_DATACENTER_ID){
 				Host host = getHostList().get(hostIndex);

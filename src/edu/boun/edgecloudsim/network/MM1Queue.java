@@ -86,6 +86,11 @@ public class MM1Queue extends NetworkModel {
 		else if (destDeviceId == SimSettings.GENERIC_EDGE_DEVICE_ID) {
 			delay = getWlanUploadDelay(accessPointLocation, CloudSim.clock());
 		}
+		//mobile device to drone orchestrator
+		else if(destDeviceId == SimSettings.DRONE_ORCHESTRATOR_ID){
+			delay = getWlanUploadDelay(accessPointLocation, CloudSim.clock()) +
+					SimSettings.getInstance().getInternalLanDelay();
+		}
 
 		return delay;
 	}
@@ -97,6 +102,11 @@ public class MM1Queue extends NetworkModel {
 	public double getDownloadDelay(int sourceDeviceId, int destDeviceId, Task task) {
 		//Special Case -> edge orchestrator to edge device
 		if(sourceDeviceId == SimSettings.EDGE_ORCHESTRATOR_ID &&
+				destDeviceId == SimSettings.GENERIC_EDGE_DEVICE_ID){
+			return SimSettings.getInstance().getInternalLanDelay();
+		}
+
+		if(sourceDeviceId == SimSettings.DRONE_ORCHESTRATOR_ID &&
 				destDeviceId == SimSettings.GENERIC_EDGE_DEVICE_ID){
 			return SimSettings.getInstance().getInternalLanDelay();
 		}

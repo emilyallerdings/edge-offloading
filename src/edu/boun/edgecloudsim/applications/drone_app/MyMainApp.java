@@ -1,10 +1,11 @@
-package edu.boun.edgecloudsim.applications.drone;
+package edu.boun.edgecloudsim.applications.drone_app;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import edu.boun.edgecloudsim.applications.sample_app5.WekaWrapper;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSim;
 
@@ -14,7 +15,7 @@ import edu.boun.edgecloudsim.core.SimSettings;
 import edu.boun.edgecloudsim.utils.SimLogger;
 import edu.boun.edgecloudsim.utils.SimUtils;
 
-public class DroneMainApp {
+public class MyMainApp {
 
 	/**
 	 * Creates main() to run this example
@@ -30,10 +31,12 @@ public class DroneMainApp {
 		String configFile = "";
 		String outputFolder = "";
 		String edgeDevicesFile = "";
+		String dronesFile = "";
 		String applicationsFile = "";
 		if (args.length == 5){
 			configFile = args[0];
 			edgeDevicesFile = args[1];
+			dronesFile = args[5];
 			applicationsFile = args[2];
 			outputFolder = args[3];
 			iterationNumber = Integer.parseInt(args[4]);
@@ -41,15 +44,16 @@ public class DroneMainApp {
 		else{
 			SimLogger.printLine("Simulation setting file, output folder and iteration number are not provided! Using default ones...");
 			String configName = "default";
-			configFile = "scripts/drone/config/" + configName + "_config.properties";
-			applicationsFile = "scripts/drone/config/applications.xml";
-			edgeDevicesFile = "scripts/drone/config/edge_devices.xml";
+			configFile = "scripts/drone_app/config/" + configName + "_config.properties";
+			applicationsFile = "scripts/drone_app/config/applications.xml";
+			edgeDevicesFile = "scripts/drone_app/config/edge_devices.xml";
+			dronesFile = "scripts/drone_app/config/drones.xml";
 			outputFolder = "sim_results/ite" + iterationNumber;
 		}
 
 		//load settings from configuration file
 		SimSettings SS = SimSettings.getInstance();
-		if(SS.initialize(configFile, edgeDevicesFile, applicationsFile) == false) {
+		if(SS.initialize(configFile, edgeDevicesFile, dronesFile, applicationsFile) == false) {
 			SimLogger.printLine("cannot initialize simulation settings!");
 			System.exit(1);
 		}
@@ -101,21 +105,21 @@ public class DroneMainApp {
 			CloudSim.init(num_user, calendar, trace_flag, 0.01);
 
 			// Generate EdgeCloudsim Scenario Factory
-			ScenarioFactory sampleFactory = new DroneScenarioFactory(numOfMobileDevice, SS.getSimulationTime(), orchestratorPolicy, simulationScenario);
+			ScenarioFactory sampleFactory = new MyScenarioFactory(numOfMobileDevice, SS.getSimulationTime(), orchestratorPolicy, simulationScenario);
 
 			// Generate EdgeCloudSim Simulation Manager
 			SimManager manager = new SimManager(sampleFactory, numOfMobileDevice, simulationScenario, orchestratorPolicy);
 
 			if(orchestratorPolicy.equals("AI_TRAINER")){
 				SimLogger.disableFileLog();
-				((DroneEdgeOrchestrator)manager.getEdgeOrchestrator()).openTrainerOutputFile();
+				((MyEdgeOrchestrator)manager.getEdgeOrchestrator()).openTrainerOutputFile();
 			}
 
 			// Start simulation
 			manager.startSimulation();
 
 			if(orchestratorPolicy.equals("AI_TRAINER"))
-				((DroneEdgeOrchestrator)manager.getEdgeOrchestrator()).closeTrainerOutputFile();
+				((MyEdgeOrchestrator)manager.getEdgeOrchestrator()).closeTrainerOutputFile();
 		}
 		catch (Exception e)
 		{

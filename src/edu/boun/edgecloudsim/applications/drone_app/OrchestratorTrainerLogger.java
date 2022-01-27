@@ -1,4 +1,4 @@
-package edu.boun.edgecloudsim.applications.drone;
+package edu.boun.edgecloudsim.applications.drone_app;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -59,10 +59,11 @@ public class OrchestratorTrainerLogger {
 	public OrchestratorTrainerLogger() {
 		trainerMap = new HashMap<Integer, TrainerItem>();
 
-		TaskOffloadStats = (ArrayList<Double>[])new ArrayList[3];
+		TaskOffloadStats = (ArrayList<Double>[])new ArrayList[4];
 		TaskOffloadStats[0] = new ArrayList<Double>();
 		TaskOffloadStats[1] = new ArrayList<Double>();
 		TaskOffloadStats[2] = new ArrayList<Double>();
+		TaskOffloadStats[3] = new ArrayList<Double>();
 	}
 
 	public void openTrainerOutputFile() {
@@ -117,13 +118,16 @@ public class OrchestratorTrainerLogger {
 		String line = "";
 
 		switch(trainerItem.selectedDatacenter){
-		case DroneEdgeOrchestrator.EDGE_DATACENTER:
+		case MyEdgeOrchestrator.DRONE_DATACENTER:
+			line = "DRONE";
+			break;
+		case MyEdgeOrchestrator.EDGE_DATACENTER:
 			line = "EDGE";
 			break;
-		case DroneEdgeOrchestrator.CLOUD_DATACENTER_VIA_RSU:
+		case MyEdgeOrchestrator.CLOUD_DATACENTER_VIA_RSU:
 			line = "CLOUD_DATACENTER_VIA_RSU";
 			break;
-		case DroneEdgeOrchestrator.CLOUD_DATACENTER_VIA_GSM:
+		case MyEdgeOrchestrator.CLOUD_DATACENTER_VIA_GSM:
 			line = "CLOUD_VIA_GSM";
 			break;
 		default:
@@ -188,6 +192,25 @@ public class OrchestratorTrainerLogger {
 		}
 
 		double avgEdgeUtilization = totalUtlization / SimSettings.getInstance().getNumOfEdgeVMs();
+
+		if (selectedDatacenter-1 == 3) {
+			numberOfHost = SimSettings.getInstance().getNumOfDroneHosts();
+			totalUtlization = 0;
+			edgeUtilizations = new double[numberOfHost];
+			for (int hostIndex = 0; hostIndex < numberOfHost; hostIndex++) {
+				List<DroneVM> vmArray = ((DroneServerManager) SimManager.getInstance().getDroneServerManager()).getDroneVmList(hostIndex);
+
+				double utilization = 0;
+				for (int vmIndex = 0; vmIndex < vmArray.size(); vmIndex++) {
+					utilization += vmArray.get(vmIndex).getCloudletScheduler().getTotalUtilizationOfCpu(CloudSim.clock());
+				}
+				totalUtlization += utilization;
+
+				edgeUtilizations[hostIndex] = utilization / (double) (vmArray.size());
+			}
+
+			avgEdgeUtilization = totalUtlization / SimSettings.getInstance().getNumOfEdgeVMs();
+		}
 
 		trainerMap.put(id,
 				new TrainerItem(selectedDatacenter,

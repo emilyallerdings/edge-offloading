@@ -1,4 +1,4 @@
-package edu.boun.edgecloudsim.applications.drone;
+package edu.boun.edgecloudsim.applications.drone_app;
 
 import java.util.ArrayList;
 
@@ -10,10 +10,10 @@ import edu.boun.edgecloudsim.utils.TaskProperty;
 import edu.boun.edgecloudsim.utils.SimLogger;
 import edu.boun.edgecloudsim.utils.SimUtils;
 
-public class DroneLoadGenerator extends LoadGeneratorModel{
+public class MyLoadGenerator extends LoadGeneratorModel{
 	int taskTypeOfDevices[];
 
-	public DroneLoadGenerator(int _numberOfMobileDevices, double _simulationTime, String _simScenario) {
+	public MyLoadGenerator(int _numberOfMobileDevices, double _simulationTime, String _simScenario) {
 		super(_numberOfMobileDevices, _simulationTime, _simScenario);
 	}
 
@@ -95,7 +95,6 @@ public class DroneLoadGenerator extends LoadGeneratorModel{
 
 	@Override
 	public int getTaskTypeOfDevice(int deviceId) {
-		// TODO Auto-generated method stub
 		return taskTypeOfDevices[deviceId];
 	}
 

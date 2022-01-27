@@ -1,4 +1,4 @@
-package edu.boun.edgecloudsim.applications.drone;
+package edu.boun.edgecloudsim.applications.drone_app;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -24,10 +24,10 @@ import edu.boun.edgecloudsim.edge_client.mobile_processing_unit.MobileServerMana
 import edu.boun.edgecloudsim.edge_client.mobile_processing_unit.MobileVM;
 import edu.boun.edgecloudsim.edge_client.mobile_processing_unit.MobileVmAllocationPolicy_Custom;
 
-public class DroneMobileServerManager extends MobileServerManager{
+public class MyMobileServerManager extends MobileServerManager{
 	private int numOfMobileDevices=0;
 
-	public DroneMobileServerManager(int _numOfMobileDevices) {
+	public MyMobileServerManager(int _numOfMobileDevices) {
 		numOfMobileDevices=_numOfMobileDevices;
 	}
 
@@ -55,8 +55,8 @@ public class DroneMobileServerManager extends MobileServerManager{
 
 	@Override
 	public void createVmList(int brockerId) {
-		//VMs should have unique IDs, so create Mobile VMs after Edge+Cloud VMs
-		int vmCounter=SimSettings.getInstance().getNumOfEdgeVMs() + SimSettings.getInstance().getNumOfCloudVMs();
+		//VMs should have unique IDs, so create Mobile VMs after Edge+Cloud+Drone VMs
+		int vmCounter=SimSettings.getInstance().getNumOfEdgeVMs() + SimSettings.getInstance().getNumOfCloudVMs() + SimSettings.getInstance().getNumOfDroneVMs();
 
 		//Create VMs for each hosts
 		//Note that each mobile device has one host with one VM!
@@ -154,8 +154,8 @@ public class DroneMobileServerManager extends MobileServerManager{
 
 			//4. Create Hosts with its id and list of PEs and add them to the list of machines
 			MobileHost host = new MobileHost(
-					//Hosts should have unique IDs, so create Mobile Hosts after Edge+Cloud Hosts
-					i+SimSettings.getInstance().getNumOfEdgeHosts()+SimSettings.getInstance().getNumOfCloudHost(),
+					//Hosts should have unique IDs, so create Mobile Hosts after Edge+Cloud+Drone Hosts
+					i+SimSettings.getInstance().getNumOfEdgeHosts()+SimSettings.getInstance().getNumOfCloudHost()+SimSettings.getInstance().getNumOfDroneHosts(),
 					new RamProvisionerSimple(ram),
 					new BwProvisionerSimple(bandwidth), //kbps
 					storage,

@@ -79,16 +79,19 @@ public class SimLogger {
 	private int[] uncompletedTask = null;
 	private int[] uncompletedTaskOnCloud = null;
 	private int[] uncompletedTaskOnEdge = null;
+	private int[] uncompletedTaskOnDrone = null;
 	private int[] uncompletedTaskOnMobile = null;
 
 	private int[] completedTask = null;
 	private int[] completedTaskOnCloud = null;
 	private int[] completedTaskOnEdge = null;
+	private int[] completedTaskOnDrone = null;
 	private int[] completedTaskOnMobile = null;
 
 	private int[] failedTask = null;
 	private int[] failedTaskOnCloud = null;
 	private int[] failedTaskOnEdge = null;
+	private int[] failedTaskOnDrone = null;
 	private int[] failedTaskOnMobile = null;
 
 	private double[] networkDelay = null;
@@ -105,16 +108,19 @@ public class SimLogger {
 	private double[] serviceTime = null;
 	private double[] serviceTimeOnCloud = null;
 	private double[] serviceTimeOnEdge = null;
+	private double[] serviceTimeOnDrone = null;
 	private double[] serviceTimeOnMobile = null;
 
 	private double[] processingTime = null;
 	private double[] processingTimeOnCloud = null;
 	private double[] processingTimeOnEdge = null;
+	private double[] processingTimeOnDrone = null;
 	private double[] processingTimeOnMobile = null;
 
 	private int[] failedTaskDueToVmCapacity = null;
 	private int[] failedTaskDueToVmCapacityOnCloud = null;
 	private int[] failedTaskDueToVmCapacityOnEdge = null;
+	private int[] failedTaskDueToVmCapacityOnDrone = null;
 	private int[] failedTaskDueToVmCapacityOnMobile = null;
 	
 	private double[] cost = null;
@@ -214,16 +220,19 @@ public class SimLogger {
 		uncompletedTask = new int[numOfAppTypes + 1];
 		uncompletedTaskOnCloud = new int[numOfAppTypes + 1];
 		uncompletedTaskOnEdge = new int[numOfAppTypes + 1];
+		uncompletedTaskOnDrone = new int[numOfAppTypes + 1];
 		uncompletedTaskOnMobile = new int[numOfAppTypes + 1];
 
 		completedTask = new int[numOfAppTypes + 1];
 		completedTaskOnCloud = new int[numOfAppTypes + 1];
 		completedTaskOnEdge = new int[numOfAppTypes + 1];
+		completedTaskOnDrone = new int[numOfAppTypes + 1];
 		completedTaskOnMobile = new int[numOfAppTypes + 1];
 
 		failedTask = new int[numOfAppTypes + 1];
 		failedTaskOnCloud = new int[numOfAppTypes + 1];
 		failedTaskOnEdge = new int[numOfAppTypes + 1];
+		failedTaskOnDrone = new int[numOfAppTypes + 1];
 		failedTaskOnMobile = new int[numOfAppTypes + 1];
 
 		networkDelay = new double[numOfAppTypes + 1];
@@ -240,16 +249,19 @@ public class SimLogger {
 		serviceTime = new double[numOfAppTypes + 1];
 		serviceTimeOnCloud = new double[numOfAppTypes + 1];
 		serviceTimeOnEdge = new double[numOfAppTypes + 1];
+		serviceTimeOnDrone = new double[numOfAppTypes + 1];
 		serviceTimeOnMobile = new double[numOfAppTypes + 1];
 
 		processingTime = new double[numOfAppTypes + 1];
 		processingTimeOnCloud = new double[numOfAppTypes + 1];
 		processingTimeOnEdge = new double[numOfAppTypes + 1];
+		processingTimeOnDrone = new double[numOfAppTypes + 1];
 		processingTimeOnMobile = new double[numOfAppTypes + 1];
 
 		failedTaskDueToVmCapacity = new int[numOfAppTypes + 1];
 		failedTaskDueToVmCapacityOnCloud = new int[numOfAppTypes + 1];
 		failedTaskDueToVmCapacityOnEdge = new int[numOfAppTypes + 1];
+		failedTaskDueToVmCapacityOnDrone = new int[numOfAppTypes + 1];
 		failedTaskDueToVmCapacityOnMobile = new int[numOfAppTypes + 1];
 		
 		cost = new double[numOfAppTypes + 1];
@@ -329,9 +341,9 @@ public class SimLogger {
 		taskMap.get(taskId).setOrchestratorOverhead(overhead);
 	}
 
-	public void addVmUtilizationLog(double time, double loadOnEdge, double loadOnCloud, double loadOnMobile) {
+	public void addVmUtilizationLog(double time, double loadOnEdge, double loadOnDrone, double loadOnCloud, double loadOnMobile) {
 		if(SimSettings.getInstance().getLocationLogInterval() != 0)
-			vmLoadList.add(new VmLoadLogItem(time, loadOnEdge, loadOnCloud, loadOnMobile));
+			vmLoadList.add(new VmLoadLogItem(time, loadOnEdge, loadOnDrone, loadOnCloud, loadOnMobile));
 	}
 
 	public void addApDelayLog(double time, double[] apUploadDelays, double[] apDownloadDelays) {
@@ -401,24 +413,29 @@ public class SimLogger {
 				uncompletedTaskOnCloud[value.getTaskType()]++;
 			else if (value.getVmType() == SimSettings.VM_TYPES.MOBILE_VM.ordinal())
 				uncompletedTaskOnMobile[value.getTaskType()]++;
-			else
+			else if (value.getVmType() == SimSettings.VM_TYPES.EDGE_VM.ordinal())
 				uncompletedTaskOnEdge[value.getTaskType()]++;
+			else
+				uncompletedTaskOnDrone[value.getTaskType()]++;
 		}
 
 		// calculate total values
 		uncompletedTask[numOfAppTypes] = IntStream.of(uncompletedTask).sum();
 		uncompletedTaskOnCloud[numOfAppTypes] = IntStream.of(uncompletedTaskOnCloud).sum();
 		uncompletedTaskOnEdge[numOfAppTypes] = IntStream.of(uncompletedTaskOnEdge).sum();
+		uncompletedTaskOnDrone[numOfAppTypes] = IntStream.of(uncompletedTaskOnDrone).sum();
 		uncompletedTaskOnMobile[numOfAppTypes] = IntStream.of(uncompletedTaskOnMobile).sum();
 
 		completedTask[numOfAppTypes] = IntStream.of(completedTask).sum();
 		completedTaskOnCloud[numOfAppTypes] = IntStream.of(completedTaskOnCloud).sum();
 		completedTaskOnEdge[numOfAppTypes] = IntStream.of(completedTaskOnEdge).sum();
+		completedTaskOnDrone[numOfAppTypes] = IntStream.of(completedTaskOnDrone).sum();
 		completedTaskOnMobile[numOfAppTypes] = IntStream.of(completedTaskOnMobile).sum();
 
 		failedTask[numOfAppTypes] = IntStream.of(failedTask).sum();
 		failedTaskOnCloud[numOfAppTypes] = IntStream.of(failedTaskOnCloud).sum();
 		failedTaskOnEdge[numOfAppTypes] = IntStream.of(failedTaskOnEdge).sum();
+		failedTaskOnDrone[numOfAppTypes] = IntStream.of(failedTaskOnDrone).sum();
 		failedTaskOnMobile[numOfAppTypes] = IntStream.of(failedTaskOnMobile).sum();
 
 		networkDelay[numOfAppTypes] = DoubleStream.of(networkDelay).sum();
@@ -435,16 +452,19 @@ public class SimLogger {
 		serviceTime[numOfAppTypes] = DoubleStream.of(serviceTime).sum();
 		serviceTimeOnCloud[numOfAppTypes] = DoubleStream.of(serviceTimeOnCloud).sum();
 		serviceTimeOnEdge[numOfAppTypes] = DoubleStream.of(serviceTimeOnEdge).sum();
+		serviceTimeOnDrone[numOfAppTypes] = DoubleStream.of(serviceTimeOnDrone).sum();
 		serviceTimeOnMobile[numOfAppTypes] = DoubleStream.of(serviceTimeOnMobile).sum();
 
 		processingTime[numOfAppTypes] = DoubleStream.of(processingTime).sum();
 		processingTimeOnCloud[numOfAppTypes] = DoubleStream.of(processingTimeOnCloud).sum();
 		processingTimeOnEdge[numOfAppTypes] = DoubleStream.of(processingTimeOnEdge).sum();
+		processingTimeOnDrone[numOfAppTypes] = DoubleStream.of(processingTimeOnDrone).sum();
 		processingTimeOnMobile[numOfAppTypes] = DoubleStream.of(processingTimeOnMobile).sum();
 
 		failedTaskDueToVmCapacity[numOfAppTypes] = IntStream.of(failedTaskDueToVmCapacity).sum();
 		failedTaskDueToVmCapacityOnCloud[numOfAppTypes] = IntStream.of(failedTaskDueToVmCapacityOnCloud).sum();
 		failedTaskDueToVmCapacityOnEdge[numOfAppTypes] = IntStream.of(failedTaskDueToVmCapacityOnEdge).sum();
+		failedTaskDueToVmCapacityOnDrone[numOfAppTypes] = IntStream.of(failedTaskDueToVmCapacityOnDrone).sum();
 		failedTaskDueToVmCapacityOnMobile[numOfAppTypes] = IntStream.of(failedTaskDueToVmCapacityOnMobile).sum();
 		
 		cost[numOfAppTypes] = DoubleStream.of(cost).sum();
@@ -461,10 +481,12 @@ public class SimLogger {
 		
 		// calculate server load
 		double totalVmLoadOnEdge = 0;
+		double totalVmLoadOnDrone = 0;
 		double totalVmLoadOnCloud = 0;
 		double totalVmLoadOnMobile = 0;
 		for (VmLoadLogItem entry : vmLoadList) {
 			totalVmLoadOnEdge += entry.getEdgeLoad();
+			totalVmLoadOnDrone += entry.getDroneLoad();
 			totalVmLoadOnCloud += entry.getCloudLoad();
 			totalVmLoadOnMobile += entry.getMobileLoad();
 			if (fileLogEnabled && SimSettings.getInstance().getVmLoadLogInterval() != 0)
@@ -862,18 +884,24 @@ public class SimLogger {
 class VmLoadLogItem {
 	private double time;
 	private double vmLoadOnEdge;
+	private double vmLoadOnDrone;
 	private double vmLoadOnCloud;
 	private double vmLoadOnMobile;
 
-	VmLoadLogItem(double _time, double _vmLoadOnEdge, double _vmLoadOnCloud, double _vmLoadOnMobile) {
+	VmLoadLogItem(double _time, double _vmLoadOnEdge, double _vmLoadOnDrone, double _vmLoadOnCloud, double _vmLoadOnMobile) {
 		time = _time;
 		vmLoadOnEdge = _vmLoadOnEdge;
+		vmLoadOnDrone = _vmLoadOnDrone;
 		vmLoadOnCloud = _vmLoadOnCloud;
 		vmLoadOnMobile = _vmLoadOnMobile;
 	}
 
 	public double getEdgeLoad() {
 		return vmLoadOnEdge;
+	}
+
+	public double getDroneLoad() {
+		return vmLoadOnDrone;
 	}
 
 	public double getCloudLoad() {
@@ -885,8 +913,9 @@ class VmLoadLogItem {
 	}
 	
 	public String toString() {
-		return time + 
+		return time +
 				SimSettings.DELIMITER + vmLoadOnEdge +
+				SimSettings.DELIMITER + vmLoadOnDrone +
 				SimSettings.DELIMITER + vmLoadOnCloud +
 				SimSettings.DELIMITER + vmLoadOnMobile;
 	}

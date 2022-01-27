@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.boun.edgecloudsim.applications.drone_app.DroneHost;
+import edu.boun.edgecloudsim.applications.drone_app.DroneVM;
 import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.Vm;
@@ -49,8 +51,51 @@ public class EdgeVmAllocationPolicy_Custom extends VmAllocationPolicy {
 	@Override
 	public boolean allocateHostForVm(Vm vm) {
 		boolean result = false;
-		
-		if (!getVmTable().containsKey(vm.getUid()) && vm instanceof EdgeVM) { // if this vm was not created
+
+		if (!getVmTable().containsKey(vm.getUid()) && vm instanceof DroneVM && getHostList().get(0) instanceof DroneHost){ // if this vm was not created
+			boolean vmFound = false;
+			int vmCounter = 0;
+			int hostIndex = 0;
+			int dataCenterIndex = 0;
+
+			//find proper datacenter id and host id for this VM
+			Document doc = SimSettings.getInstance().getDronesDocument();
+			NodeList datacenterList = doc.getElementsByTagName("datacenter");
+			for (int i = 0; (!vmFound && i < datacenterList.getLength()); i++) {
+				Node datacenterNode = datacenterList.item(i);
+				Element datacenterElement = (Element) datacenterNode;
+				NodeList hostNodeList = datacenterElement.getElementsByTagName("host");
+				for (int j = 0; (!vmFound  && j < hostNodeList.getLength()); j++) {
+					Node hostNode = hostNodeList.item(j);
+					Element hostElement = (Element) hostNode;
+					NodeList vmNodeList = hostElement.getElementsByTagName("VM");
+					for (int k = 0; (!vmFound && k < vmNodeList.getLength()); k++) {
+
+						if(vmCounter == vm.getId()){
+							dataCenterIndex = i;
+							hostIndex = j;
+							vmFound = true;
+						}
+
+						vmCounter++;
+					}
+				}
+			}
+
+			if(vmFound && dataCenterIndex == DataCenterIndex && hostIndex < getHostList().size()){
+				Host host = getHostList().get(hostIndex);
+				result = host.vmCreate(vm);
+
+				if (result) { // if vm were successfully created in the host
+					getVmTable().put(vm.getUid(), host);
+					createdVmNum++;
+					Log.formatLine("%.2f: Drone VM #" + vm.getId() + " has been allocated to the host #" + host.getId(),CloudSim.clock());
+					result = true;
+				}
+			}
+		}
+
+		else if (!getVmTable().containsKey(vm.getUid()) && vm instanceof EdgeVM && getHostList().get(0) instanceof EdgeHost) { // if this vm was not created
 			boolean vmFound = false;
 			int vmCounter = 0;
 			int hostIndex = 0;
