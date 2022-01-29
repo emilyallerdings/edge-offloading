@@ -18,7 +18,7 @@ import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
 public class WekaModelCreator {
-	private static final String[] targets = {"edge","cloud_rsu","cloud_gsm"};
+	private static final String[] targets = {"edge","cloud_rsu","cloud_gsm", "drone"};
 	
 	public static void main(String[] args) throws Exception {
 		String dataPath = "";

@@ -30,7 +30,7 @@ def getDecisionColumnName(target):
         COLUMN_NAME  = "CLOUD_DATACENTER_VIA_RSU"
     elif target == "cloud_gsm":
         COLUMN_NAME  = "CLOUD_DATACENTER_VIA_GSM"
-   elif target == "drone":
+    elif target == "drone":
         COLUMN_NAME  = "DRONE"
     return COLUMN_NAME
 

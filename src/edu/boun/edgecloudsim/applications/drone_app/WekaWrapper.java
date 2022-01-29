@@ -86,34 +86,34 @@ public class WekaWrapper {
 		try {
 			if(ClassifierType.equals("NaiveBayes")) {
 				classifier_edge = (NaiveBayes) weka.core.SerializationHelper.read(ModelFolder + "nb_edge.model");
-				classifier_drone = (NaiveBayes) weka.core.SerializationHelper.read(ModelFolder + "nb_edge.model");
+				classifier_drone = (NaiveBayes) weka.core.SerializationHelper.read(ModelFolder + "nb_drone.model");
 
 				classifier_cloud_rsu = (NaiveBayes) weka.core.SerializationHelper.read(ModelFolder + "nb_cloud_rsu.model");
 				classifier_cloud_gsm = (NaiveBayes) weka.core.SerializationHelper.read(ModelFolder + "nb_cloud_gsm.model");
 			}
 			else if(ClassifierType.equals("SMO")){
 				classifier_edge = (SMO) weka.core.SerializationHelper.read(ModelFolder + "smo_edge.model");
-				classifier_drone = (SMO) weka.core.SerializationHelper.read(ModelFolder + "smo_edge.model");
+				classifier_drone = (SMO) weka.core.SerializationHelper.read(ModelFolder + "smo_drone.model");
 				classifier_cloud_rsu = (SMO) weka.core.SerializationHelper.read(ModelFolder + "smo_cloud_rsu.model");
 				classifier_cloud_gsm = (SMO) weka.core.SerializationHelper.read(ModelFolder + "smo_cloud_gsm.model");
 			}
 			else if(ClassifierType.equals("MultilayerPerceptron")){
 				classifier_edge = (MultilayerPerceptron) weka.core.SerializationHelper.read(ModelFolder + "mlp_edge.model");
-				classifier_drone = (MultilayerPerceptron) weka.core.SerializationHelper.read(ModelFolder + "mlp_edge.model");
+				classifier_drone = (MultilayerPerceptron) weka.core.SerializationHelper.read(ModelFolder + "mlp_drone.model");
 				classifier_cloud_rsu = (MultilayerPerceptron) weka.core.SerializationHelper.read(ModelFolder + "mlp_cloud_rsu.model");
 				classifier_cloud_gsm = (MultilayerPerceptron) weka.core.SerializationHelper.read(ModelFolder + "mlp_cloud_gsm.model");
 			}
 
 			if(RegressionType.equals("LinearRegression")){
 				regression_edge = (LinearRegression) weka.core.SerializationHelper.read(ModelFolder + "lr_edge.model");
-				regression_drone = (LinearRegression) weka.core.SerializationHelper.read(ModelFolder + "lr_edge.model");
+				regression_drone = (LinearRegression) weka.core.SerializationHelper.read(ModelFolder + "lr_drone.model");
 
 				regression_cloud_rsu = (LinearRegression) weka.core.SerializationHelper.read(ModelFolder + "lr_cloud_rsu.model");
 				regression_cloud_gsm = (LinearRegression) weka.core.SerializationHelper.read(ModelFolder + "lr_cloud_gsm.model");
 			}
 			else if(RegressionType.equals("SMOreg")){
 				regression_edge = (SMOreg) weka.core.SerializationHelper.read(ModelFolder + "smoreg_edge.model");
-				regression_drone = (SMOreg) weka.core.SerializationHelper.read(ModelFolder + "smoreg_edge.model");
+				regression_drone = (SMOreg) weka.core.SerializationHelper.read(ModelFolder + "smoreg_drone.model");
 				regression_cloud_rsu = (SMOreg) weka.core.SerializationHelper.read(ModelFolder + "smoreg_cloud_rsu.model");
 				regression_cloud_gsm = (SMOreg) weka.core.SerializationHelper.read(ModelFolder + "smoreg_cloud_gsm.model");
 			}
