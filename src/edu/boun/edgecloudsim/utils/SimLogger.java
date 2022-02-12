@@ -206,9 +206,27 @@ public class SimLogger {
 				failFile = new File(outputFolder, filePrefix + "_FAIL.log");
 				failFW = new FileWriter(failFile, true);
 				failBW = new BufferedWriter(failFW);
-				
-				appendToFile(successBW, "#auto generated file!");
-				appendToFile(failBW, "#auto generated file!");
+
+				appendToFile(successBW, "taskId;deviceId;datacenterId;hostId" +
+						";vmId;vmType;taskType" +
+						";taskLenght;taskInputType;" +
+						"taskOutputSize;taskStartTime;taskEndTime;QoE;wlanId;" +
+						"sum of all NetworkDelays;" +
+						"NetworkDelay of WLAN;" +
+						"NetworkDelay of MAN;" +
+						"NetworkDelay of WAN;" +
+						"NetworkDelay of GSM");
+				appendToFile(failBW, "taskId;deviceId;datacenterId;hostId" +
+						";vmId;vmType;taskType" +
+						";taskLenght;taskInputType;" +
+						"taskOutputSize;taskStartTime;taskEndTime;QoE;wlanId;" +
+						"failure reason " +
+						"(REJECTED_DUE_TO_VM_CAPACITY: 1, " +
+						"REJECTED_DUE_TO_BANDWIDTH: 2, " +
+						"UNFINISHED_DUE_TO_BANDWIDTH: 3, " +
+						"UNFINISHED_DUE_TO_MOBILITY: 4, " +
+						"REJECTED_DUE_TO_WLAN_COVERAGE: 5, " +
+						"OTHER: 0)");
 			} catch (IOException e) {
 				e.printStackTrace();
 				System.exit(1);
@@ -395,13 +413,19 @@ public class SimLogger {
 				genericFiles[i] = new File(outputFolder, filePrefix + "_" + fileName);
 				genericFWs[i] = new FileWriter(genericFiles[i], true);
 				genericBWs[i] = new BufferedWriter(genericFWs[i]);
-				appendToFile(genericBWs[i], "#auto generated file!");
 			}
-
-			appendToFile(vmLoadBW, "#auto generated file!");
-			appendToFile(locationBW, "#auto generated file!");
-			appendToFile(apUploadDelayBW, "#auto generated file!");
-			appendToFile(apDownloadDelayBW, "#auto generated file!");
+			appendToFile(vmLoadBW,  "time;vmLoadOnEdge;vmLoadOnCloud;vmLoadOnMobile;vmLoadOnDrone");
+			locationBW.write("time");
+			for (int jj = 0; jj < SimSettings.getInstance().getNumOfEdgeDatacenters(); jj++)
+				locationBW.write(SimSettings.DELIMITER + "num users in WLAN " + String.valueOf(jj));
+			appendToFile(apUploadDelayBW, "time" + SimSettings.DELIMITER +
+					"app[0]" + SimSettings.DELIMITER +
+					"app[1]" + SimSettings.DELIMITER +
+					"app[2]");
+			appendToFile(apDownloadDelayBW, "time" + SimSettings.DELIMITER +
+					"app[0]" + SimSettings.DELIMITER +
+					"app[1]" + SimSettings.DELIMITER +
+					"app[2]");
 		}
 
 		//the tasks in the map is not completed yet!
@@ -486,9 +510,9 @@ public class SimLogger {
 		double totalVmLoadOnMobile = 0;
 		for (VmLoadLogItem entry : vmLoadList) {
 			totalVmLoadOnEdge += entry.getEdgeLoad();
-			totalVmLoadOnDrone += entry.getDroneLoad();
 			totalVmLoadOnCloud += entry.getCloudLoad();
 			totalVmLoadOnMobile += entry.getMobileLoad();
+			totalVmLoadOnDrone += entry.getDroneLoad();
 			if (fileLogEnabled && SimSettings.getInstance().getVmLoadLogInterval() != 0)
 				appendToFile(vmLoadBW, entry.toString());
 		}
@@ -498,6 +522,7 @@ public class SimLogger {
 			// assuming each location has only one access point
 			double locationLogInterval = SimSettings.getInstance().getLocationLogInterval();
 			if(locationLogInterval != 0) {
+				// TODO: must log file for drone too
 				for (int t = 1; t < (SimSettings.getInstance().getSimulationTime() / locationLogInterval); t++) {
 					int[] locationInfo = new int[SimSettings.getInstance().getNumOfEdgeDatacenters()];
 					Double time = t * SimSettings.getInstance().getLocationLogInterval();
@@ -540,6 +565,7 @@ public class SimLogger {
 				double _networkDelay = (completedTask[i] == 0) ? 0.0 : (networkDelay[i] / ((double) completedTask[i] - (double)completedTaskOnMobile[i]));
 				double _processingTime = (completedTask[i] == 0) ? 0.0 : (processingTime[i] / (double) completedTask[i]);
 				double _vmLoadOnEdge = (vmLoadList.size() == 0) ? 0.0 : (totalVmLoadOnEdge / (double) vmLoadList.size());
+				double _vmLoadOnDrone = (vmLoadList.size() == 0) ? 0.0 : (totalVmLoadOnDrone / (double) vmLoadList.size());
 				double _vmLoadOnClould = (vmLoadList.size() == 0) ? 0.0 : (totalVmLoadOnCloud / (double) vmLoadList.size());
 				double _vmLoadOnMobile = (vmLoadList.size() == 0) ? 0.0 : (totalVmLoadOnMobile / (double) vmLoadList.size());
 				double _cost = (completedTask[i] == 0) ? 0.0 : (cost[i] / (double) completedTask[i]);
@@ -615,8 +641,22 @@ public class SimLogger {
 						+ Double.toString(0.0) + SimSettings.DELIMITER
 						+ Double.toString(_vmLoadOnMobile) + SimSettings.DELIMITER 
 						+ Integer.toString(failedTaskDueToVmCapacityOnMobile[i]);
-				
-				String genericResult5 = Double.toString(_lanDelay) + SimSettings.DELIMITER
+
+				double _serviceTimeOnDrone = (completedTaskOnDrone[i] == 0) ? 0.0
+						: (serviceTimeOnDrone[i] / (double) completedTaskOnDrone[i]);
+				double _processingTimeOnDrone = (completedTaskOnDrone[i] == 0) ? 0.0
+						: (processingTimeOnDrone[i] / (double) completedTaskOnDrone[i]);
+				String genericResult5 = Integer.toString(completedTaskOnDrone[i]) + SimSettings.DELIMITER
+						+ Integer.toString(failedTaskOnDrone[i]) + SimSettings.DELIMITER
+						+ Integer.toString(uncompletedTaskOnDrone[i]) + SimSettings.DELIMITER
+						+ Integer.toString(0) + SimSettings.DELIMITER
+						+ Double.toString(_serviceTimeOnDrone) + SimSettings.DELIMITER
+						+ Double.toString(_processingTimeOnDrone) + SimSettings.DELIMITER
+						+ Double.toString(0.0) + SimSettings.DELIMITER
+						+ Double.toString(_vmLoadOnDrone) + SimSettings.DELIMITER
+						+ Integer.toString(failedTaskDueToVmCapacityOnDrone[i]);
+
+				String genericResult6 = Double.toString(_lanDelay) + SimSettings.DELIMITER
 						+ Double.toString(_manDelay) + SimSettings.DELIMITER
 						+ Double.toString(_wanDelay) + SimSettings.DELIMITER
 						+ Double.toString(_gsmDelay) + SimSettings.DELIMITER
@@ -628,36 +668,111 @@ public class SimLogger {
 				//performance related values
 				double _orchestratorOverhead = orchestratorOverhead[i] / (double) (failedTask[i] + completedTask[i]);
 				
-				String genericResult6 = Long.toString((endTime-startTime)/60)  + SimSettings.DELIMITER
+				String genericResult7 = Long.toString((endTime-startTime)/60)  + SimSettings.DELIMITER
 						+ Double.toString(_orchestratorOverhead);
-						
 
+
+				appendToFile(genericBWs[i],
+								"completedTask" + SimSettings.DELIMITER +
+								"failedTask" + SimSettings.DELIMITER +
+								"uncompletedTask" + SimSettings.DELIMITER +
+								"failedTaskDuetoBw" + SimSettings.DELIMITER +
+								"_serviceTime" + SimSettings.DELIMITER +
+								"_processingTime" + SimSettings.DELIMITER +
+								"_networkDelay" + SimSettings.DELIMITER +
+								"0" + SimSettings.DELIMITER +
+								"_cost" + SimSettings.DELIMITER +
+								"failedTaskDueToVmCapacity" + SimSettings.DELIMITER +
+								"failedTaskDuetoMobility" + SimSettings.DELIMITER +
+								"failedTaskDuetoAnomaly" + SimSettings.DELIMITER +
+								"_QoE1" + SimSettings.DELIMITER +
+								"_QoE2" + SimSettings.DELIMITER +
+								"refectedTaskDuetoWlanRange");
 				appendToFile(genericBWs[i], genericResult1);
+
+				appendToFile(genericBWs[i],"completedTaskOnEdge" + SimSettings.DELIMITER +
+								"failedTaskOnEdge" + SimSettings.DELIMITER +
+								"uncompletedTaskOnEdge" + SimSettings.DELIMITER +
+								"0" + SimSettings.DELIMITER +
+								"_serviceTimeOnEdge" + SimSettings.DELIMITER +
+								"_processingTimeOnEdge" + SimSettings.DELIMITER +
+								"0.0" + SimSettings.DELIMITER +
+								"_vmLoadOnEdge" + SimSettings.DELIMITER +
+								"failedTaskDueToVmCapacityOnEdge");
 				appendToFile(genericBWs[i], genericResult2);
+
+				appendToFile(genericBWs[i],
+								"completedTaskOnCloud" + SimSettings.DELIMITER +
+								"failedTaskOnCloud" + SimSettings.DELIMITER +
+								"uncompletedTaskOnCloud" + SimSettings.DELIMITER +
+								"0" + SimSettings.DELIMITER +
+								"_serviceTimeOnCloud" + SimSettings.DELIMITER +
+								"_processingTimeOnCloud" + SimSettings.DELIMITER +
+								"0.0" + SimSettings.DELIMITER +
+								"_vmLoadOnClould" + SimSettings.DELIMITER +
+								"failedTaskDueToVmCapacityOnCloud");
 				appendToFile(genericBWs[i], genericResult3);
+
+				appendToFile(genericBWs[i],
+								"completedTaskOnMobile" + SimSettings.DELIMITER +
+								"failedTaskOnMobile" + SimSettings.DELIMITER +
+								"uncompletedTaskOnMobile" + SimSettings.DELIMITER +
+								"0" + SimSettings.DELIMITER +
+								"_serviceTimeOnMobile" + SimSettings.DELIMITER +
+								"_processingTimeOnMobile" + SimSettings.DELIMITER +
+								"0.0" + SimSettings.DELIMITER +
+								"_vmLoadOnMobile" + SimSettings.DELIMITER +
+								"failedTaskDueToVmCapacityOnMobile");
 				appendToFile(genericBWs[i], genericResult4);
+
+				appendToFile(genericBWs[i],
+						"completedTaskOnDrone" + SimSettings.DELIMITER +
+						"failedTaskOnDrone" + SimSettings.DELIMITER +
+						"uncompletedTaskOnDrone" + SimSettings.DELIMITER +
+						"0" + SimSettings.DELIMITER +
+						"_serviceTimeOnDrone" + SimSettings.DELIMITER +
+						"_processingTimeOnDrone" + SimSettings.DELIMITER +
+						"0.0" + SimSettings.DELIMITER +
+						"_vmLoadOnDrone" + SimSettings.DELIMITER +
+						"failedTaskDueToVmCapacityOnDrone");
 				appendToFile(genericBWs[i], genericResult5);
-				
+
+				appendToFile(genericBWs[i],
+								"_lanDelay" + SimSettings.DELIMITER +
+								"_manDelay" + SimSettings.DELIMITER +
+								"_wanDelay" + SimSettings.DELIMITER +
+								"_gsmDelay" + SimSettings.DELIMITER +
+								"failedTaskDuetoLanBw" + SimSettings.DELIMITER +
+								"failedTaskDuetoManBw" + SimSettings.DELIMITER +
+								"failedTaskDuetoWanBw" + SimSettings.DELIMITER +
+								"failedTaskDuetoGsmBw");
+				appendToFile(genericBWs[i], genericResult6);
+
 				//append performance related values only to ALL_ALLPS file
 				if(i == numOfAppTypes) {
-					appendToFile(genericBWs[i], genericResult6);
+					appendToFile(genericBWs[i],
+							"(endTime-startTime)/60;_orchestratorOverhead");
+					appendToFile(genericBWs[i], genericResult7);
 				}
 				else {
 					printLine(SimSettings.getInstance().getTaskName(i));
-					printLine("# of tasks (Edge/Cloud): "
+					printLine("# of tasks (Edge/Cloud/Drone): "
 							+ (failedTask[i] + completedTask[i]) + "("
 							+ (failedTaskOnEdge[i] + completedTaskOnEdge[i]) + "/" 
-							+ (failedTaskOnCloud[i]+ completedTaskOnCloud[i]) + ")" );
+							+ (failedTaskOnCloud[i]+ completedTaskOnCloud[i]) + "/"
+							+ (failedTaskOnDrone[i]+ completedTaskOnDrone[i]) + ")" );
 					
-					printLine("# of failed tasks (Edge/Cloud): "
+					printLine("# of failed tasks (Edge/Cloud/Drone): "
 							+ failedTask[i] + "("
 							+ failedTaskOnEdge[i] + "/"
-							+ failedTaskOnCloud[i] + ")");
+							+ failedTaskOnCloud[i] + "/"
+							+ failedTaskOnDrone[i] + ")");
 					
-					printLine("# of completed tasks (Edge/Cloud): "
+					printLine("# of completed tasks (Edge/Cloud/Drone): "
 							+ completedTask[i] + "("
 							+ completedTaskOnEdge[i] + "/"
-							+ completedTaskOnCloud[i] + ")");
+							+ completedTaskOnCloud[i]+ "/"
+							+ completedTaskOnDrone[i] + ")");
 					
 					printLine("---------------------------------------");
 				}
@@ -685,35 +800,40 @@ public class SimLogger {
 		}
 
 		// printout important results
-		printLine("# of tasks (Edge/Cloud/Mobile): "
+		printLine("# of tasks (Edge/Cloud/Mobile/Drone): "
 				+ (failedTask[numOfAppTypes] + completedTask[numOfAppTypes]) + "("
 				+ (failedTaskOnEdge[numOfAppTypes] + completedTaskOnEdge[numOfAppTypes]) + "/" 
 				+ (failedTaskOnCloud[numOfAppTypes]+ completedTaskOnCloud[numOfAppTypes]) + "/" 
-				+ (failedTaskOnMobile[numOfAppTypes]+ completedTaskOnMobile[numOfAppTypes]) + ")");
+				+ (failedTaskOnMobile[numOfAppTypes]+ completedTaskOnMobile[numOfAppTypes]) + "/"
+				+ (failedTaskOnDrone[numOfAppTypes]+ completedTaskOnDrone[numOfAppTypes]) +")");
 		
-		printLine("# of failed tasks (Edge/Cloud/Mobile): "
+		printLine("# of failed tasks (Edge/Cloud/Mobile/Drone): "
 				+ failedTask[numOfAppTypes] + "("
 				+ failedTaskOnEdge[numOfAppTypes] + "/"
 				+ failedTaskOnCloud[numOfAppTypes] + "/"
-				+ failedTaskOnMobile[numOfAppTypes] + ")");
+				+ failedTaskOnMobile[numOfAppTypes] + "/"
+				+ failedTaskOnDrone[numOfAppTypes] + ")");
 		
-		printLine("# of completed tasks (Edge/Cloud/Mobile): "
+		printLine("# of completed tasks (Edge/Cloud/Mobile/Drone): "
 				+ completedTask[numOfAppTypes] + "("
 				+ completedTaskOnEdge[numOfAppTypes] + "/"
 				+ completedTaskOnCloud[numOfAppTypes] + "/"
-				+ completedTaskOnMobile[numOfAppTypes] + ")");
+				+ completedTaskOnMobile[numOfAppTypes] + "/"
+				+ completedTaskOnDrone[numOfAppTypes] + ")");
 		
-		printLine("# of uncompleted tasks (Edge/Cloud/Mobile): "
+		printLine("# of uncompleted tasks (Edge/Cloud/Mobile/Drone): "
 				+ uncompletedTask[numOfAppTypes] + "("
 				+ uncompletedTaskOnEdge[numOfAppTypes] + "/"
 				+ uncompletedTaskOnCloud[numOfAppTypes] + "/"
-				+ uncompletedTaskOnMobile[numOfAppTypes] + ")");
+				+ uncompletedTaskOnMobile[numOfAppTypes] + "/"
+				+ uncompletedTaskOnDrone[numOfAppTypes] + ")");
 
-		printLine("# of failed tasks due to vm capacity (Edge/Cloud/Mobile): "
+		printLine("# of failed tasks due to vm capacity (Edge/Cloud/Mobile/Drone): "
 				+ failedTaskDueToVmCapacity[numOfAppTypes] + "("
 				+ failedTaskDueToVmCapacityOnEdge[numOfAppTypes] + "/"
 				+ failedTaskDueToVmCapacityOnCloud[numOfAppTypes] + "/"
-				+ failedTaskDueToVmCapacityOnMobile[numOfAppTypes] + ")");
+				+ failedTaskDueToVmCapacityOnMobile[numOfAppTypes] + "/"
+				+ failedTaskDueToVmCapacityOnDrone[numOfAppTypes]+ ")");
 		
 		printLine("# of failed tasks due to Mobility/WLAN Range/Network(WLAN/MAN/WAN/GSM): "
 				+ failedTaskDuetoMobility[numOfAppTypes]
@@ -737,6 +857,8 @@ public class SimLogger {
 				+ String.format("%.6f", serviceTimeOnCloud[numOfAppTypes] / (double) completedTaskOnCloud[numOfAppTypes])
 				+ ", " + "on Mobile: "
 				+ String.format("%.6f", serviceTimeOnMobile[numOfAppTypes] / (double) completedTaskOnMobile[numOfAppTypes])
+				+ ", " + "on Drone: "
+				+ String.format("%.6f", serviceTimeOnDrone[numOfAppTypes] / (double) completedTaskOnDrone[numOfAppTypes])
 				+ ")");
 
 		printLine("average processing time: "
@@ -747,6 +869,8 @@ public class SimLogger {
 				+ String.format("%.6f", processingTimeOnCloud[numOfAppTypes] / (double) completedTaskOnCloud[numOfAppTypes])
 				+ ", " + "on Mobile: " 
 				+ String.format("%.6f", processingTimeOnMobile[numOfAppTypes] / (double) completedTaskOnMobile[numOfAppTypes])
+				+ ", " + "on Drone: "
+				+ String.format("%.6f", processingTimeOnDrone[numOfAppTypes] / (double) completedTaskOnDrone[numOfAppTypes])
 				+ ")");
 
 		printLine("average network delay: "
@@ -760,10 +884,11 @@ public class SimLogger {
 				+ ", " + "GSM delay: "
 				+ String.format("%.6f", gsmDelay[numOfAppTypes] / (double) gsmUsage[numOfAppTypes]) + ")");
 
-		printLine("average server utilization Edge/Cloud/Mobile: " 
+		printLine("average server utilization Edge/Cloud/Mobile/Drone: "
 				+ String.format("%.6f", totalVmLoadOnEdge / (double) vmLoadList.size()) + "/"
 				+ String.format("%.6f", totalVmLoadOnCloud / (double) vmLoadList.size()) + "/"
-				+ String.format("%.6f", totalVmLoadOnMobile / (double) vmLoadList.size()));
+				+ String.format("%.6f", totalVmLoadOnMobile / (double) vmLoadList.size()) + "/"
+				+ String.format("%.6f", totalVmLoadOnDrone / (double) vmLoadList.size()) + "/");
 
 		printLine("average cost: " + cost[numOfAppTypes] / completedTask[numOfAppTypes] + "$");
 		printLine("average overhead: " + orchestratorOverhead[numOfAppTypes] / (failedTask[numOfAppTypes] + completedTask[numOfAppTypes]) + " ns");
@@ -789,8 +914,10 @@ public class SimLogger {
 				completedTaskOnCloud[value.getTaskType()]++;
 			else if (value.getVmType() == SimSettings.VM_TYPES.MOBILE_VM.ordinal())
 				completedTaskOnMobile[value.getTaskType()]++;
-			else
+			else if (value.getVmType() == SimSettings.VM_TYPES.EDGE_VM.ordinal())
 				completedTaskOnEdge[value.getTaskType()]++;
+			else
+				completedTaskOnDrone[value.getTaskType()]++;
 		}
 		else {
 			failedTask[value.getTaskType()]++;
@@ -799,8 +926,10 @@ public class SimLogger {
 				failedTaskOnCloud[value.getTaskType()]++;
 			else if (value.getVmType() == SimSettings.VM_TYPES.MOBILE_VM.ordinal())
 				failedTaskOnMobile[value.getTaskType()]++;
-			else
+			else if (value.getVmType() == SimSettings.VM_TYPES.EDGE_VM.ordinal())
 				failedTaskOnEdge[value.getTaskType()]++;
+			else
+				failedTaskOnDrone[value.getTaskType()]++;
 		}
 
 		if (value.getStatus() == SimLogger.TASK_STATUS.COMLETED) {
@@ -836,9 +965,12 @@ public class SimLogger {
 				serviceTimeOnMobile[value.getTaskType()] += value.getServiceTime();
 				processingTimeOnMobile[value.getTaskType()] += value.getServiceTime();
 			}
-			else {
+			else if (value.getVmType() == SimSettings.VM_TYPES.EDGE_VM.ordinal()) {
 				serviceTimeOnEdge[value.getTaskType()] += value.getServiceTime();
 				processingTimeOnEdge[value.getTaskType()] += (value.getServiceTime() - value.getNetworkDelay());
+			} else {
+				serviceTimeOnDrone[value.getTaskType()] += value.getServiceTime();
+				processingTimeOnDrone[value.getTaskType()] += (value.getServiceTime() - value.getNetworkDelay());
 			}
 		} else if (value.getStatus() == SimLogger.TASK_STATUS.REJECTED_DUE_TO_VM_CAPACITY) {
 			failedTaskDueToVmCapacity[value.getTaskType()]++;
@@ -847,8 +979,10 @@ public class SimLogger {
 				failedTaskDueToVmCapacityOnCloud[value.getTaskType()]++;
 			else if (value.getVmType() == SimSettings.VM_TYPES.MOBILE_VM.ordinal())
 				failedTaskDueToVmCapacityOnMobile[value.getTaskType()]++;
-			else
+			else if (value.getVmType() == SimSettings.VM_TYPES.EDGE_VM.ordinal())
 				failedTaskDueToVmCapacityOnEdge[value.getTaskType()]++;
+			else
+				failedTaskDueToVmCapacityOnDrone[value.getTaskType()]++;
 		} else if (value.getStatus() == SimLogger.TASK_STATUS.REJECTED_DUE_TO_BANDWIDTH
 				|| value.getStatus() == SimLogger.TASK_STATUS.UNFINISHED_DUE_TO_BANDWIDTH) {
 			failedTaskDuetoBw[value.getTaskType()]++;

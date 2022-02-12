@@ -13,7 +13,6 @@
 		</location>
 		<hosts>
 			<host>
-				<type>true</type>
 				<core>4</core>
 				<mips>20000</mips>
 				<ram>16000</ram>
@@ -48,7 +47,6 @@
 		</location>
 		<hosts>
 			<host>
-				<type>true</type>
 				<core>4</core>
 				<mips>20000</mips>
 				<ram>16000</ram>
@@ -83,7 +81,6 @@
 		</location>
 		<hosts>
 			<host>
-				<type>true</type>
 				<core>4</core>
 				<mips>20000</mips>
 				<ram>16000</ram>
@@ -118,7 +115,6 @@
 		</location>
 		<hosts>
 			<host>
-				<type>true</type>
 				<core>4</core>
 				<mips>20000</mips>
 				<ram>16000</ram>
@@ -153,7 +149,6 @@
 		</location>
 		<hosts>
 			<host>
-				<type>true</type>
 				<core>4</core>
 				<mips>20000</mips>
 				<ram>16000</ram>
@@ -188,7 +183,6 @@
 		</location>
 		<hosts>
 			<host>
-				<type>true</type>
 				<core>4</core>
 				<mips>20000</mips>
 				<ram>16000</ram>
@@ -223,7 +217,6 @@
 		</location>
 		<hosts>
 			<host>
-				<type>true</type>
 				<core>4</core>
 				<mips>20000</mips>
 				<ram>16000</ram>
@@ -258,7 +251,6 @@
 		</location>
 		<hosts>
 			<host>
-				<type>true</type>
 				<core>4</core>
 				<mips>20000</mips>
 				<ram>16000</ram>
@@ -293,7 +285,6 @@
 		</location>
 		<hosts>
 			<host>
-				<type>true</type>
 				<core>4</core>
 				<mips>20000</mips>
 				<ram>16000</ram>

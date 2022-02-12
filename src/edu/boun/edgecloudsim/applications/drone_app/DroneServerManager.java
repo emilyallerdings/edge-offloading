@@ -48,7 +48,7 @@ public class DroneServerManager extends EdgeServerManager {
 
     public void startDatacenters() throws Exception {
         Document doc = SimSettings.getInstance().getDronesDocument();
-        NodeList datacenterList = doc.getElementsByTagName("datacenter");
+        NodeList datacenterList = doc.getElementsByTagName("drone");
         for (int i = 0; i < datacenterList.getLength(); i++) {
             Node datacenterNode = datacenterList.item(i);
             Element datacenterElement = (Element) datacenterNode;

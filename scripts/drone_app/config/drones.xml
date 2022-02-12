@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<edge_devices>
-	<datacenter arch="x86" os="Linux" vmm="Xen">
+<drones>
+	<drone arch="x86" os="Linux" vmm="Xen">
 		<costPerBw>0.1</costPerBw>
 		<costPerSec>3.0</costPerSec>
 		<costPerMem>0.05</costPerMem>
@@ -34,8 +34,8 @@
 				</VMs>
 			</host>
 		</hosts>
-	</datacenter>
-	<datacenter arch="x86" os="Linux" vmm="Xen">
+	</drone>
+	<drone arch="x86" os="Linux" vmm="Xen">
 		<costPerBw>0.1</costPerBw>
 		<costPerSec>3.0</costPerSec>
 		<costPerMem>0.05</costPerMem>
@@ -69,8 +69,8 @@
 				</VMs>
 			</host>
 		</hosts>
-	</datacenter>
-	<datacenter arch="x86" os="Linux" vmm="Xen">
+	</drone>
+	<drone arch="x86" os="Linux" vmm="Xen">
 		<costPerBw>0.1</costPerBw>
 		<costPerSec>3.0</costPerSec>
 		<costPerMem>0.05</costPerMem>
@@ -104,8 +104,8 @@
 				</VMs>
 			</host>
 		</hosts>
-	</datacenter>
-	<datacenter arch="x86" os="Linux" vmm="Xen">
+	</drone>
+	<drone arch="x86" os="Linux" vmm="Xen">
 		<costPerBw>0.1</costPerBw>
 		<costPerSec>3.0</costPerSec>
 		<costPerMem>0.05</costPerMem>
@@ -139,8 +139,8 @@
 				</VMs>
 			</host>
 		</hosts>
-	</datacenter>
-	<datacenter arch="x86" os="Linux" vmm="Xen">
+	</drone>
+	<drone arch="x86" os="Linux" vmm="Xen">
 		<costPerBw>0.1</costPerBw>
 		<costPerSec>3.0</costPerSec>
 		<costPerMem>0.05</costPerMem>
@@ -174,8 +174,8 @@
 				</VMs>
 			</host>
 		</hosts>
-	</datacenter>
-	<datacenter arch="x86" os="Linux" vmm="Xen">
+	</drone>
+	<drone arch="x86" os="Linux" vmm="Xen">
 		<costPerBw>0.1</costPerBw>
 		<costPerSec>3.0</costPerSec>
 		<costPerMem>0.05</costPerMem>
@@ -209,8 +209,8 @@
 				</VMs>
 			</host>
 		</hosts>
-	</datacenter>
-	<datacenter arch="x86" os="Linux" vmm="Xen">
+	</drone>
+	<drone arch="x86" os="Linux" vmm="Xen">
 		<costPerBw>0.1</costPerBw>
 		<costPerSec>3.0</costPerSec>
 		<costPerMem>0.05</costPerMem>
@@ -244,8 +244,8 @@
 				</VMs>
 			</host>
 		</hosts>
-	</datacenter>
-	<datacenter arch="x86" os="Linux" vmm="Xen">
+	</drone>
+	<drone arch="x86" os="Linux" vmm="Xen">
 		<costPerBw>0.1</costPerBw>
 		<costPerSec>3.0</costPerSec>
 		<costPerMem>0.05</costPerMem>
@@ -279,8 +279,8 @@
 				</VMs>
 			</host>
 		</hosts>
-	</datacenter>
-	<datacenter arch="x86" os="Linux" vmm="Xen">
+	</drone>
+	<drone arch="x86" os="Linux" vmm="Xen">
 		<costPerBw>0.1</costPerBw>
 		<costPerSec>3.0</costPerSec>
 		<costPerMem>0.05</costPerMem>
@@ -314,5 +314,5 @@
 				</VMs>
 			</host>
 		</hosts>
-	</datacenter>
-</edge_devices>
+	</drone>
+</drones>

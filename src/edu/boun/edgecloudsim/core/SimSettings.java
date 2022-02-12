@@ -773,7 +773,7 @@ public class SimSettings {
 			dronesDoc = dBuilder.parse(devicesFile);
 			dronesDoc.getDocumentElement().normalize();
 
-			NodeList datacenterList = dronesDoc.getElementsByTagName("datacenter");
+			NodeList datacenterList = dronesDoc.getElementsByTagName("drone");
 			for (int i = 0; i < datacenterList.getLength(); i++) {
 				NUM_OF_DRONE_DATACENTERS++;
 				Node datacenterNode = datacenterList.item(i);
