@@ -261,6 +261,12 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 				submitTaskToVm(task, SimSettings.VM_TYPES.MOBILE_VM);
 				break;
 			}
+			case REQUEST_RECEIVED_BY_DRONE: {
+				Task task = (Task) ev.getData();
+				//scheduleNow(getId(), RESPONSE_RECEIVED_BY_DRONE_TO_RELAY_MOBILE_DEVICE, task);
+				submitTaskToVm(task, SimSettings.VM_TYPES.DRONE_VM);
+				break;
+			}
 			case REQUEST_RECEIVED_BY_EDGE_DEVICE_TO_RELAY_CLOUD:
 			case REQUEST_RECEIVED_BY_DRONE_TO_RELAY_CLOUD: {
 				Task task = (Task) ev.getData();
@@ -368,11 +374,11 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 
 				break;
 			}
-			case REQUEST_RECEIVED_BY_DRONE: {
-				Task task = (Task) ev.getData();
-					scheduleNow(getId(), RESPONSE_RECEIVED_BY_DRONE_TO_RELAY_MOBILE_DEVICE, task);
-				break;
-			}
+//			case REQUEST_RECEIVED_BY_DRONE: {
+//				Task task = (Task) ev.getData();
+//					scheduleNow(getId(), RESPONSE_RECEIVED_BY_DRONE_TO_RELAY_MOBILE_DEVICE, task);
+//				break;
+//			}
 			default:
 				SimLogger.printLine(getName() + ".processOtherEvent(): " + "Error - event unknown by this DatacenterBroker. Terminating simulation...");
 				System.exit(1);
