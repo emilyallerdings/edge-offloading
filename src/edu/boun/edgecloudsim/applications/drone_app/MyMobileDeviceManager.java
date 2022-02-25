@@ -38,10 +38,7 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 	private static final int RESPONSE_RECEIVED_BY_EDGE_DEVICE_TO_RELAY_MOBILE_DEVICE = BASE + 11;
 
 	private static final int REQUEST_RECEIVED_BY_DRONE = BASE + 12;
-	private static final int REQUEST_RECEIVED_BY_DRONE_TO_RELAY_CLOUD = BASE + 13;
-	private static final int REQUEST_RECEIVED_BY_DRONE_TO_RELAY_NEIGHBOR = BASE + 14;
-	private static final int RESPONSE_RECEIVED_BY_DRONE = BASE + 15;
-	private static final int RESPONSE_RECEIVED_BY_DRONE_TO_RELAY_MOBILE_DEVICE = BASE + 16;
+	private static final int REQUEST_RECEIVED_BY_DRONE_TO_RELAY_NEIGHBOR = BASE + 13;
 
 	private static final double MM1_QUEUE_MODEL_UPDATE_INTERVAL = 0.5; //seconds
 	private int taskIdCounter=0;
@@ -181,13 +178,16 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 				schedule(getId(), SimSettings.getInstance().getVmLoadLogInterval(), SET_DELAY_LOG);
 				break;
 			}
+			// task is just created and assigned to a Datacenter type based on the delay values for different network types.
 			case READY_TO_SELECT_VM: {
 				Task task = (Task) ev.getData();
 
+				// The task has already an associated datacenter which is decided based on delays and orchestration strategy (AssociatedDatacenterId is set in getDeviceToOffload function in MyEdgeOrchestrator)
 				int nextHopId = task.getAssociatedDatacenterId();
 				int nextEvent = 0;
 				VM_TYPES vmType = null;
 
+				//
 				if (nextHopId == MyEdgeOrchestrator.CLOUD_DATACENTER_VIA_GSM) {
 					nextEvent = REQUEST_RECEIVED_BY_CLOUD;
 					vmType = VM_TYPES.CLOUD_VM;
@@ -207,6 +207,7 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 					System.exit(1);
 				}
 
+				//The VM on the host which is closest to the task (based on location for Drones, and WLAN Id for Edge devices)
 				Vm selectedVM = SimManager.getInstance().getEdgeOrchestrator().getVmToOffload(task, nextHopId);
 
 				if (selectedVM != null) {
@@ -222,10 +223,11 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 					getCloudletList().clear();
 
 					if (selectedVM instanceof DroneVM) {
-						DroneHost host = (DroneHost)(selectedVM.getHost());
+						DroneHost host = (DroneHost) (selectedVM.getHost());
 						if (host.getLocation(CloudSim.clock()).getServingWlanId() == task.getSubmittedLocation().getServingWlanId())
 							nextEvent = REQUEST_RECEIVED_BY_DRONE;
 						else
+							// if the host (drone) moves and exits the wlan which the task resides in, we should find the closest drone again.
 							nextEvent = REQUEST_RECEIVED_BY_DRONE_TO_RELAY_NEIGHBOR;
 					}
 
@@ -235,6 +237,7 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 						if (host.getLocation().getServingWlanId() == task.getSubmittedLocation().getServingWlanId())
 							nextEvent = REQUEST_RECEIVED_BY_EDGE_DEVICE;
 						else
+							// if the mobile device moves and exits the wlan which the Edge resides in, we should relay the task to the next edge.
 							nextEvent = REQUEST_RECEIVED_BY_EDGE_DEVICE_TO_RELAY_NEIGHBOR;
 					}
 
@@ -263,12 +266,11 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 			}
 			case REQUEST_RECEIVED_BY_DRONE: {
 				Task task = (Task) ev.getData();
-				//scheduleNow(getId(), RESPONSE_RECEIVED_BY_DRONE_TO_RELAY_MOBILE_DEVICE, task);
 				submitTaskToVm(task, SimSettings.VM_TYPES.DRONE_VM);
 				break;
 			}
-			case REQUEST_RECEIVED_BY_EDGE_DEVICE_TO_RELAY_CLOUD:
-			case REQUEST_RECEIVED_BY_DRONE_TO_RELAY_CLOUD: {
+			// if cloud_rsu is selected as associated datacenter, then the task will be relayed to the cloud by edge.
+			case REQUEST_RECEIVED_BY_EDGE_DEVICE_TO_RELAY_CLOUD: {
 				Task task = (Task) ev.getData();
 				NETWORK_DELAY_TYPES delayType = NETWORK_DELAY_TYPES.WAN_DELAY;
 
@@ -309,6 +311,7 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 				break;
 			}
 			case REQUEST_RECEIVED_BY_DRONE_TO_RELAY_NEIGHBOR: {
+				// in this case a drone has moved out of the task's wlan and needs to relay the task to the closest drone.
 				Task task = (Task) ev.getData();
 				NETWORK_DELAY_TYPES delayType = NETWORK_DELAY_TYPES.MAN_DELAY;
 
@@ -330,11 +333,10 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 			}
 			case RESPONSE_RECEIVED_BY_EDGE_DEVICE: {
 				Task task = (Task) ev.getData();
-					scheduleNow(getId(), RESPONSE_RECEIVED_BY_EDGE_DEVICE_TO_RELAY_MOBILE_DEVICE, task);
+				scheduleNow(getId(), RESPONSE_RECEIVED_BY_EDGE_DEVICE_TO_RELAY_MOBILE_DEVICE, task);
 				break;
 			}
-			case RESPONSE_RECEIVED_BY_EDGE_DEVICE_TO_RELAY_MOBILE_DEVICE:
-			case RESPONSE_RECEIVED_BY_DRONE_TO_RELAY_MOBILE_DEVICE: {
+			case RESPONSE_RECEIVED_BY_EDGE_DEVICE_TO_RELAY_MOBILE_DEVICE: {
 				Task task = (Task) ev.getData();
 				NETWORK_DELAY_TYPES delayType = NETWORK_DELAY_TYPES.WLAN_DELAY;
 
@@ -342,8 +344,8 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 				double wlanDelay = networkModel.getDownloadDelay(delayType, task);
 
 				if (wlanDelay > 0) {
-						SimLogger.getInstance().setDownloadDelay(task.getCloudletId(), wlanDelay, delayType);
-						schedule(getId(), wlanDelay, RESPONSE_RECEIVED_BY_MOBILE_DEVICE, task);
+					SimLogger.getInstance().setDownloadDelay(task.getCloudletId(), wlanDelay, delayType);
+					schedule(getId(), wlanDelay, RESPONSE_RECEIVED_BY_MOBILE_DEVICE, task);
 				} else {
 					SimLogger.getInstance().failedDueToBandwidth(task.getCloudletId(), CloudSim.clock(), delayType);
 					edgeOrchestrator.taskFailed(task);
@@ -374,11 +376,6 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 
 				break;
 			}
-//			case REQUEST_RECEIVED_BY_DRONE: {
-//				Task task = (Task) ev.getData();
-//					scheduleNow(getId(), RESPONSE_RECEIVED_BY_DRONE_TO_RELAY_MOBILE_DEVICE, task);
-//				break;
-//			}
 			default:
 				SimLogger.printLine(getName() + ".processOtherEvent(): " + "Error - event unknown by this DatacenterBroker. Terminating simulation...");
 				System.exit(1);

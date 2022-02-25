@@ -57,6 +57,7 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 		double avgEdgeUtilization = SimManager.getInstance().getEdgeServerManager().getAvgUtilization();
 		double avgDroneUtilization = SimManager.getInstance().getDroneServerManager().getAvgUtilization();
 
+		//TODO: Delays are calculated based on connection type only and the distances between the task and destination datacenter (EDGE/DRONE) are not considered.
 		MyNetworkModel networkModel = (MyNetworkModel) SimManager.getInstance().getNetworkModel();
 		double wanUploadDelay = networkModel.estimateUploadDelay(NETWORK_DELAY_TYPES.WAN_DELAY, task);
 		double wanDownloadDelay = networkModel.estimateDownloadDelay(NETWORK_DELAY_TYPES.WAN_DELAY, task);
@@ -125,6 +126,7 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 						new double[]{task.getCloudletLength(), avgEdgeUtilization});
 
 			if (predictedResultForDrone)
+				//TODO: should create model again after changing the VM specs for drones.
 				predictedServiceTimeForDrone = weka.handleRegression(DRONE_DATACENTER,
 						new double[]{task.getCloudletLength(), avgDroneUtilization});
 

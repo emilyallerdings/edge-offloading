@@ -28,7 +28,6 @@ import edu.boun.edgecloudsim.utils.Location;
 
 public class DroneServerManager extends EdgeServerManager {
     private int hostIdCounter;
-    private int[] areaBounds;
     protected List<List<DroneVM>> vmList;
 
     public DroneServerManager() {
