@@ -15,21 +15,21 @@
 		<hosts>
 			<host>
 				<core>4</core>
-				<mips>20000</mips>
-				<ram>16000</ram>
-				<storage>250000</storage>
+				<mips>16000</mips>
+				<ram>8000</ram>
+				<storage>125000</storage>
 				<VMs>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>9000</mips>
-						<ram>6000</ram>
-						<storage>120000</storage>
+						<mips>10000</mips>
+						<ram>4000</ram>
+						<storage>62500</storage>
 					</VM>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>9000</mips>
-						<ram>6000</ram>
-						<storage>120000</storage>
+						<mips>10000</mips>
+						<ram>4000</ram>
+						<storage>62500</storage>
 					</VM>
 				</VMs>
 			</host>
@@ -50,21 +50,21 @@
 		<hosts>
 			<host>
 				<core>4</core>
-				<mips>20000</mips>
-				<ram>16000</ram>
-				<storage>250000</storage>
+				<mips>16000</mips>
+				<ram>8000</ram>
+				<storage>125000</storage>
 				<VMs>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>9000</mips>
-						<ram>6000</ram>
-						<storage>120000</storage>
+						<mips>10000</mips>
+						<ram>4000</ram>
+						<storage>62500</storage>
 					</VM>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>9000</mips>
-						<ram>6000</ram>
-						<storage>120000</storage>
+						<mips>10000</mips>
+						<ram>4000</ram>
+						<storage>62500</storage>
 					</VM>
 				</VMs>
 			</host>
@@ -85,21 +85,21 @@
 		<hosts>
 			<host>
 				<core>4</core>
-				<mips>20000</mips>
-				<ram>16000</ram>
-				<storage>250000</storage>
+				<mips>16000</mips>
+				<ram>8000</ram>
+				<storage>125000</storage>
 				<VMs>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>9000</mips>
-						<ram>6000</ram>
-						<storage>120000</storage>
+						<mips>10000</mips>
+						<ram>4000</ram>
+						<storage>62500</storage>
 					</VM>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>9000</mips>
-						<ram>6000</ram>
-						<storage>120000</storage>
+						<mips>10000</mips>
+						<ram>4000</ram>
+						<storage>62500</storage>
 					</VM>
 				</VMs>
 			</host>
@@ -120,21 +120,21 @@
 		<hosts>
 			<host>
 				<core>4</core>
-				<mips>20000</mips>
-				<ram>16000</ram>
-				<storage>250000</storage>
+				<mips>16000</mips>
+				<ram>8000</ram>
+				<storage>125000</storage>
 				<VMs>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>9000</mips>
-						<ram>6000</ram>
-						<storage>120000</storage>
+						<mips>10000</mips>
+						<ram>4000</ram>
+						<storage>62500</storage>
 					</VM>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>9000</mips>
-						<ram>6000</ram>
-						<storage>120000</storage>
+						<mips>10000</mips>
+						<ram>4000</ram>
+						<storage>62500</storage>
 					</VM>
 				</VMs>
 			</host>
@@ -155,21 +155,21 @@
 		<hosts>
 			<host>
 				<core>4</core>
-				<mips>20000</mips>
-				<ram>16000</ram>
-				<storage>250000</storage>
+				<mips>16000</mips>
+				<ram>8000</ram>
+				<storage>125000</storage>
 				<VMs>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>9000</mips>
-						<ram>6000</ram>
-						<storage>120000</storage>
+						<mips>10000</mips>
+						<ram>4000</ram>
+						<storage>62500</storage>
 					</VM>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>9000</mips>
-						<ram>6000</ram>
-						<storage>120000</storage>
+						<mips>10000</mips>
+						<ram>4000</ram>
+						<storage>62500</storage>
 					</VM>
 				</VMs>
 			</host>
@@ -190,21 +190,21 @@
 		<hosts>
 			<host>
 				<core>4</core>
-				<mips>20000</mips>
-				<ram>16000</ram>
-				<storage>250000</storage>
+				<mips>16000</mips>
+				<ram>8000</ram>
+				<storage>125000</storage>
 				<VMs>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>9000</mips>
-						<ram>6000</ram>
-						<storage>120000</storage>
+						<mips>10000</mips>
+						<ram>4000</ram>
+						<storage>62500</storage>
 					</VM>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>9000</mips>
-						<ram>6000</ram>
-						<storage>120000</storage>
+						<mips>10000</mips>
+						<ram>4000</ram>
+						<storage>62500</storage>
 					</VM>
 				</VMs>
 			</host>
@@ -225,21 +225,21 @@
 		<hosts>
 			<host>
 				<core>4</core>
-				<mips>20000</mips>
-				<ram>16000</ram>
-				<storage>250000</storage>
+				<mips>16000</mips>
+				<ram>8000</ram>
+				<storage>125000</storage>
 				<VMs>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>9000</mips>
-						<ram>6000</ram>
-						<storage>120000</storage>
+						<mips>10000</mips>
+						<ram>4000</ram>
+						<storage>62500</storage>
 					</VM>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>9000</mips>
-						<ram>6000</ram>
-						<storage>120000</storage>
+						<mips>10000</mips>
+						<ram>4000</ram>
+						<storage>62500</storage>
 					</VM>
 				</VMs>
 			</host>
@@ -260,21 +260,21 @@
 		<hosts>
 			<host>
 				<core>4</core>
-				<mips>20000</mips>
-				<ram>16000</ram>
-				<storage>250000</storage>
+				<mips>16000</mips>
+				<ram>8000</ram>
+				<storage>125000</storage>
 				<VMs>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>9000</mips>
-						<ram>6000</ram>
-						<storage>120000</storage>
+						<mips>10000</mips>
+						<ram>4000</ram>
+						<storage>62500</storage>
 					</VM>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>9000</mips>
-						<ram>6000</ram>
-						<storage>120000</storage>
+						<mips>10000</mips>
+						<ram>4000</ram>
+						<storage>62500</storage>
 					</VM>
 				</VMs>
 			</host>
@@ -295,21 +295,21 @@
 		<hosts>
 			<host>
 				<core>4</core>
-				<mips>20000</mips>
-				<ram>16000</ram>
-				<storage>250000</storage>
+				<mips>16000</mips>
+				<ram>8000</ram>
+				<storage>125000</storage>
 				<VMs>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>9000</mips>
-						<ram>6000</ram>
-						<storage>120000</storage>
+						<mips>10000</mips>
+						<ram>4000</ram>
+						<storage>62500</storage>
 					</VM>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>9000</mips>
-						<ram>6000</ram>
-						<storage>120000</storage>
+						<mips>10000</mips>
+						<ram>4000</ram>
+						<storage>62500</storage>
 					</VM>
 				</VMs>
 			</host>
