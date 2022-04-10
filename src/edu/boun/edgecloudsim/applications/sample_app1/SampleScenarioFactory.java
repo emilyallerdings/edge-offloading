@@ -10,6 +10,7 @@
 
 package edu.boun.edgecloudsim.applications.sample_app1;
 
+import edu.boun.edgecloudsim.applications.drone_app.DroneServerManager;
 import edu.boun.edgecloudsim.cloud_server.CloudServerManager;
 import edu.boun.edgecloudsim.cloud_server.DefaultCloudServerManager;
 import edu.boun.edgecloudsim.core.ScenarioFactory;
@@ -67,6 +68,11 @@ public class SampleScenarioFactory implements ScenarioFactory {
 	@Override
 	public EdgeServerManager getEdgeServerManager() {
 		return new DefaultEdgeServerManager();
+	}
+
+	@Override
+	public DroneServerManager getDroneServerManager() {
+		return new DroneServerManager();
 	}
 
 	@Override

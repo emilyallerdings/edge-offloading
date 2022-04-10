@@ -218,7 +218,7 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 						SimManager.getInstance().getEdgeServerManager().getVmList(0).get(0).getMips();
 
 				double expectedProcessingDelayOnDrone = task.getCloudletLength() /
-						((DroneServerManager) SimManager.getInstance().getDroneServerManager()).getDroneVmList(0).get(0).getMips();
+						SimManager.getInstance().getDroneServerManager().getVmList(0).get(0).getMips();
 
 				double[] expectedDelays = {
 						wlanUploadDelay + wlanDownloadDelay + expectedProcessingDelayOnEdge,
@@ -273,7 +273,7 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 
 			DroneHost host = ((MyMobilityModel) (SimManager.getInstance().getMobilityModel())).getClosestDrone(task.getMobileDeviceId());
 
-			selectedVM = ((DroneServerManager) SimManager.getInstance().getDroneServerManager()).getDroneVmList(host.getId()).get(vmIndex);
+			selectedVM = SimManager.getInstance().getDroneServerManager().getVmList(host.getId()).get(vmIndex);
 
 			droneVmCounter++;
 			droneVmCounter = droneVmCounter % numOfDroneVMs;

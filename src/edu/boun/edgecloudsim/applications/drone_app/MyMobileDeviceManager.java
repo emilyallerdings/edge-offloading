@@ -38,7 +38,6 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 	private static final int RESPONSE_RECEIVED_BY_EDGE_DEVICE_TO_RELAY_MOBILE_DEVICE = BASE + 11;
 
 	private static final int REQUEST_RECEIVED_BY_DRONE = BASE + 12;
-	private static final int REQUEST_RECEIVED_BY_DRONE_TO_RELAY_NEIGHBOR = BASE + 13;
 
 	private static final double MM1_QUEUE_MODEL_UPDATE_INTERVAL = 0.5; //seconds
 	private int taskIdCounter=0;
@@ -131,14 +130,32 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 
 		}
 		else if(task.getAssociatedDatacenterId() == MyEdgeOrchestrator.DRONE_DATACENTER) {
-			NETWORK_DELAY_TYPES delayType = NETWORK_DELAY_TYPES.WLAN_DELAY;
-			double wlanDelay = networkModel.getDownloadDelay(delayType, task);
-			if (wlanDelay > 0) {
-				SimLogger.getInstance().setDownloadDelay(task.getCloudletId(), wlanDelay, delayType);
-				schedule(getId(), wlanDelay, RESPONSE_RECEIVED_BY_MOBILE_DEVICE, task);
-			} else {
-				SimLogger.getInstance().failedDueToBandwidth(task.getCloudletId(), CloudSim.clock(), delayType);
-				edgeOrchestrator.taskFailed(task);
+			DroneHost host = (DroneHost) SimManager.getInstance().getDroneServerManager().getDatacenterList().get(task.getAssociatedHostId()).getHostList().get(0);
+			Location currentLocation = host.getLocation();
+			if(task.getSubmittedLocation().getServingWlanId() == currentLocation.getServingWlanId())
+			{
+				NETWORK_DELAY_TYPES delayType = NETWORK_DELAY_TYPES.WLAN_DELAY;
+				double wlanDelay = networkModel.getDownloadDelay(delayType, task);
+				if(wlanDelay > 0)
+				{
+					Location futureLocation = host.getLocation(CloudSim.clock()+wlanDelay);
+					if(task.getSubmittedLocation().getServingWlanId() == futureLocation.getServingWlanId())
+					{
+						SimLogger.getInstance().setDownloadDelay(task.getCloudletId(), wlanDelay, delayType);
+						schedule(getId(), wlanDelay, RESPONSE_RECEIVED_BY_MOBILE_DEVICE, task);
+					}
+					else
+					{
+						SimLogger.getInstance().failedDueToMobility(task.getCloudletId(), CloudSim.clock());
+						//no need to record failed task due to the mobility
+						//edgeOrchestrator.taskFailed(task);
+					}
+				}
+				else
+				{
+					SimLogger.getInstance().failedDueToBandwidth(task.getCloudletId(), CloudSim.clock(), delayType);
+					edgeOrchestrator.taskFailed(task);
+				}
 			}
 		}
 		else {
@@ -223,15 +240,13 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 					getCloudletList().clear();
 
 					if (selectedVM instanceof DroneVM) {
-						DroneHost host = (DroneHost) (selectedVM.getHost());
-						if (host.getLocation(CloudSim.clock()).getServingWlanId() == task.getSubmittedLocation().getServingWlanId())
-							nextEvent = REQUEST_RECEIVED_BY_DRONE;
-						else
-							// if the host (drone) moves and exits the wlan which the task resides in, we should find the closest drone again.
-							nextEvent = REQUEST_RECEIVED_BY_DRONE_TO_RELAY_NEIGHBOR;
-					}
-
-					if (selectedVM instanceof EdgeVM) {
+							DroneHost host = (DroneHost) (selectedVM.getHost());
+							if (host.getLocation(CloudSim.clock()).getServingWlanId() == task.getSubmittedLocation().getServingWlanId())
+								nextEvent = REQUEST_RECEIVED_BY_DRONE;
+							else
+								// if the host (drone) moves and exits the wlan which the task resides in, we should find the closest drone again.
+								nextEvent = READY_TO_SELECT_VM; //REQUEST_RECEIVED_BY_DRONE_TO_RELAY_NEIGHBOR;
+						} else if (selectedVM instanceof EdgeVM) {
 						EdgeHost host = (EdgeHost) (selectedVM.getHost());
 						//if nearest edge device is selected
 						if (host.getLocation().getServingWlanId() == task.getSubmittedLocation().getServingWlanId())
@@ -304,27 +319,6 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 							task.getCloudletId(),
 							CloudSim.clock(),
 							SimSettings.VM_TYPES.EDGE_VM.ordinal(),
-							delayType);
-
-					edgeOrchestrator.taskFailed(task);
-				}
-				break;
-			}
-			case REQUEST_RECEIVED_BY_DRONE_TO_RELAY_NEIGHBOR: {
-				// in this case a drone has moved out of the task's wlan and needs to relay the task to the closest drone.
-				Task task = (Task) ev.getData();
-				NETWORK_DELAY_TYPES delayType = NETWORK_DELAY_TYPES.MAN_DELAY;
-
-				double manDelay = networkModel.getUploadDelay(delayType, task);
-				if (manDelay > 0) {
-					SimLogger.getInstance().setUploadDelay(task.getCloudletId(), manDelay, delayType);
-					schedule(getId(), manDelay, REQUEST_RECEIVED_BY_DRONE, task);
-				} else {
-					//SimLogger.printLine("Task #" + task.getCloudletId() + " cannot assign to any VM");
-					SimLogger.getInstance().rejectedDueToBandwidth(
-							task.getCloudletId(),
-							CloudSim.clock(),
-							VM_TYPES.DRONE_VM.ordinal(),
 							delayType);
 
 					edgeOrchestrator.taskFailed(task);
@@ -480,7 +474,7 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 		else if(vmType == VM_TYPES.DRONE_VM) {
 			int numberOfHost = SimSettings.getInstance().getNumOfDroneHosts();
 			for (int hostIndex = 0; hostIndex < numberOfHost; hostIndex++) {
-				List<DroneVM> vmArray = ((DroneServerManager)SimManager.getInstance().getDroneServerManager()).getDroneVmList(hostIndex);
+				List<DroneVM> vmArray = SimManager.getInstance().getDroneServerManager().getVmList(hostIndex);
 				for (int vmIndex = 0; vmIndex < vmArray.size(); vmIndex++) {
 					if(vmArray.get(vmIndex).getId() == task.getAssociatedVmId()) {
 						targetVM = vmArray.get(vmIndex);

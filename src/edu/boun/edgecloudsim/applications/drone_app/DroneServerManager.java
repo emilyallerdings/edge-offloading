@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import edu.boun.edgecloudsim.core.SimManager;
-import edu.boun.edgecloudsim.edge_server.EdgeServerManager;
 import org.cloudbus.cloudsim.CloudletSchedulerTimeShared;
 import org.cloudbus.cloudsim.Datacenter;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
@@ -23,26 +22,32 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import edu.boun.edgecloudsim.core.SimSettings;
-import edu.boun.edgecloudsim.edge_server.EdgeVmAllocationPolicy_Custom;
 import edu.boun.edgecloudsim.utils.Location;
 
-public class DroneServerManager extends EdgeServerManager {
+public class DroneServerManager {
     private int hostIdCounter;
     protected List<List<DroneVM>> vmList;
+    protected List<Datacenter> localDatacenters;
 
     public DroneServerManager() {
-    }
-
-    @Override
-    public void initialize() {
-        localDatacenters = new ArrayList<Datacenter>();
-        hostIdCounter = 0;
+        localDatacenters=new ArrayList<Datacenter>();
         vmList = new ArrayList<List<DroneVM>>();
     }
 
-    @Override
+    public List<DroneVM> getVmList(int hostId){
+        return vmList.get(hostId);
+    }
+
+    public List<Datacenter> getDatacenterList(){
+        return localDatacenters;
+    }
+
+
+    public void initialize() {
+    }
+
     public VmAllocationPolicy getVmAllocationPolicy(List<? extends Host> hostList, int dataCenterIndex) {
-        return new EdgeVmAllocationPolicy_Custom(hostList, dataCenterIndex);
+        return new DroneVmAllocationPolicy(hostList,dataCenterIndex);
     }
 
     public void startDatacenters() throws Exception {
@@ -55,37 +60,44 @@ public class DroneServerManager extends EdgeServerManager {
         }
     }
 
-    public List<DroneVM> getDroneVmList(int hostId) {
-        return vmList.get(hostId);
-    }
+    public void createVmList(int brockerId){
+        int hostCounter=0;
+        int vmCounter=SimSettings.getInstance().getNumOfEdgeVMs();
 
-    public void createVmList(DroneHost host, Node hostNode, int hostCounter, int hostNodeLength) {
-        int vmCounter = 0;
-        vmList.add(hostCounter, new ArrayList<DroneVM>());
+        //Create VMs for each hosts
+        Document doc = SimSettings.getInstance().getDronesDocument();
+        NodeList datacenterList = doc.getElementsByTagName("drone");
+        for (int i = 0; i < datacenterList.getLength(); i++) {
+            Node datacenterNode = datacenterList.item(i);
+            Element datacenterElement = (Element) datacenterNode;
+            NodeList hostNodeList = datacenterElement.getElementsByTagName("host");
+            for (int j = 0; j < hostNodeList.getLength(); j++) {
 
-        Element hostElement = (Element) hostNode;
-        NodeList vmNodeList = hostElement.getElementsByTagName("VM");
-        for (int k = 0; k < vmNodeList.getLength(); k++) {
-            Node vmNode = vmNodeList.item(k);
-            Element vmElement = (Element) vmNode;
+                vmList.add(hostCounter, new ArrayList<DroneVM>());
 
-            String vmm = vmElement.getAttribute("vmm");
-            int numOfCores = Integer.parseInt(vmElement.getElementsByTagName("core").item(0).getTextContent());
-            double mips = Double.parseDouble(vmElement.getElementsByTagName("mips").item(0).getTextContent());
-            int ram = Integer.parseInt(vmElement.getElementsByTagName("ram").item(0).getTextContent());
-            long storage = Long.parseLong(vmElement.getElementsByTagName("storage").item(0).getTextContent());
-            long bandwidth = SimSettings.getInstance().getWlanBandwidth() / (hostNodeLength + vmNodeList.getLength());
+                Node hostNode = hostNodeList.item(j);
+                Element hostElement = (Element) hostNode;
+                NodeList vmNodeList = hostElement.getElementsByTagName("VM");
+                for (int k = 0; k < vmNodeList.getLength(); k++) {
+                    Node vmNode = vmNodeList.item(k);
+                    Element vmElement = (Element) vmNode;
 
-            //VM Parameters
-            DroneVM vm = new DroneVM(vmCounter, SimManager.getInstance().getMobileDeviceManager().getId(), mips, numOfCores, ram, bandwidth, storage, vmm, new CloudletSchedulerTimeShared());
-            vm.setHost(host);
-            vmList.get(hostCounter).add(vm);
-            vmCounter++;
+                    String vmm = vmElement.getAttribute("vmm");
+                    int numOfCores = Integer.parseInt(vmElement.getElementsByTagName("core").item(0).getTextContent());
+                    double mips = Double.parseDouble(vmElement.getElementsByTagName("mips").item(0).getTextContent());
+                    int ram = Integer.parseInt(vmElement.getElementsByTagName("ram").item(0).getTextContent());
+                    long storage = Long.parseLong(vmElement.getElementsByTagName("storage").item(0).getTextContent());
+                    long bandwidth = SimSettings.getInstance().getWlanBandwidth() / (hostNodeList.getLength()+vmNodeList.getLength());
+
+                    //VM Parameters
+                    DroneVM vm = new DroneVM(vmCounter, brockerId, mips, numOfCores, ram, bandwidth, storage, vmm, new CloudletSchedulerTimeShared());
+                    vmList.get(hostCounter).add(vm);
+                    vmCounter++;
+                }
+
+                hostCounter++;
+            }
         }
-    }
-
-    public void createVmList(int brockerId) {
-        // VMs are created alongside the hosts. So this method has no implementation
     }
 
     public void terminateDatacenters() {
@@ -104,8 +116,8 @@ public class DroneServerManager extends EdgeServerManager {
         for (int i = 0; i < localDatacenters.size(); i++) {
             List<? extends Host> list = localDatacenters.get(i).getHostList();
             // for each host...
-            for (int hostIndex = 0; hostIndex < list.size(); hostIndex++) {
-                List<DroneVM> vmArray = getDroneVmList(hostCounter);
+            for (int hostIndex=0; hostIndex < list.size(); hostIndex++) {
+                List<DroneVM> vmArray = SimManager.getInstance().getDroneServerManager().getVmList(hostCounter);
                 //for each vm...
                 for (int vmIndex = 0; vmIndex < vmArray.size(); vmIndex++) {
                     totalUtilization += vmArray.get(vmIndex).getCloudletScheduler().getTotalUtilizationOfCpu(CloudSim.clock());
@@ -196,9 +208,6 @@ public class DroneServerManager extends EdgeServerManager {
 
             host.setPlace(new Location(placeTypeIndex, wlan_id, x_pos, y_pos));
             hostList.add(host);
-
-            createVmList(host, hostNode, hostIdCounter, hostNodeList.getLength());
-
             hostIdCounter++;
         }
 

@@ -47,7 +47,7 @@ public class CloudVmAllocationPolicy_Custom extends VmAllocationPolicy {
 		boolean result = false;
 
 		if (!getVmTable().containsKey(vm.getUid()) && vm instanceof CloudVM) { // if this vm was not created
-			int hostIndex = (vm.getId() - SimSettings.getInstance().getNumOfEdgeVMs()) / SimSettings.getInstance().getNumOfCloudVMsPerHost();
+			int hostIndex = (vm.getId() - (SimSettings.getInstance().getNumOfEdgeVMs() + SimSettings.getInstance().getNumOfDroneVMs())) / SimSettings.getInstance().getNumOfCloudVMsPerHost();
 			
 			if(DataCenterIndex == SimSettings.CLOUD_DATACENTER_ID){
 				Host host = getHostList().get(hostIndex);

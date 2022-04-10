@@ -13,6 +13,7 @@
 		<task_length>3000</task_length>
 		<required_core>1</required_core>
 		<vm_utilization_on_edge>6</vm_utilization_on_edge>
+		<vm_utilization_on_drone>6</vm_utilization_on_drone>
 		<vm_utilization_on_cloud>1.2</vm_utilization_on_cloud>
 		<vm_utilization_on_mobile>0</vm_utilization_on_mobile>
 	</application>
@@ -29,6 +30,7 @@
 		<task_length>10000</task_length>
 		<required_core>1</required_core>
 		<vm_utilization_on_edge>20</vm_utilization_on_edge>
+		<vm_utilization_on_drone>20</vm_utilization_on_drone>
 		<vm_utilization_on_cloud>4</vm_utilization_on_cloud>
 		<vm_utilization_on_mobile>0</vm_utilization_on_mobile>
 	</application>
@@ -45,6 +47,7 @@
 		<task_length>20000</task_length>
 		<required_core>1</required_core>
 		<vm_utilization_on_edge>40</vm_utilization_on_edge>
+		<vm_utilization_on_drone>40</vm_utilization_on_drone>
 		<vm_utilization_on_cloud>8</vm_utilization_on_cloud>
 		<vm_utilization_on_mobile>0</vm_utilization_on_mobile>
 	</application>

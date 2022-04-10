@@ -58,10 +58,10 @@ public class MyNetworkModel extends NetworkModel {
 			lastTaskSize = taskSize;
 
 			double avgTaskSize = taskSize * 8; //convert from KB to Kb
-			double lamda = ((double)1/(double)poissonMean); //task per seconds
+			double lambda = ((double)1/(double)poissonMean); //task per seconds
 			double mu = bandwidth /*Kbps*/ / avgTaskSize /*Kb*/; //task per seconds
 
-			if(mu <= lamda) {
+			if(mu <= lambda) {
 				SimLogger.printLine("Error in initializeMM1QueueValues function:" +
 						"MU is smallar than LAMDA! Check your simulation settings.");
 				System.exit(1);
@@ -126,6 +126,7 @@ public class MyNetworkModel extends NetworkModel {
 		wlanMMPPForDownload = new MMPPWrapper[numOfAccessPoint];
 		wlanMMPPForUpload = new MMPPWrapper[numOfAccessPoint];
 		for(int apIndex=0; apIndex<numOfAccessPoint; apIndex++) {
+			//TODO: we need wlanMMPP for drones as well as edges
 			wlanMMPPForDownload[apIndex] = new MMPPWrapper();
 			wlanMMPPForUpload[apIndex] = new MMPPWrapper();
 		}

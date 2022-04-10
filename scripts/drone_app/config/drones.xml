@@ -11,7 +11,7 @@
 			<wlan_id>0</wlan_id>
 			<attractiveness>0</attractiveness>
 		</location>
-		<speed>10</speed>
+		<speed>3</speed>
 		<hosts>
 			<host>
 				<core>4</core>
@@ -21,13 +21,13 @@
 				<VMs>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>10000</mips>
+						<mips>8000</mips>
 						<ram>4000</ram>
 						<storage>62500</storage>
 					</VM>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>10000</mips>
+						<mips>8000</mips>
 						<ram>4000</ram>
 						<storage>62500</storage>
 					</VM>
@@ -46,7 +46,7 @@
 			<wlan_id>1</wlan_id>
 			<attractiveness>0</attractiveness>
 		</location>
-		<speed>10</speed>
+		<speed>3</speed>
 		<hosts>
 			<host>
 				<core>4</core>
@@ -56,13 +56,13 @@
 				<VMs>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>10000</mips>
+						<mips>8000</mips>
 						<ram>4000</ram>
 						<storage>62500</storage>
 					</VM>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>10000</mips>
+						<mips>8000</mips>
 						<ram>4000</ram>
 						<storage>62500</storage>
 					</VM>
@@ -81,7 +81,7 @@
 			<wlan_id>2</wlan_id>
 			<attractiveness>1</attractiveness>
 		</location>
-		<speed>10</speed>
+		<speed>3</speed>
 		<hosts>
 			<host>
 				<core>4</core>
@@ -91,13 +91,13 @@
 				<VMs>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>10000</mips>
+						<mips>8000</mips>
 						<ram>4000</ram>
 						<storage>62500</storage>
 					</VM>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>10000</mips>
+						<mips>8000</mips>
 						<ram>4000</ram>
 						<storage>62500</storage>
 					</VM>
@@ -116,7 +116,7 @@
 			<wlan_id>3</wlan_id>
 			<attractiveness>1</attractiveness>
 		</location>
-		<speed>10</speed>
+		<speed>3</speed>
 		<hosts>
 			<host>
 				<core>4</core>
@@ -126,13 +126,13 @@
 				<VMs>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>10000</mips>
+						<mips>8000</mips>
 						<ram>4000</ram>
 						<storage>62500</storage>
 					</VM>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>10000</mips>
+						<mips>8000</mips>
 						<ram>4000</ram>
 						<storage>62500</storage>
 					</VM>
@@ -151,7 +151,7 @@
 			<wlan_id>4</wlan_id>
 			<attractiveness>1</attractiveness>
 		</location>
-		<speed>10</speed>
+		<speed>3</speed>
 		<hosts>
 			<host>
 				<core>4</core>
@@ -161,13 +161,13 @@
 				<VMs>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>10000</mips>
+						<mips>8000</mips>
 						<ram>4000</ram>
 						<storage>62500</storage>
 					</VM>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>10000</mips>
+						<mips>8000</mips>
 						<ram>4000</ram>
 						<storage>62500</storage>
 					</VM>
@@ -186,7 +186,7 @@
 			<wlan_id>5</wlan_id>
 			<attractiveness>1</attractiveness>
 		</location>
-		<speed>10</speed>
+		<speed>3</speed>
 		<hosts>
 			<host>
 				<core>4</core>
@@ -196,13 +196,13 @@
 				<VMs>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>10000</mips>
+						<mips>8000</mips>
 						<ram>4000</ram>
 						<storage>62500</storage>
 					</VM>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>10000</mips>
+						<mips>8000</mips>
 						<ram>4000</ram>
 						<storage>62500</storage>
 					</VM>
@@ -221,7 +221,7 @@
 			<wlan_id>6</wlan_id>
 			<attractiveness>2</attractiveness>
 		</location>
-		<speed>10</speed>
+		<speed>3</speed>
 		<hosts>
 			<host>
 				<core>4</core>
@@ -231,13 +231,13 @@
 				<VMs>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>10000</mips>
+						<mips>8000</mips>
 						<ram>4000</ram>
 						<storage>62500</storage>
 					</VM>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>10000</mips>
+						<mips>8000</mips>
 						<ram>4000</ram>
 						<storage>62500</storage>
 					</VM>
@@ -256,7 +256,7 @@
 			<wlan_id>7</wlan_id>
 			<attractiveness>2</attractiveness>
 		</location>
-		<speed>10</speed>
+		<speed>3</speed>
 		<hosts>
 			<host>
 				<core>4</core>
@@ -266,13 +266,13 @@
 				<VMs>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>10000</mips>
+						<mips>8000</mips>
 						<ram>4000</ram>
 						<storage>62500</storage>
 					</VM>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>10000</mips>
+						<mips>8000</mips>
 						<ram>4000</ram>
 						<storage>62500</storage>
 					</VM>
@@ -291,7 +291,7 @@
 			<wlan_id>8</wlan_id>
 			<attractiveness>2</attractiveness>
 		</location>
-		<speed>10</speed>
+		<speed>3</speed>
 		<hosts>
 			<host>
 				<core>4</core>
@@ -301,13 +301,13 @@
 				<VMs>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>10000</mips>
+						<mips>8000</mips>
 						<ram>4000</ram>
 						<storage>62500</storage>
 					</VM>
 					<VM vmm="Xen">
 						<core>2</core>
-						<mips>10000</mips>
+						<mips>8000</mips>
 						<ram>4000</ram>
 						<storage>62500</storage>
 					</VM>

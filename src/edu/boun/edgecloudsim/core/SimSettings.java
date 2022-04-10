@@ -134,17 +134,18 @@ public class SimSettings {
 		return instance;
 	}
 
-	public boolean initialize(String propertiesFile, String edgeDevicesFile, String dronesFile, String applicationsFile) {
-		boolean result = initialize(propertiesFile, edgeDevicesFile, applicationsFile);
-		parseDronesXML(dronesFile);
+	public boolean initialize(String propertiesFile, String edgeDevicesFile, String applicationsFile) {
+		boolean result = initialize(propertiesFile, edgeDevicesFile, "", applicationsFile);
 		return result;
 	}
-		/**
-         * Reads configuration file and stores information to local variables
-         * @param propertiesFile
-         * @return
-         */
-	public boolean initialize(String propertiesFile, String edgeDevicesFile, String applicationsFile){
+
+	/**
+	 * Reads configuration file and stores information to local variables
+	 *
+	 * @param propertiesFile
+	 * @return
+	 */
+	public boolean initialize(String propertiesFile, String edgeDevicesFile, String dronesFile, String applicationsFile) {
 		boolean result = false;
 		InputStream input = null;
 		try {
@@ -223,6 +224,9 @@ public class SimSettings {
 		}
 		parseApplicationsXML(applicationsFile);
 		parseEdgeDevicesXML(edgeDevicesFile);
+		if (dronesFile != "") {
+			parseDronesXML(dronesFile);
+		}
 
 		return result;
 	}
@@ -423,112 +427,98 @@ public class SimSettings {
 	/**
 	 * returns the number of different place types
 	 */
-	public int getNumOfPlaceTypes()
-	{
+	public int getNumOfPlaceTypes() {
 		return NUM_OF_PLACE_TYPES;
 	}
 
 	/**
 	 * returns the number of cloud datacenters
 	 */
-	public int getNumOfCloudHost()
-	{
+	public int getNumOfCloudHost() {
 		return NUM_OF_HOST_ON_CLOUD_DATACENTER;
 	}
 
 	/**
 	 * returns the number of cloud VMs per Host
 	 */
-	public int getNumOfCloudVMsPerHost()
-	{
+	public int getNumOfCloudVMsPerHost() {
 		return NUM_OF_VM_ON_CLOUD_HOST;
 	}
 
 	/**
 	 * returns the total number of cloud VMs
 	 */
-	public int getNumOfCloudVMs()
-	{
+	public int getNumOfCloudVMs() {
 		return NUM_OF_VM_ON_CLOUD_HOST * NUM_OF_HOST_ON_CLOUD_DATACENTER;
 	}
 
 	/**
 	 * returns the number of cores for cloud VMs
 	 */
-	public int getCoreForCloudVM()
-	{
+	public int getCoreForCloudVM() {
 		return CORE_FOR_CLOUD_VM;
 	}
 
 	/**
 	 * returns MIPS of the central cloud VMs
 	 */
-	public int getMipsForCloudVM()
-	{
+	public int getMipsForCloudVM() {
 		return MIPS_FOR_CLOUD_VM;
 	}
 
 	/**
 	 * returns RAM of the central cloud VMs
 	 */
-	public int getRamForCloudVM()
-	{
+	public int getRamForCloudVM() {
 		return RAM_FOR_CLOUD_VM;
 	}
 
 	/**
 	 * returns Storage of the central cloud VMs
 	 */
-	public int getStorageForCloudVM()
-	{
+	public int getStorageForCloudVM() {
 		return STORAGE_FOR_CLOUD_VM;
 	}
 
 	/**
 	 * returns RAM of the mobile (processing unit) VMs
 	 */
-	public int getRamForMobileVM()
-	{
+	public int getRamForMobileVM() {
 		return RAM_FOR_VM;
 	}
 
 	/**
 	 * returns the number of cores for mobile VMs
 	 */
-	public int getCoreForMobileVM()
-	{
+	public int getCoreForMobileVM() {
 		return CORE_FOR_VM;
 	}
 
 	/**
 	 * returns MIPS of the mobile (processing unit) VMs
 	 */
-	public int getMipsForMobileVM()
-	{
+	public int getMipsForMobileVM() {
 		return MIPS_FOR_VM;
 	}
 
 	/**
 	 * returns Storage of the mobile (processing unit) VMs
 	 */
-	public int getStorageForMobileVM()
-	{
+	public int getStorageForMobileVM() {
 		return STORAGE_FOR_VM;
 	}
 
 	/**
 	 * returns simulation screnarios as string
 	 */
-	public String[] getSimulationScenarios()
-	{
+	public String[] getSimulationScenarios() {
 		return SIMULATION_SCENARIOS;
 	}
 
 	/**
 	 * returns orchestrator policies as string
 	 */
-	public String[] getOrchestratorPolicies()
-	{
+	public String[] getOrchestratorPolicies() {
 		return ORCHESTRATOR_POLICIES;
 	}
 
@@ -552,9 +542,8 @@ public class SimSettings {
 	/**
 	 * returns mobility characteristic within an array
 	 * the result includes mean waiting time (minute) or each place type
-	 */ 
-	public double[] getMobilityLookUpTable()
-	{
+	 */
+	public double[] getMobilityLookUpTable() {
 		return mobilityLookUpTable;
 	}
 
@@ -575,48 +564,46 @@ public class SimSettings {
 	 * [11] vm utilization on mobile (%)
 	 * [12] delay sensitivity [0-1]
 	 * [13] maximum delay requirement (sec)
-	 */ 
-	public double[][] getTaskLookUpTable()
-	{
+	 */
+	public double[][] getTaskLookUpTable() {
 		return taskLookUpTable;
 	}
 
 	public double[] getTaskProperties(String taskName) {
 		double[] result = null;
 		int index = -1;
-		for (int i=0;i<taskNames.length;i++) {
+		for (int i = 0; i < taskNames.length; i++) {
 			if (taskNames[i].equals(taskName)) {
 				index = i;
 				break;
 			}
 		}
 
-		if(index >= 0 && index < taskLookUpTable.length)
+		if (index >= 0 && index < taskLookUpTable.length)
 			result = taskLookUpTable[index];
 
 		return result;
 	}
 
-	public String getTaskName(int taskType)
-	{
+	public String getTaskName(int taskType) {
 		return taskNames[taskType];
 	}
 
 	private void isAttributePresent(Element element, String key) {
 		String value = element.getAttribute(key);
-		if (value.isEmpty() || value == null){
-			throw new IllegalArgumentException("Attribute '" + key + "' is not found in '" + element.getNodeName() +"'");
+		if (value.isEmpty() || value == null) {
+			throw new IllegalArgumentException("Attribute '" + key + "' is not found in '" + element.getNodeName() + "'");
 		}
 	}
 
 	private void isElementPresent(Element element, String key) {
 		try {
 			String value = element.getElementsByTagName(key).item(0).getTextContent();
-			if (value.isEmpty() || value == null){
-				throw new IllegalArgumentException("Element '" + key + "' is not found in '" + element.getNodeName() +"'");
+			if (value.isEmpty() || value == null) {
+				throw new IllegalArgumentException("Element '" + key + "' is not found in '" + element.getNodeName() + "'");
 			}
 		} catch (Exception e) {
-			throw new IllegalArgumentException("Element '" + key + "' is not found in '" + element.getNodeName() +"'");
+			throw new IllegalArgumentException("Element '" + key + "' is not found in '" + element.getNodeName() + "'");
 		}
 	}
 
@@ -624,7 +611,7 @@ public class SimSettings {
 		Boolean result = true;
 		try {
 			String value = element.getElementsByTagName(key).item(0).getTextContent();
-			if (value.isEmpty() || value == null){
+			if (value.isEmpty() || value == null) {
 				result = false;
 			}
 		} catch (Exception e) {
@@ -634,10 +621,9 @@ public class SimSettings {
 		return result;
 	}
 
-	private void parseApplicationsXML(String filePath)
-	{
+	private void parseApplicationsXML(String filePath) {
 		Document doc = null;
-		try {	
+		try {
 			File devicesFile = new File(filePath);
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -645,23 +631,23 @@ public class SimSettings {
 			doc.getDocumentElement().normalize();
 
 			String mandatoryAttributes[] = {
-					"usage_percentage", //usage percentage [0-100]
-					"prob_cloud_selection", //prob. of selecting cloud [0-100]
-					"poisson_interarrival", //poisson mean (sec)
-					"active_period", //active period (sec)
-					"idle_period", //idle period (sec)
-					"data_upload", //avg data upload (KB)
-					"data_download", //avg data download (KB)
-					"task_length", //avg task length (MI)
-					"required_core", //required # of core
-					"vm_utilization_on_edge", //vm utilization on edge vm [0-100]
-					"vm_utilization_on_cloud", //vm utilization on cloud vm [0-100]
-					"vm_utilization_on_mobile", //vm utilization on mobile vm [0-100]
-					"vm_utilization_on_drone",
-			"delay_sensitivity"}; //delay_sensitivity [0-1]
+					"usage_percentage", //usage percentage [0-100]					//0
+					"prob_cloud_selection", //prob. of selecting cloud [0-100]		//1
+					"poisson_interarrival", //poisson mean (sec)					//2
+					"active_period", //active period (sec)							//3
+					"idle_period", //idle period (sec)								//4
+					"data_upload", //avg data upload (KB)							//5
+					"data_download", //avg data download (KB)						//6
+					"task_length", //avg task length (MI)							//7
+					"required_core", //required # of core							//8
+					"vm_utilization_on_edge", //vm utilization on edge vm [0-100]	//9
+					"vm_utilization_on_cloud", //vm utilization on cloud vm [0-100]	//10
+					"vm_utilization_on_mobile", //vm utilization on mobile vm [0-100]//11
+					"vm_utilization_on_drone",                                        //12
+					"delay_sensitivity"}; //delay_sensitivity [0-1]							//13
 
 			String optionalAttributes[] = {
-			"max_delay_requirement"}; //maximum delay requirement (sec)
+					"max_delay_requirement"}; //maximum delay requirement (sec)
 
 			NodeList appList = doc.getElementsByTagName("application");
 			taskLookUpTable = new double[appList.getLength()]
@@ -676,16 +662,16 @@ public class SimSettings {
 				String taskName = appElement.getAttribute("name");
 				taskNames[i] = taskName;
 
-				for(int m=0; m<mandatoryAttributes.length; m++){
+				for (int m = 0; m < mandatoryAttributes.length; m++) {
 					isElementPresent(appElement, mandatoryAttributes[m]);
 					taskLookUpTable[i][m] = Double.parseDouble(appElement.
 							getElementsByTagName(mandatoryAttributes[m]).item(0).getTextContent());
 				}
 
-				for(int o=0; o<optionalAttributes.length; o++){
+				for (int o = 0; o < optionalAttributes.length; o++) {
 					double value = 0;
-					if(checkElement(appElement, optionalAttributes[o]))
-						value =  Double.parseDouble(appElement.getElementsByTagName(optionalAttributes[o]).item(0).getTextContent());
+					if (checkElement(appElement, optionalAttributes[o]))
+						value = Double.parseDouble(appElement.getElementsByTagName(optionalAttributes[o]).item(0).getTextContent());
 
 					taskLookUpTable[i][mandatoryAttributes.length + o] = value;
 				}
@@ -697,9 +683,8 @@ public class SimSettings {
 		}
 	}
 
-	private void parseEdgeDevicesXML(String filePath)
-	{
-		try {	
+	private void parseEdgeDevicesXML(String filePath) {
+		try {
 			File devicesFile = new File(filePath);
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -720,7 +705,7 @@ public class SimSettings {
 				isElementPresent(datacenterElement, "costPerMem");
 				isElementPresent(datacenterElement, "costPerStorage");
 
-				Element location = (Element)datacenterElement.getElementsByTagName("location").item(0);
+				Element location = (Element) datacenterElement.getElementsByTagName("location").item(0);
 				isElementPresent(location, "attractiveness");
 				isElementPresent(location, "wlan_id");
 				isElementPresent(location, "x_pos");
@@ -728,8 +713,8 @@ public class SimSettings {
 
 				String attractiveness = location.getElementsByTagName("attractiveness").item(0).getTextContent();
 				int placeTypeIndex = Integer.parseInt(attractiveness);
-				if(NUM_OF_PLACE_TYPES < placeTypeIndex+1)
-					NUM_OF_PLACE_TYPES = placeTypeIndex+1;
+				if (NUM_OF_PLACE_TYPES < placeTypeIndex + 1)
+					NUM_OF_PLACE_TYPES = placeTypeIndex + 1;
 
 				NodeList hostList = datacenterElement.getElementsByTagName("host");
 				for (int j = 0; j < hostList.getLength(); j++) {
@@ -764,8 +749,7 @@ public class SimSettings {
 		}
 	}
 
-	private void parseDronesXML(String filePath)
-	{
+	private void parseDronesXML(String filePath) {
 		try {
 			File devicesFile = new File(filePath);
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -787,7 +771,7 @@ public class SimSettings {
 				isElementPresent(datacenterElement, "costPerMem");
 				isElementPresent(datacenterElement, "costPerStorage");
 
-				Element location = (Element)datacenterElement.getElementsByTagName("location").item(0);
+				Element location = (Element) datacenterElement.getElementsByTagName("location").item(0);
 				isElementPresent(location, "attractiveness");
 				isElementPresent(location, "wlan_id");
 				isElementPresent(location, "x_pos");

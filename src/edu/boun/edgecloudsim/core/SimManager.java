@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.List;
 
 import edu.boun.edgecloudsim.applications.drone_app.DroneServerManager;
+import edu.boun.edgecloudsim.applications.drone_app.DroneVmAllocationPolicy;
 import edu.boun.edgecloudsim.applications.drone_app.MyScenarioFactory;
 import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.core.CloudSim;
@@ -49,7 +50,7 @@ public class SimManager extends SimEntity {
 	private ScenarioFactory scenarioFactory;
 	private EdgeOrchestrator edgeOrchestrator;
 	private EdgeServerManager edgeServerManager;
-	private EdgeServerManager droneServerManager;
+	private DroneServerManager droneServerManager;
 	private CloudServerManager cloudServerManager;
 	private MobileServerManager mobileServerManager;
 	private LoadGeneratorModel loadGeneratorModel;
@@ -122,7 +123,7 @@ public class SimManager extends SimEntity {
 
 		//Start Drone Datacenters & Generate VMs
 		droneServerManager.startDatacenters();
-//		droneServerManager.createVmList(mobileDeviceManager.getId());
+		droneServerManager.createVmList(mobileDeviceManager.getId());
 
 		//Start cloud Datacenters & Generate VMs
 		cloudServerManager.startDatacenters();
@@ -183,7 +184,7 @@ public class SimManager extends SimEntity {
 		return mobileDeviceManager;
 	}
 
-	public EdgeServerManager getDroneServerManager() {
+	public DroneServerManager getDroneServerManager() {
 		return droneServerManager;
 	}
 
@@ -203,7 +204,7 @@ public class SimManager extends SimEntity {
 		for (int i = 0; i < droneServerManager.getDatacenterList().size(); i++) {
 			List<? extends Host> list = droneServerManager.getDatacenterList().get(i).getHostList();
 			for (int j = 0; j < list.size(); j++) {
-				mobileDeviceManager.submitVmList(((DroneServerManager)droneServerManager).getDroneVmList(hostCounter));
+				mobileDeviceManager.submitVmList(droneServerManager.getVmList(hostCounter));
 				hostCounter++;
 			}
 		}
@@ -246,7 +247,12 @@ public class SimManager extends SimEntity {
 				case CHECK_ALL_VM:
 					int totalNumOfVm = SimSettings.getInstance().getNumOfEdgeVMs();
 					if (EdgeVmAllocationPolicy_Custom.getCreatedVmNum() != totalNumOfVm) {
-						SimLogger.printLine("All VMs cannot be created! Terminating simulation...");
+						SimLogger.printLine("All Edge VMs cannot be created! Terminating simulation...");
+						System.exit(1);
+					}
+					totalNumOfVm = SimSettings.getInstance().getNumOfDroneVMs();
+					if (DroneVmAllocationPolicy.getCreatedVmNum() != totalNumOfVm) {
+						SimLogger.printLine("All Drone VMs cannot be created! Terminating simulation...");
 						System.exit(1);
 					}
 					break;

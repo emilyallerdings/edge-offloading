@@ -55,7 +55,7 @@ public class DefaultCloudServerManager extends CloudServerManager{
 
 	public void createVmList(int brokerId){
 		//VMs should have unique IDs, so create Cloud VMs after Edge VMs
-		int vmCounter=SimSettings.getInstance().getNumOfEdgeVMs();
+		int vmCounter=SimSettings.getInstance().getNumOfEdgeVMs() + SimSettings.getInstance().getNumOfDroneVMs();
 		
 		//Create VMs for each hosts
 		for (int i = 0; i < SimSettings.getInstance().getNumOfCloudHost(); i++) {
@@ -153,7 +153,7 @@ public class DefaultCloudServerManager extends CloudServerManager{
 			//4. Create Hosts with its id and list of PEs and add them to the list of machines
 			Host host = new Host(
 					//Hosts should have unique IDs, so create Cloud Hosts after Edge Hosts
-					i+SimSettings.getInstance().getNumOfEdgeHosts(),
+					i+SimSettings.getInstance().getNumOfEdgeHosts() + SimSettings.getInstance().getNumOfDroneHosts(),
 					new RamProvisionerSimple(ram),
 					new BwProvisionerSimple(bandwidth), //kbps
 					storage,

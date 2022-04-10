@@ -52,7 +52,7 @@ public class MyScenarioFactory implements ScenarioFactory {
 		return new MyEdgeServerManager();
 	}
 
-	public EdgeServerManager getDroneServerManager() {
+	public DroneServerManager getDroneServerManager() {
 		return new DroneServerManager();
 	}
 

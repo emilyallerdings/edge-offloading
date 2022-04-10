@@ -117,23 +117,23 @@ public class OrchestratorTrainerLogger {
 			boolean result, double serviceTime) {
 		String line = "";
 
-		switch(trainerItem.selectedDatacenter){
-		case MyEdgeOrchestrator.DRONE_DATACENTER:
-			line = "DRONE";
-			break;
-		case MyEdgeOrchestrator.EDGE_DATACENTER:
-			line = "EDGE";
-			break;
-		case MyEdgeOrchestrator.CLOUD_DATACENTER_VIA_RSU:
-			line = "CLOUD_DATACENTER_VIA_RSU";
-			break;
-		case MyEdgeOrchestrator.CLOUD_DATACENTER_VIA_GSM:
-			line = "CLOUD_VIA_GSM";
-			break;
-		default:
-			SimLogger.printLine("Unknown datacenter type");
-			System.exit(1);
-			break;
+		switch(trainerItem.selectedDatacenter) {
+			case MyEdgeOrchestrator.DRONE_DATACENTER:
+				line = "DRONE";
+				break;
+			case MyEdgeOrchestrator.EDGE_DATACENTER:
+				line = "EDGE";
+				break;
+			case MyEdgeOrchestrator.CLOUD_DATACENTER_VIA_RSU:
+				line = "CLOUD_DATACENTER_VIA_RSU";
+				break;
+			case MyEdgeOrchestrator.CLOUD_DATACENTER_VIA_GSM:
+				line = "CLOUD_VIA_GSM";
+				break;
+			default:
+				SimLogger.printLine("Unknown datacenter type");
+				System.exit(1);
+				break;
 		}
 
 		int submittedLocation = task.getSubmittedLocation().getServingWlanId();
@@ -175,30 +175,17 @@ public class OrchestratorTrainerLogger {
 
 		addOffloadStat(selectedDatacenter-1);
 		int numOffloadedTasks = getOffloadStat(selectedDatacenter-1);
-
-		int numberOfHost = SimSettings.getInstance().getNumOfEdgeHosts();
+		int numberOfHost;
 		double totalUtlization = 0;
-		double[] edgeUtilizations = new double[numberOfHost];
-		for(int hostIndex=0; hostIndex<numberOfHost; hostIndex++){
-			List<EdgeVM> vmArray = SimManager.getInstance().getEdgeServerManager().getVmList(hostIndex);
+		double[] edgeUtilizations;
+		double avgEdgeUtilization = 0;
 
-			double utilization=0;
-			for(int vmIndex=0; vmIndex<vmArray.size(); vmIndex++){
-				utilization += vmArray.get(vmIndex).getCloudletScheduler().getTotalUtilizationOfCpu(CloudSim.clock());
-			}
-			totalUtlization += utilization;
+		if (selectedDatacenter == 3) {
+			numberOfHost = SimSettings.getInstance().getNumOfEdgeHosts();
 
-			edgeUtilizations[hostIndex] = utilization / (double)(vmArray.size());
-		}
-
-		double avgEdgeUtilization = totalUtlization / SimSettings.getInstance().getNumOfEdgeVMs();
-
-		if (selectedDatacenter-1 == 3) {
-			numberOfHost = SimSettings.getInstance().getNumOfDroneHosts();
-			totalUtlization = 0;
 			edgeUtilizations = new double[numberOfHost];
 			for (int hostIndex = 0; hostIndex < numberOfHost; hostIndex++) {
-				List<DroneVM> vmArray = ((DroneServerManager) SimManager.getInstance().getDroneServerManager()).getDroneVmList(hostIndex);
+				List<EdgeVM> vmArray = SimManager.getInstance().getEdgeServerManager().getVmList(hostIndex);
 
 				double utilization = 0;
 				for (int vmIndex = 0; vmIndex < vmArray.size(); vmIndex++) {
@@ -210,6 +197,24 @@ public class OrchestratorTrainerLogger {
 			}
 
 			avgEdgeUtilization = totalUtlization / SimSettings.getInstance().getNumOfEdgeVMs();
+
+		} else if (selectedDatacenter == 4) {
+			numberOfHost = SimSettings.getInstance().getNumOfDroneHosts();
+			totalUtlization = 0;
+			edgeUtilizations = new double[numberOfHost];
+			for (int hostIndex = 0; hostIndex < numberOfHost; hostIndex++) {
+				List<DroneVM> vmArray = SimManager.getInstance().getDroneServerManager().getVmList(hostIndex);
+
+				double utilization = 0;
+				for (int vmIndex = 0; vmIndex < vmArray.size(); vmIndex++) {
+					utilization += vmArray.get(vmIndex).getCloudletScheduler().getTotalUtilizationOfCpu(CloudSim.clock());
+				}
+				totalUtlization += utilization;
+
+				edgeUtilizations[hostIndex] = utilization / (double) (vmArray.size());
+			}
+
+			avgEdgeUtilization = totalUtlization / SimSettings.getInstance().getNumOfDroneVMs();
 		}
 
 		trainerMap.put(id,
