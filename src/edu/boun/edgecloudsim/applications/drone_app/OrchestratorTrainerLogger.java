@@ -82,7 +82,7 @@ public class OrchestratorTrainerLogger {
 					+ DELIMITER + "Result"
 					+ DELIMITER + "ServiceTime"
 					+ DELIMITER + "ProcessingTime"
-					+ DELIMITER + "VehicleLocation"
+					+ DELIMITER + "TaskLocation"
 					+ DELIMITER + "SelectedHostID"
 					+ DELIMITER + "TaskLength"
 					+ DELIMITER + "TaskInput"
