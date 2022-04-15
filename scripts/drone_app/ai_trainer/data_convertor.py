@@ -19,9 +19,9 @@ print("conversion started with args " + target + ", " + method + ", " + datatype
 sim_result_folder = data["sim_result_folder"]
 num_iterations = data["num_iterations"]
 train_data_ratio = data["train_data_ratio"]
-min_vehicle = data["min_vehicle"]
-max_vehicle = data["max_vehicle"]
-vehicle_step_size = data["vehicle_step_size"]
+min_mobile = data["min_mobile"]
+max_mobile = data["max_mobile"]
+mobile_step_size = data["mobile_step_size"]
 
 def getDecisionColumnName(target):
     if target == "edge":
@@ -42,7 +42,7 @@ def getClassifierColumns(target):
     elif target == "cloud_gsm":
         result  = ["NumOffloadedTask", "GSMUploadDelay", "GSMDownloadDelay", "Result"]
     elif target == "drone":
-        result  = ["NumOffloadedTask", "TaskLength", "WLANUploadDelay", "WLANDownloadDelay", "AvgEdgeUtilization", "Result"]
+        result  = ["NumOffloadedTask", "TaskLength", "WLANUploadDelay", "WLANDownloadDelay", "AvgDroneUtilization", "Result"]
     return result
 
 def getRegressionColumns(target):
@@ -53,7 +53,7 @@ def getRegressionColumns(target):
     elif target == "cloud_gsm":
         result = ["TaskLength", "GSMUploadDelay", "GSMDownloadDelay", "ServiceTime"]
     elif target == "drone":
-        result = ["TaskLength", "AvgEdgeUtilization", "ServiceTime"]
+        result = ["TaskLength", "AvgDroneUtilization", "ServiceTime"]
     return result
 
 def znorm(column):
@@ -65,11 +65,11 @@ data_set =  []
 testDataStartIndex = (train_data_ratio * num_iterations) / 100
 
 for ite in range(num_iterations):
-    for vehicle in range(min_vehicle, max_vehicle+1, vehicle_step_size):
+    for mobile in range(min_mobile, max_mobile+1, mobile_step_size):
         if (datatype == "train" and ite < testDataStartIndex) or (datatype == "test" and ite >= testDataStartIndex):
-            file_name = sim_result_folder + "/ite" + str(ite + 1) + "/" + str(vehicle) + "_learnerOutputFile.cvs"
+            file_name = sim_result_folder + "/ite" + str(ite + 1) + "/" + str(mobile) + "_learnerOutputFile.csv"
             df = [pd.read_csv(file_name, na_values = "?", comment='\t', sep=",")]
-            df[0]['VehicleCount'] = vehicle
+            df[0]['MobileCount'] = mobile
             #print(file_name)
             data_set += df
 
@@ -97,21 +97,21 @@ if method == "classifier":
     df0 = data_set[data_set['Result']=="fail"]
     df1 = data_set[data_set['Result']=="success"]
     
-    #size = min(len(df0[df0['VehicleCount']==max_vehicle]), len(df1[df1['VehicleCount']==min_vehicle]))
+    #size = min(len(df0[df0['MobileCount']==max_mobile]), len(df1[df1['MobileCount']==min_mobile]))
     
-    size = len(df0[df0['VehicleCount']==max_vehicle]) // 2
+    size = len(df0[df0['MobileCount']==max_mobile]) // 2
     
-    df1 = df1.groupby('VehicleCount').apply(lambda x: x if len(x) < size else x.sample(size))
-    df0 = df0.groupby('VehicleCount').apply(lambda x: x if len(x) < size else x.sample(size))
+    df1 = df1.groupby('MobileCount').apply(lambda x: x if len(x) < size else x.sample(size))
+    df0 = df0.groupby('MobileCount').apply(lambda x: x if len(x) < size else x.sample(size))
 
     data_set = pd.concat([df0, df1], ignore_index=True)
 else:        
     data_set = data_set[data_set['Result'] == 'success']
     
-    #size = min(len(data_set[data_set['VehicleCount']==min_vehicle]), len(data_set[data_set['VehicleCount']==max_vehicle]))
+    #size = min(len(data_set[data_set['MobileCount']==min_mobile]), len(data_set[data_set['MobileCount']==max_mobile]))
     
-    size = len(data_set[data_set['VehicleCount']==max_vehicle]) // 3
-    data_set = data_set.groupby('VehicleCount').apply(lambda x: x if len(x.index) < size else x.sample(size))
+    size = len(data_set[data_set['MobileCount']==max_mobile]) // 3
+    data_set = data_set.groupby('MobileCount').apply(lambda x: x if len(x.index) < size else x.sample(size))
 
 #EXTRACT RELATED ATTRIBUTES
 df = pd.DataFrame(columns=targetColumns)
