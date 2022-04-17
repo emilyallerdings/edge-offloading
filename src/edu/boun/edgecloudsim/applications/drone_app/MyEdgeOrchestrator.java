@@ -179,7 +179,7 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 			double probabilities[] = null;
 			if (task.getTaskType() == 0)
 				// TODO: dunno where these numbers come from. changed them randomly
-				probabilities = new double[]{0.50, 0.20, 0.17, 13};
+				probabilities = new double[]{0.50, 0.20, 0.17, 0.13};
 			else if (task.getTaskType() == 1)
 				probabilities = new double[]{0.25, 0.43, 0.16, 0.16};
 			else

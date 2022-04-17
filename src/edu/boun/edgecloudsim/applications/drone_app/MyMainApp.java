@@ -2,6 +2,7 @@ package edu.boun.edgecloudsim.applications.drone_app;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -68,8 +69,10 @@ public class MyMainApp {
 		SimLogger.printLine("Simulation started at " + now);
 		SimLogger.printLine("----------------------------------------------------------------------");
 
-		String wekaModelsFolder = configFile.substring(0, configFile.lastIndexOf('/')) + "/weka/";
-		WekaWrapper.getInstance().initialize("MultilayerPerceptron", "LinearRegression", wekaModelsFolder);
+		if (Arrays.asList(SS.getOrchestratorPolicies()).contains("AI_BASED")) {
+			String wekaModelsFolder = configFile.substring(0, configFile.lastIndexOf('/')) + "/weka/";
+			WekaWrapper.getInstance().initialize("MultilayerPerceptron", "LinearRegression", wekaModelsFolder);
+		}
 
 		for(int i=SS.getMinNumOfMobileDev(); i<=SS.getMaxNumOfMobileDev(); i+=SS.getMobileDevCounterSize())
 			for(int s=0; s<SS.getSimulationScenarios().length; s++)
