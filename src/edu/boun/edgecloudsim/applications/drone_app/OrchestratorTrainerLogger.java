@@ -82,7 +82,7 @@ public class OrchestratorTrainerLogger {
 					+ DELIMITER + "Result"
 					+ DELIMITER + "ServiceTime"
 					+ DELIMITER + "ProcessingTime"
-					+ DELIMITER + "VehicleLocation"
+					+ DELIMITER + "TaskLocation"
 					+ DELIMITER + "SelectedHostID"
 					+ DELIMITER + "TaskLength"
 					+ DELIMITER + "TaskInput"
@@ -133,7 +133,7 @@ public class OrchestratorTrainerLogger {
 				line = "CLOUD_DATACENTER_VIA_RSU";
 				break;
 			case MyEdgeOrchestrator.CLOUD_DATACENTER_VIA_GSM:
-				line = "CLOUD_VIA_GSM";
+				line = "CLOUD_DATACENTER_VIA_GSM";
 				break;
 			default:
 				SimLogger.printLine("Unknown datacenter type");

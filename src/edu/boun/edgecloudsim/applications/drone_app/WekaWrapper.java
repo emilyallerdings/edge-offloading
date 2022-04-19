@@ -27,11 +27,11 @@ public class WekaWrapper {
 	private static final double[] EDGE_CLASSIFIER_MEAN_VALS = {130, 5756, 0.024192, 0.022952, 18};
 	private static final double[] EDGE_CLASSIFIER_STD_VALS = {47, 4737, 0.025628, 0.010798, 7};
 
-	private static final String[] DRONE_REGRESSION_ATTRIBUTES = {"TaskLength","AvgEdgeUtilization","ServiceTime"};
+	private static final String[] DRONE_REGRESSION_ATTRIBUTES = {"TaskLength","AvgDroneUtilization","ServiceTime"};
 	private static final double[] DRONE_REGRESSION_MEAN_VALS = {5756, 18};
 	private static final double[] DRONE_REGRESSION_STD_VALS = {4737, 7};
 
-	private static final String[] DRONE_CLASSIFIER_ATTRIBUTES = {"NumOffloadedTask","TaskLength","WLANUploadDelay","WLANDownloadDelay","AvgEdgeUtilization"};
+	private static final String[] DRONE_CLASSIFIER_ATTRIBUTES = {"NumOffloadedTask","TaskLength","WLANUploadDelay","WLANDownloadDelay","AvgDroneUtilization"};
 	private static final double[] DRONE_CLASSIFIER_MEAN_VALS = {130, 5756, 0.024192, 0.022952, 18};
 	private static final double[] DRONE_CLASSIFIER_STD_VALS = {47, 4737, 0.025628, 0.010798, 7};
 
@@ -63,7 +63,7 @@ public class WekaWrapper {
 	 * A private Constructor prevents any other class from instantiating.
 	 */
 	private WekaWrapper() {
-
+		// TODO: add code for calculating mean values and std
 	}
 
 	/* Static 'instance' method */

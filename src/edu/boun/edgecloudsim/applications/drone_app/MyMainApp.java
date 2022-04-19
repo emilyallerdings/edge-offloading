@@ -41,13 +41,13 @@ public class MyMainApp {
 			outputFolder = args[3];
 			iterationNumber = Integer.parseInt(args[4]);
 		}
-		else{
+		else {
 			SimLogger.printLine("Simulation setting file, output folder and iteration number are not provided! Using default ones...");
 			String configName = "default";
-			configFile = "scripts/drone_app/config/" + configName + "_config.properties";
-			applicationsFile = "scripts/drone_app/config/applications.xml";
-			edgeDevicesFile = "scripts/drone_app/config/edge_devices.xml";
-			dronesFile = "scripts/drone_app/config/drones.xml";
+			configFile = "scripts/drone_app/config/" + configName + "/config.properties";
+			applicationsFile = "scripts/drone_app/config/" + configName + "/applications.xml";
+			edgeDevicesFile = "scripts/drone_app/config/" + configName + "/edge_devices.xml";
+			dronesFile = "scripts/drone_app/config/" + configName + "/drones.xml";
 			outputFolder = "sim_results/ite" + iterationNumber;
 		}
 
@@ -70,7 +70,7 @@ public class MyMainApp {
 		SimLogger.printLine("----------------------------------------------------------------------");
 
 		if (Arrays.asList(SS.getOrchestratorPolicies()).contains("AI_BASED")) {
-			String wekaModelsFolder = configFile.substring(0, configFile.lastIndexOf('/')) + "/weka/";
+			String wekaModelsFolder = "scripts/drone_app/config/weka/";
 			WekaWrapper.getInstance().initialize("MultilayerPerceptron", "LinearRegression", wekaModelsFolder);
 		}
 
