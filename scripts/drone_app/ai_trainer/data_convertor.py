@@ -88,6 +88,19 @@ if datatype == "train":
     train_stats = data_set[targetColumns].describe()
     train_stats = train_stats.transpose()
     print(train_stats)
+    
+    with open("stat.txt", "a") as myfile:
+    	for ind in range(0,len(targetColumns)-1):
+    		myfile.write(str(train_stats['mean'][:,][ind]))
+    		myfile.write('\n')
+    	myfile.write('\n')
+    
+    with open("stat.txt", "a") as myfile:
+    	for ind in range(0,len(targetColumns)-1):
+    		myfile.write(str(train_stats['std'][:,][ind]))
+    		myfile.write('\n')
+    	myfile.write('\n')
+    	
     print ("##############################################################")
 
 #print("balancing " + target + " for " + method)
