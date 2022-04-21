@@ -17,12 +17,16 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+//import org.json.simple.JSONObject;
+//import org.json.simple.parser.JSONParser;
+
 public class WekaWrapper {
 	public static final double MAX_WLAN_DELAY = 9; // sec
 	public static final double MAX_WAN_DELAY = 7; // sec
 	public static final double MAX_GSM_DELAY = 8; // sec
-	
+
 	private static ArrayList<double[]> arrays = new ArrayList<double[]>();
+	private static String statFilePath;
 
 	private static final String[] EDGE_REGRESSION_ATTRIBUTES = { "TaskLength", "AvgEdgeUtilization", "ServiceTime" };
 	private static double[] EDGE_REGRESSION_MEAN_VALS = new double[2];
@@ -67,7 +71,7 @@ public class WekaWrapper {
 	private AbstractClassifier classifier_edge, classifier_cloud_rsu, classifier_cloud_gsm, classifier_drone;
 	private AbstractClassifier regression_edge, regression_cloud_rsu, regression_cloud_gsm, regression_drone;
 
-	private static WekaWrapper singleton = new WekaWrapper();
+	private static WekaWrapper singleton;
 
 	/*
 	 * A private Constructor prevents any other class from instantiating.
@@ -78,11 +82,32 @@ public class WekaWrapper {
 
 	/* Static 'instance' method */
 	public static WekaWrapper getInstance() {
-		readStat();
-		return singleton;
+		if(singleton == null) {
+			singleton = new WekaWrapper();
+			readStat();
+			return singleton;
+		}else{
+			return singleton;
+		}
+		
 	}
 
 	private static void readStat() {
+//		String dataPath = "";
+//		String statFilePath = "";
+//		JSONParser parser = new JSONParser();
+//		try {
+//			Object object = parser.parse(new FileReader(args[0]));
+//			JSONObject jsonObject = (JSONObject) object;
+//			dataPath = (String) jsonObject.get("sim_result_folder");
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			System.exit(1);
+//		}
+		String dataPath = "/Users/yasamanamannejad/workspace_all/research/edge-offloading/sim_results";
+		statFilePath = dataPath + "/stat.txt";
+
+		
 		arrays.add(EDGE_CLASSIFIER_MEAN_VALS);
 		arrays.add(EDGE_CLASSIFIER_STD_VALS);
 		arrays.add(EDGE_REGRESSION_MEAN_VALS);
@@ -102,17 +127,16 @@ public class WekaWrapper {
 		arrays.add(DRONE_CLASSIFIER_STD_VALS);
 		arrays.add(DRONE_REGRESSION_MEAN_VALS);
 		arrays.add(DRONE_REGRESSION_STD_VALS);
-		
 
 		try {
-			String statPath = "/Users/yasamanamannejad/workspace_all/research/edge-offloading/scripts/drone_app/ai_trainer/stat.txt";
-			File myObj = new File(statPath);
+
+			File myObj = new File(statFilePath);
 			Scanner myReader = new Scanner(myObj);
 
 			for (int i = 0; i < arrays.size(); i++) {
 				double[] tmp = arrays.get(i);
 				for (int j = 0; j < tmp.length; j++) {
-					tmp[j] = Integer.parseInt(myReader.nextLine());
+					tmp[j] = Double.parseDouble(myReader.nextLine());
 				}
 			}
 
