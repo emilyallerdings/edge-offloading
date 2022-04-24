@@ -17,6 +17,8 @@ datatype = sys.argv[4]
 print("conversion started with args " + target + ", " + method + ", " + datatype)
 
 sim_result_folder = data["sim_result_folder"]
+statFilePath = sim_result_folder +"/stat.txt"
+ 
 num_iterations = data["num_iterations"]
 train_data_ratio = data["train_data_ratio"]
 min_mobile = data["min_mobile"]
@@ -88,6 +90,17 @@ if datatype == "train":
     train_stats = data_set[targetColumns].describe()
     train_stats = train_stats.transpose()
     print(train_stats)
+    
+    with open(statFilePath, "a") as myfile:
+    	for ind in range(0,len(targetColumns)-1):
+    		myfile.write(str(train_stats['mean'][:,][ind]))
+    		myfile.write('\n')
+    
+    with open(statFilePath, "a") as myfile:
+    	for ind in range(0,len(targetColumns)-1):
+    		myfile.write(str(train_stats['std'][:,][ind]))
+    		myfile.write('\n')
+    	
     print ("##############################################################")
 
 #print("balancing " + target + " for " + method)

@@ -79,6 +79,16 @@ public class MyMainApp {
 				for(int p=0; p<SS.getOrchestratorPolicies().length; p++)
 					mainHelper(outputFolder, SS.getSimulationScenarios()[s], SS.getOrchestratorPolicies()[p], iterationNumber, i);
 
+//      To run the experiments in a loop for all iterations
+		
+//		for(int it=1; it<=iterationNumber; it++) {
+//			outputFolder = "sim_results/ite" + it;
+//			for(int i=SS.getMinNumOfMobileDev(); i<=SS.getMaxNumOfMobileDev(); i+=SS.getMobileDevCounterSize())
+//				for(int s=0; s<SS.getSimulationScenarios().length; s++)
+//					for(int p=0; p<SS.getOrchestratorPolicies().length; p++) 
+//						mainHelper(outputFolder, SS.getSimulationScenarios()[s], SS.getOrchestratorPolicies()[p], it, i);
+//					}
+
 		Date SimulationEndDate = Calendar.getInstance().getTime();
 		now = df.format(SimulationEndDate);
 		SimLogger.printLine("Simulation finished at " + now +  ". It took " + SimUtils.getTimeDifference(SimulationStartDate,SimulationEndDate));
