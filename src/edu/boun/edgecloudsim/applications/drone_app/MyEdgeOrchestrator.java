@@ -175,7 +175,31 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 			}
 
 			trainerLogger.addOffloadStat(result - 1);
-		} else if (policy.equals("AI_TRAINER")) {
+		}
+		else if (policy.equals("RANDOM")) {
+			double probabilities[] = null;
+			probabilities = new double[]{0.25, 0.25, 0.25, 0.25};
+
+			double randomNumber = SimUtils.getRandomDoubleNumber(0, 1);
+			double lastPercentagte = 0;
+			boolean resultFound = false;
+			for (int i = 0; i < probabilities.length; i++) {
+				if (randomNumber <= probabilities[i] + lastPercentagte) {
+					result = options[i];
+					resultFound = true;
+
+					break;
+				}
+				lastPercentagte += probabilities[i];
+			}
+
+			if (!resultFound) {
+				SimLogger.printLine("Unexpected probability calculation for AI based orchestrator! Terminating simulation...");
+				System.exit(1);
+			}
+		}
+		
+		else if (policy.equals("AI_TRAINER")) {
 			double probabilities[] = null;
 			if (task.getTaskType() == 0)
 				// TODO: dunno where these numbers come from. changed them randomly

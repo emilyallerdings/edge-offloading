@@ -27,7 +27,7 @@ public class MyMainApp {
 		//enable console output and file output of this application
 		SimLogger.enablePrintLog();
 
-		int iterationNumber = 1;
+		int iterationNumber = 5;
 		String configFile = "";
 		String outputFolder = "";
 		String edgeDevicesFile = "";
@@ -72,6 +72,11 @@ public class MyMainApp {
 		if (Arrays.asList(SS.getOrchestratorPolicies()).contains("AI_BASED")) {
 			String wekaModelsFolder = "scripts/drone_app/config/weka/";
 			WekaWrapper.getInstance().initialize("MultilayerPerceptron", "LinearRegression", wekaModelsFolder);
+//			WekaWrapper.getInstance().initialize("NaiveBayes", "LinearRegression", wekaModelsFolder);
+//			WekaWrapper.getInstance().initialize("SMO", "LinearRegression", wekaModelsFolder);
+//			WekaWrapper.getInstance().initialize("MultilayerPerceptron", "SMOreg", wekaModelsFolder);
+//			WekaWrapper.getInstance().initialize("NaiveBayes", "SMOreg", wekaModelsFolder);
+//			WekaWrapper.getInstance().initialize("SMO", "SMOreg", wekaModelsFolder);
 		}
 
 		for(int i=SS.getMinNumOfMobileDev(); i<=SS.getMaxNumOfMobileDev(); i+=SS.getMobileDevCounterSize())
