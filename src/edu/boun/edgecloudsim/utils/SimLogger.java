@@ -35,10 +35,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
+import edu.boun.edgecloudsim.applications.drone_app.DroneHost;
 import edu.boun.edgecloudsim.core.SimManager;
 import edu.boun.edgecloudsim.core.SimSettings;
 import edu.boun.edgecloudsim.core.SimSettings.NETWORK_DELAY_TYPES;
@@ -73,6 +75,10 @@ public class SimLogger {
 	private File successFile = null, failFile = null;
 	private FileWriter successFW = null, failFW = null;
 	private BufferedWriter successBW = null, failBW = null;
+
+	private File droneLocFile = null;
+	private FileWriter droneLocFW = null;
+	private BufferedWriter droneLocBW = null;
 
 	// extract following values for each app type.
 	// last index is average of all app types
@@ -551,6 +557,20 @@ public class SimLogger {
 				}
 			}
 
+//			droneLocFile = new File(outputFolder, filePrefix + "_DRONES_LOCATIONS.log");
+//			droneLocFW = new FileWriter(droneLocFile, true);
+//			droneLocBW = new BufferedWriter(droneLocFW);
+//			appendToFile(droneLocBW, "host_id" + SimSettings.DELIMITER + "x" + SimSettings.DELIMITER + "y" + SimSettings.DELIMITER + "time");
+//			for (int ii = 0; ii < SimManager.getInstance().getDroneServerManager().getDatacenterList().size(); ii++) {
+//				DroneHost host = (DroneHost) (SimManager.getInstance().getDroneServerManager().getDatacenterList().get(ii).getHostList().get(0));
+//				List<Location> locs = host.getLocations();
+//				List<Double> times = host.getLocationTime();
+//				for (int jj = 0; jj < locs.size(); jj++) {
+//					appendToFile(droneLocBW, host.getId() + SimSettings.DELIMITER + locs.get(jj).getXPos() + SimSettings.DELIMITER + locs.get(jj).getYPos() + SimSettings.DELIMITER + times.get(jj).toString());
+//				}
+//			}
+//
+//			droneLocBW.close();
 			for (int i = 0; i < numOfAppTypes + 1; i++) {
 
 				if (i < numOfAppTypes) {
@@ -684,7 +704,6 @@ public class SimLogger {
 								"_cost" + SimSettings.DELIMITER +
 								"failedTaskDueToVmCapacity" + SimSettings.DELIMITER +
 								"failedTaskDuetoMobility" + SimSettings.DELIMITER +
-								"failedTaskDuetoAnomaly" + SimSettings.DELIMITER +
 								"_QoE1" + SimSettings.DELIMITER +
 								"_QoE2" + SimSettings.DELIMITER +
 								"refectedTaskDuetoWlanRange");

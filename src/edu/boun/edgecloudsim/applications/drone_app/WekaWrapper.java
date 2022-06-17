@@ -104,7 +104,7 @@ public class WekaWrapper {
 //			e.printStackTrace();
 //			System.exit(1);
 //		}
-		String dataPath = "/Users/yasamanamannejad/workspace_all/research/edge-offloading/sim_results";
+		String dataPath = "/Users/nedasoltani/Workspaces/Task Offloading/edge-offloading/sim_results";
 		statFilePath = dataPath + "/stat.txt";
 
 		

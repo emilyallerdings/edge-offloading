@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import edu.boun.edgecloudsim.core.SimManager;
+import edu.boun.edgecloudsim.utils.TaskProperty;
 import org.cloudbus.cloudsim.CloudletSchedulerTimeShared;
 import org.cloudbus.cloudsim.Datacenter;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
@@ -212,5 +213,56 @@ public class DroneServerManager {
         }
 
         return hostList;
+    }
+
+    public void moveDronesToPopulatedAreas() {
+        // get the most populated area
+        List<TaskProperty> tasks = SimManager.getInstance().getLoadGeneratorModel().getTaskList();
+        int taskCount[] = new int[SimSettings.getInstance().getNumColumns() * SimSettings.getInstance().getNumRows()];
+        for (int i = 0; i < tasks.size(); i++){
+            Location loc = SimManager.getInstance().getMobilityModel().
+                    getLocation(tasks.get(i).getMobileDeviceId(), CloudSim.clock());
+            int WlanId = loc.getServingWlanId();
+            taskCount[WlanId]++;
+        }
+        int maxTaskCount = 0;
+        int maxWlan = 0;
+        int minWlan = 0;
+        for(int i=0; i<taskCount.length; i++)
+        {
+            minWlan = taskCount[i] < taskCount[minWlan] ? i : minWlan;
+            maxWlan = taskCount[i] > taskCount[maxWlan] ? i : maxWlan;
+            maxTaskCount = taskCount[maxWlan];
+        }
+
+        // get the number of drones inside the area
+        int dronesCount = 0;
+        for(int i=0; i<getDatacenterList().size(); i++)
+        {
+            int wlanId = ((DroneHost)(getDatacenterList().get(i).getHostList().get(0))).getLocation(CloudSim.clock()).getServingWlanId();
+            if(wlanId == maxWlan)
+                dronesCount++;
+        }
+
+        // if there is fewer drones than one per ten tasks, move other drones here
+        //TODO: try other strategies
+        if(SimSettings.getInstance().getDronesMovementStrategy().equals("COUNT")) {
+            if (dronesCount < maxTaskCount / 50) {
+                // get least-populated area and move drone from there to here
+                for (int i = 0; i < getDatacenterList().size(); i++) {
+                    DroneHost host = (DroneHost) (getDatacenterList().get(i).getHostList().get(0));
+                    int wlanId = host.getLocation(CloudSim.clock()).getServingWlanId();
+                    double p = 0.5;
+                    // move neighbour drones to the maxWlan
+                    if(Math.abs(wlanId - maxWlan) == 1 || wlanId % 8 == maxWlan % 8)
+                        p = 0.8;
+                    else if (wlanId == minWlan)
+                        p = 0.7;
+                    host.moveToWlan(p, maxWlan);
+                }
+            }
+        } else if(SimSettings.getInstance().getDronesMovementStrategy().equals("UTILIZATION")) {
+
+        }
     }
 }

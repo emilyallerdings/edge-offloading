@@ -1,6 +1,8 @@
 package edu.boun.edgecloudsim.applications.drone_app;
 
+import edu.boun.edgecloudsim.applications.sample_app5.GameTheoryHelper;
 import org.cloudbus.cloudsim.Vm;
+import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEvent;
 import edu.boun.edgecloudsim.core.SimManager;
 import edu.boun.edgecloudsim.core.SimSettings;
@@ -9,6 +11,8 @@ import edu.boun.edgecloudsim.edge_orchestrator.EdgeOrchestrator;
 import edu.boun.edgecloudsim.edge_client.Task;
 import edu.boun.edgecloudsim.utils.SimLogger;
 import edu.boun.edgecloudsim.utils.SimUtils;
+
+import java.util.stream.DoubleStream;
 
 public class MyEdgeOrchestrator extends EdgeOrchestrator {
 	private static final int BASE = 100000; //start from base in order not to conflict cloudsim tag!
@@ -28,6 +32,7 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 	private OrchestratorTrainerLogger trainerLogger;
 
 	private MultiArmedBanditHelper MAB;
+	private GameTheoryHelper GTH;
 
 	public MyEdgeOrchestrator(int _numOfMobileDevices, String _policy, String _simScenario) {
 		super(_policy, _simScenario);
@@ -48,6 +53,7 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 		double minTaskLength = lookupTable[0][7];
 		double maxTaskLength = lookupTable[lookupTable.length - 1][7];
 		MAB = new MultiArmedBanditHelper(minTaskLength, maxTaskLength);
+		GTH = new GameTheoryHelper(0, 20, numOfMobileDevice);
 	}
 
 	@Override
@@ -56,6 +62,8 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 
 		double avgEdgeUtilization = SimManager.getInstance().getEdgeServerManager().getAvgUtilization();
 		double avgDroneUtilization = SimManager.getInstance().getDroneServerManager().getAvgUtilization();
+		double avgCloudUtilization = SimManager.getInstance().getCloudServerManager().getAvgUtilization();
+
 
 		//TODO: Delays are calculated based on connection type only and the distances between the task and destination datacenter (EDGE/DRONE) are not considered.
 		MyNetworkModel networkModel = (MyNetworkModel) SimManager.getInstance().getNetworkModel();
@@ -75,7 +83,7 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 				DRONE_DATACENTER
 		};
 
-		if (policy.startsWith("AI_") || policy.equals("MAB")) {
+		if (policy.startsWith("AI_") || policy.equals("MAB") || policy.equals("GAME_THEORY")) {
 			if (wanUploadDelay == 0)
 				wanUploadDelay = WekaWrapper.MAX_WAN_DELAY;
 
@@ -231,7 +239,28 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 				SimLogger.printLine("Unexpected probability calculation for AI based orchestrator! Terminating simulation...");
 				System.exit(1);
 			}
-		} else if (policy.equals("MAB")) {
+		} else if(policy.equals("RANDOM")){
+			double probabilities[] = {0.25, 0.25, 0.25, 0.25};
+
+			double randomNumber = SimUtils.getRandomDoubleNumber(0, 1);
+			double lastPercentagte = 0;
+			boolean resultFound = false;
+			for(int i=0; i<probabilities.length; i++) {
+				if(randomNumber <= probabilities[i] + lastPercentagte) {
+					result = options[i];
+					resultFound = true;
+					break;
+				}
+				lastPercentagte += probabilities[i];
+			}
+
+			if(!resultFound) {
+				SimLogger.printLine("Unexpected probability calculation for random orchestrator! Terminating simulation...");
+				System.exit(1);
+			}
+
+		}
+		else if (policy.equals("MAB")) {
 			if (!MAB.isInitialized()) {
 				double expectedProcessingDealyOnCloud = task.getCloudletLength() /
 						SimSettings.getInstance().getMipsForCloudVM();
@@ -255,6 +284,71 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 			}
 
 			result = options[MAB.runUCB(task.getCloudletLength())];
+		} else if (policy.equals("PREDICTIVE")) {
+			//initial probability of different computing paradigms
+			double probabilities[] = {0.25, 0.25, 0.25, 0.25};
+
+			//do not use predictive offloading during warm-up period
+			if(CloudSim.clock() > SimSettings.getInstance().getWarmUpPeriod()) {
+				/*
+				 * failureRate_i = 100 * numOfFailedTask / (numOfFailedTask + numOfSuccessfulTask)
+				 */
+				double failureRates[] = {
+						statisticLogger.getFailureRate(options[0]),
+						statisticLogger.getFailureRate(options[1]),
+						statisticLogger.getFailureRate(options[2]),
+						statisticLogger.getFailureRate(options[3])
+				};
+
+				double serviceTimes[] = {
+						statisticLogger.getServiceTime(options[0]),
+						statisticLogger.getServiceTime(options[1]),
+						statisticLogger.getServiceTime(options[2]),
+						statisticLogger.getServiceTime(options[3])
+				};
+
+				double failureRateScores[] = {0, 0, 0, 0};
+				double serviceTimeScores[] = {0, 0, 0, 0};
+
+				//scores are calculated inversely by failure rate and service time
+				//lower failure rate and service time is better
+				for(int i=0; i<probabilities.length; i++) {
+					/*
+					 * failureRateScore_i = 1 / (failureRate_i / sum(failureRate))
+					 * failureRateScore_i = sum(failureRate) / failureRate_i
+					 */
+					failureRateScores[i] = DoubleStream.of(failureRates).sum() / failureRates[i];
+					/*
+					 * serviceTimeScore_i = 1 / (serviceTime_i / sum(serviceTime))
+					 * serviceTimeScore_i = sum(serviceTime) / serviceTime_i
+					 */
+					serviceTimeScores[i] = DoubleStream.of(serviceTimes).sum() / serviceTimes[i];
+				}
+
+				for(int i=0; i<probabilities.length; i++) {
+					if(DoubleStream.of(failureRates).sum() > 0.3)
+						probabilities[i] = failureRateScores[i] / DoubleStream.of(failureRateScores).sum();
+					else
+						probabilities[i] = serviceTimeScores[i] / DoubleStream.of(serviceTimeScores).sum();
+				}
+			}
+
+			double randomNumber = SimUtils.getRandomDoubleNumber(0.01, 0.99);
+			double lastPercentagte = 0;
+			boolean resultFound = false;
+			for(int i=0; i<probabilities.length; i++) {
+				if(randomNumber <= probabilities[i] + lastPercentagte) {
+					result = options[i];
+					resultFound = true;
+					break;
+				}
+				lastPercentagte += probabilities[i];
+			}
+
+			if(!resultFound) {
+				SimLogger.printLine("Unexpected probability calculation for predictive orchestrator! Terminating simulation...");
+				System.exit(1);
+			}
 		} else {
 			SimLogger.printLine("Unknow edge orchestrator policy! Terminating simulation...");
 			System.exit(1);

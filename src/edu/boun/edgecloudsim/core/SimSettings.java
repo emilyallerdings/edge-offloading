@@ -36,6 +36,29 @@ public class SimSettings {
 
 	public static final double CLIENT_ACTIVITY_START_TIME = 10;
 
+	public int getPlaceTypeIndex(int Wlan) {
+		int placeTypeIndex = 0;
+		// int[] att0 = new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 15, 16, 23, 24, 31, 32, 33, 34, 35, 36, 37, 38, 39};
+		int[] att1 = new int[]{9, 10, 11, 12, 13, 14, 17, 22, 23, 24, 25, 26, 27, 28, 29, 30};
+		int[] att2 = new int[]{18, 19, 20, 21};
+		for (int i = 0; i < att1.length; i++)
+			if (Wlan == att1[i]) {
+				placeTypeIndex = 1;
+				break;
+			}
+		for (int i = 0; i < att2.length; i++)
+			if (Wlan == att2[i]) {
+				placeTypeIndex = 2;
+				break;
+			}
+
+		return placeTypeIndex;
+	}
+
+	public String getDronesMovementStrategy() {
+		return DRONES_MOVEMENT_STRATEGY;
+	}
+
 	//enumarations for the VM types
 	public static enum VM_TYPES { MOBILE_VM, EDGE_VM, CLOUD_VM, DRONE_VM }
 
@@ -97,10 +120,13 @@ public class SimSettings {
 	private String[] SIMULATION_SCENARIOS;
 	private String[] ORCHESTRATOR_POLICIES;
 
-	private double NORTHERN_BOUND;
-	private double EASTERN_BOUND;
-	private double SOUTHERN_BOUND;
-	private double WESTERN_BOUND;
+	private double Y_BOUND;
+	private double X_BOUND;
+
+	private int NUM_COLUMNS;
+	private int NUM_ROWS;
+
+	private String DRONES_MOVEMENT_STRATEGY;
 
 	// mean waiting time (minute) is stored for each place types
 	private double[] mobilityLookUpTable;
@@ -192,10 +218,13 @@ public class SimSettings {
 
 			SIMULATION_SCENARIOS = prop.getProperty("simulation_scenarios").split(",");
 
-			NORTHERN_BOUND = Double.parseDouble(prop.getProperty("northern_bound", "0"));
-			SOUTHERN_BOUND = Double.parseDouble(prop.getProperty("southern_bound", "0"));
-			EASTERN_BOUND = Double.parseDouble(prop.getProperty("eastern_bound", "0"));
-			WESTERN_BOUND = Double.parseDouble(prop.getProperty("western_bound", "0"));
+			Y_BOUND = Double.parseDouble(prop.getProperty("y_bound", "0"));
+			X_BOUND = Double.parseDouble(prop.getProperty("x_bound", "0"));
+
+			NUM_COLUMNS = Integer.parseInt(prop.getProperty("num_columns", "0"));
+			NUM_ROWS = Integer.parseInt(prop.getProperty("num_rows", "0"));
+
+			DRONES_MOVEMENT_STRATEGY = prop.getProperty("drones_movement_strategy");
 
 			//avg waiting time in a place (min)
 			double place1_mean_waiting_time = Double.parseDouble(prop.getProperty("attractiveness_L1_mean_waiting_time"));
@@ -524,19 +553,19 @@ public class SimSettings {
 
 
 	public double getNorthernBound() {
-		return NORTHERN_BOUND;
+		return Y_BOUND;
 	}
 
 	public double getEasternBound() {
-		return EASTERN_BOUND;
+		return X_BOUND;
 	}
 
-	public double getSouthernBound() {
-		return SOUTHERN_BOUND;
+	public int getNumColumns() {
+		return NUM_COLUMNS;
 	}
 
-	public double getWesternBound() {
-		return WESTERN_BOUND;
+	public int getNumRows() {
+		return NUM_ROWS;
 	}
 
 	/**

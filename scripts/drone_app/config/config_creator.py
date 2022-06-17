@@ -67,29 +67,31 @@ values.loc["drones"] = {
 for config in ["edge_devices", "drones"]:
     root = ET.Element(config)
     for i in range(count[config]):
-        doc = ET.SubElement(root, "drone" if config ==
-                            "drones" else "datacenter", arch=ARCH[config], os=OS[config], vmm=VMM[config])
-        for c in ["costPerBw", "costPerSec", "costPerMem", "costPerStorage"]:
-            ET.SubElement(doc, c).text = str(values.loc[config][c])
+        # place 2 drones in each wlan
+        for j in range(2 if config == "drones" else 1):
+            doc = ET.SubElement(root, "drone" if config ==
+                                "drones" else "datacenter", arch=ARCH[config], os=OS[config], vmm=VMM[config])
+            for c in ["costPerBw", "costPerSec", "costPerMem", "costPerStorage"]:
+                ET.SubElement(doc, c).text = str(values.loc[config][c])
 
-        location = ET.SubElement(doc, 'location')
-        for c in ["x_pos", "y_pos", "wlan_id", "attractiveness"]:
-            ET.SubElement(location, c).text = str(getLocationInfo(c, i))
+            location = ET.SubElement(doc, 'location')
+            for c in ["x_pos", "y_pos", "wlan_id", "attractiveness"]:
+                ET.SubElement(location, c).text = str(getLocationInfo(c, i))
 
-        if config == "drones":
-            ET.SubElement(doc, 'speed').text = str(
-                int(values.loc[config]["speed"]))
+            if config == "drones":
+                ET.SubElement(doc, 'speed').text = str(
+                    int(values.loc[config]["speed"]))
 
-        hosts = ET.SubElement(doc, 'hosts')
-        host = ET.SubElement(hosts, 'host')
-        for c in ["core", "mips", "ram", "storage"]:
-            ET.SubElement(host, c).text = str(int(values.loc[config][c]))
-        vms = ET.SubElement(host, 'VMs')
-        for i in range(NUM_VMS_PER_DEVICE[config]):
-            vm = ET.SubElement(vms, 'VM', vmm="Xen")
+            hosts = ET.SubElement(doc, 'hosts')
+            host = ET.SubElement(hosts, 'host')
             for c in ["core", "mips", "ram", "storage"]:
-                ET.SubElement(vm, c).text = str(
-                    int(values.loc[config][c] / NUM_VMS_PER_DEVICE[config]))
+                ET.SubElement(host, c).text = str(int(values.loc[config][c]))
+            vms = ET.SubElement(host, 'VMs')
+            for k in range(NUM_VMS_PER_DEVICE[config]):
+                vm = ET.SubElement(vms, 'VM', vmm="Xen")
+                for c in ["core", "mips", "ram", "storage"]:
+                    ET.SubElement(vm, c).text = str(
+                        int(values.loc[config][c] / NUM_VMS_PER_DEVICE[config]))
 
     tree = ET.ElementTree(root)
     tree.write(f"{config}.xml")

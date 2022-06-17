@@ -41,6 +41,7 @@ public class SimManager extends SimEntity {
 	private static final int GET_LOAD_LOG = 2;
 	private static final int PRINT_PROGRESS = 3;
 	private static final int STOP_SIMULATION = 4;
+	private static final int MOVE_DRONES = 5;
 
 	private String simScenario;
 	private String orchestratorPolicy;
@@ -222,6 +223,10 @@ public class SimManager extends SimEntity {
 		for (int i = 0; i < loadGeneratorModel.getTaskList().size(); i++)
 			schedule(getId(), loadGeneratorModel.getTaskList().get(i).getStartTime(), CREATE_TASK, loadGeneratorModel.getTaskList().get(i));
 
+		// Creation of drone moves
+		// change 100 to change the movement interval
+//		schedule(getId(), SimSettings.getInstance().getSimulationTime() / 100, MOVE_DRONES);
+
 		//Periodic event loops starts from here!
 		schedule(getId(), 5, CHECK_ALL_VM);
 		schedule(getId(), SimSettings.getInstance().getSimulationTime() / 100, PRINT_PROGRESS);
@@ -275,6 +280,9 @@ public class SimManager extends SimEntity {
 					if (CloudSim.clock() < SimSettings.getInstance().getSimulationTime())
 						schedule(getId(), SimSettings.getInstance().getSimulationTime() / 100, PRINT_PROGRESS);
 
+					break;
+				case MOVE_DRONES:
+//					getInstance().getDroneServerManager().moveDronesToPopulatedAreas();
 					break;
 				case STOP_SIMULATION:
 					SimLogger.printLine("100");
