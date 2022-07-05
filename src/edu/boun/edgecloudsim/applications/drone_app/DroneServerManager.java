@@ -254,7 +254,7 @@ public class DroneServerManager {
                     int wlanId = host.getLocation(CloudSim.clock()).getServingWlanId();
                     double p = 0.5;
                     // move neighbour drones to the maxWlan
-                    if(Math.abs(wlanId - maxWlan) == 1 || wlanId % 8 == maxWlan % 8)
+                    if(SimSettings.getInstance().checkNeighborCells(wlanId, minWlan))
                         p = 0.8;
                     else if (wlanId == minWlan)
                         p = 0.7;

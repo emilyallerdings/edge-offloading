@@ -66,6 +66,7 @@ public class SimLogger {
 	private String outputFolder;
 	private Map<Integer, LogItem> taskMap;
 	private LinkedList<VmLoadLogItem> vmLoadList;
+	private LinkedList<DroneLocationLogItem> droneLocationList;
 	private LinkedList<ApDelayLogItem> apDelayList;
 
 	private static SimLogger singleton = new SimLogger();
@@ -199,39 +200,40 @@ public class SimLogger {
 		outputFolder = outFolder;
 		taskMap = new HashMap<Integer, LogItem>();
 		vmLoadList = new LinkedList<VmLoadLogItem>();
+		droneLocationList = new LinkedList<DroneLocationLogItem>();
 		apDelayList = new LinkedList<ApDelayLogItem>();
 		
 		numOfAppTypes = SimSettings.getInstance().getTaskLookUpTable().length;
 		
 		if (SimSettings.getInstance().getDeepFileLoggingEnabled()) {
 			try {
-				successFile = new File(outputFolder, filePrefix + "_SUCCESS.log");
+				successFile = new File(outputFolder, filePrefix + "_SUCCESS.csv");
 				successFW = new FileWriter(successFile, true);
 				successBW = new BufferedWriter(successFW);
 
-				failFile = new File(outputFolder, filePrefix + "_FAIL.log");
+				failFile = new File(outputFolder, filePrefix + "_FAIL.csv");
 				failFW = new FileWriter(failFile, true);
 				failBW = new BufferedWriter(failFW);
 
-				appendToFile(successBW, "taskId;deviceId;datacenterId;hostId" +
-						";vmId;vmType;taskType" +
-						";taskLenght;taskInputType;" +
-						"taskOutputSize;taskStartTime;taskEndTime;QoE;wlanId;" +
-						"sum of all NetworkDelays;" +
-						"NetworkDelay of WLAN;" +
-						"NetworkDelay of MAN;" +
-						"NetworkDelay of WAN;" +
+				appendToFile(successBW, "taskId" + SimSettings.DELIMITER + "deviceId" + SimSettings.DELIMITER + "datacenterId" + SimSettings.DELIMITER + "hostId" +
+						"" + SimSettings.DELIMITER + "vmId" + SimSettings.DELIMITER + "vmType" + SimSettings.DELIMITER + "taskType" +
+						"" + SimSettings.DELIMITER + "taskLenght" + SimSettings.DELIMITER + "taskInputType" + SimSettings.DELIMITER + "" +
+						"taskOutputSize" + SimSettings.DELIMITER + "taskStartTime" + SimSettings.DELIMITER + "taskEndTime" + SimSettings.DELIMITER + "QoE" + SimSettings.DELIMITER + "wlanId" + SimSettings.DELIMITER + "" +
+						"sum of all NetworkDelays" + SimSettings.DELIMITER + "" +
+						"NetworkDelay of WLAN" + SimSettings.DELIMITER + "" +
+						"NetworkDelay of MAN" + SimSettings.DELIMITER + "" +
+						"NetworkDelay of WAN" + SimSettings.DELIMITER + "" +
 						"NetworkDelay of GSM");
-				appendToFile(failBW, "taskId;deviceId;datacenterId;hostId" +
-						";vmId;vmType;taskType" +
-						";taskLenght;taskInputType;" +
-						"taskOutputSize;taskStartTime;taskEndTime;QoE;wlanId;" +
+				appendToFile(failBW, "taskId" + SimSettings.DELIMITER + "deviceId" + SimSettings.DELIMITER + "datacenterId" + SimSettings.DELIMITER + "hostId" +
+						"" + SimSettings.DELIMITER + "vmId" + SimSettings.DELIMITER + "vmType" + SimSettings.DELIMITER + "taskType" +
+						"" + SimSettings.DELIMITER + "taskLenght" + SimSettings.DELIMITER + "taskInputType" + SimSettings.DELIMITER + "" +
+						"taskOutputSize" + SimSettings.DELIMITER + "taskStartTime" + SimSettings.DELIMITER + "taskEndTime" + SimSettings.DELIMITER + "QoE" + SimSettings.DELIMITER + "wlanId" + SimSettings.DELIMITER + "" +
 						"failure reason " +
-						"(REJECTED_DUE_TO_VM_CAPACITY: 1, " +
-						"REJECTED_DUE_TO_BANDWIDTH: 2, " +
-						"UNFINISHED_DUE_TO_BANDWIDTH: 3, " +
-						"UNFINISHED_DUE_TO_MOBILITY: 4, " +
-						"REJECTED_DUE_TO_WLAN_COVERAGE: 5, " +
+						"(REJECTED_DUE_TO_VM_CAPACITY: 1; " +
+						"REJECTED_DUE_TO_BANDWIDTH: 2; " +
+						"UNFINISHED_DUE_TO_BANDWIDTH: 3; " +
+						"UNFINISHED_DUE_TO_MOBILITY: 4; " +
+						"REJECTED_DUE_TO_WLAN_COVERAGE: 5; " +
 						"OTHER: 0)");
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -370,6 +372,11 @@ public class SimLogger {
 			vmLoadList.add(new VmLoadLogItem(time, loadOnEdge, loadOnDrone, loadOnCloud, loadOnMobile));
 	}
 
+	public void addDroneLocationLog(int host, double time, int x, int y, int wlan) {
+		if(SimSettings.getInstance().getLocationLogInterval() != 0)
+			droneLocationList.add(new DroneLocationLogItem(host, time, x, y, wlan));
+	}
+
 	public void addApDelayLog(double time, double[] apUploadDelays, double[] apDownloadDelays) {
 		if(SimSettings.getInstance().getApDelayLogInterval() != 0)
 			apDelayList.add(new ApDelayLogItem(time, apUploadDelays, apDownloadDelays));
@@ -389,38 +396,38 @@ public class SimLogger {
 
 		// open all files and prepare them for write
 		if (fileLogEnabled) {
-			vmLoadFile = new File(outputFolder, filePrefix + "_VM_LOAD.log");
+			vmLoadFile = new File(outputFolder, filePrefix + "_VM_LOAD.csv");
 			vmLoadFW = new FileWriter(vmLoadFile, true);
 			vmLoadBW = new BufferedWriter(vmLoadFW);
 
-			locationFile = new File(outputFolder, filePrefix + "_LOCATION.log");
+			locationFile = new File(outputFolder, filePrefix + "_LOCATION.csv");
 			locationFW = new FileWriter(locationFile, true);
 			locationBW = new BufferedWriter(locationFW);
 
-			apUploadDelayFile = new File(outputFolder, filePrefix + "_AP_UPLOAD_DELAY.log");
+			apUploadDelayFile = new File(outputFolder, filePrefix + "_AP_UPLOAD_DELAY.csv");
 			apUploadDelayFW = new FileWriter(apUploadDelayFile, true);
 			apUploadDelayBW = new BufferedWriter(apUploadDelayFW);
 
-			apDownloadDelayFile = new File(outputFolder, filePrefix + "_AP_DOWNLOAD_DELAY.log");
+			apDownloadDelayFile = new File(outputFolder, filePrefix + "_AP_DOWNLOAD_DELAY.csv");
 			apDownloadDelayFW = new FileWriter(apDownloadDelayFile, true);
 			apDownloadDelayBW = new BufferedWriter(apDownloadDelayFW);
 
 			for (int i = 0; i < numOfAppTypes + 1; i++) {
-				String fileName = "ALL_APPS_GENERIC.log";
+				String fileName = "ALL_APPS_GENERIC.csv";
 
 				if (i < numOfAppTypes) {
 					// if related app is not used in this simulation, just discard it
 					if (SimSettings.getInstance().getTaskLookUpTable()[i][0] == 0)
 						continue;
 
-					fileName = SimSettings.getInstance().getTaskName(i) + "_GENERIC.log";
+					fileName = SimSettings.getInstance().getTaskName(i) + "_GENERIC.csv";
 				}
 
 				genericFiles[i] = new File(outputFolder, filePrefix + "_" + fileName);
 				genericFWs[i] = new FileWriter(genericFiles[i], true);
 				genericBWs[i] = new BufferedWriter(genericFWs[i]);
 			}
-			appendToFile(vmLoadBW,  "time;vmLoadOnEdge;vmLoadOnCloud;vmLoadOnMobile;vmLoadOnDrone");
+			appendToFile(vmLoadBW,  "time" + SimSettings.DELIMITER + "vmLoadOnEdge" + SimSettings.DELIMITER + "vmLoadOnCloud" + SimSettings.DELIMITER + "vmLoadOnMobile" + SimSettings.DELIMITER + "vmLoadOnDrone");
 			locationBW.write("time");
 			for (int jj = 0; jj < SimSettings.getInstance().getNumOfEdgeDatacenters(); jj++)
 				locationBW.write(SimSettings.DELIMITER + "num users in WLAN " + String.valueOf(jj));
@@ -528,7 +535,6 @@ public class SimLogger {
 			// assuming each location has only one access point
 			double locationLogInterval = SimSettings.getInstance().getLocationLogInterval();
 			if(locationLogInterval != 0) {
-				// TODO: must log file for drone too
 				for (int t = 1; t < (SimSettings.getInstance().getSimulationTime() / locationLogInterval); t++) {
 					int[] locationInfo = new int[SimSettings.getInstance().getNumOfEdgeDatacenters()];
 					Double time = t * SimSettings.getInstance().getLocationLogInterval();
@@ -557,20 +563,16 @@ public class SimLogger {
 				}
 			}
 
-//			droneLocFile = new File(outputFolder, filePrefix + "_DRONES_LOCATIONS.log");
-//			droneLocFW = new FileWriter(droneLocFile, true);
-//			droneLocBW = new BufferedWriter(droneLocFW);
-//			appendToFile(droneLocBW, "host_id" + SimSettings.DELIMITER + "x" + SimSettings.DELIMITER + "y" + SimSettings.DELIMITER + "time");
-//			for (int ii = 0; ii < SimManager.getInstance().getDroneServerManager().getDatacenterList().size(); ii++) {
-//				DroneHost host = (DroneHost) (SimManager.getInstance().getDroneServerManager().getDatacenterList().get(ii).getHostList().get(0));
-//				List<Location> locs = host.getLocations();
-//				List<Double> times = host.getLocationTime();
-//				for (int jj = 0; jj < locs.size(); jj++) {
-//					appendToFile(droneLocBW, host.getId() + SimSettings.DELIMITER + locs.get(jj).getXPos() + SimSettings.DELIMITER + locs.get(jj).getYPos() + SimSettings.DELIMITER + times.get(jj).toString());
-//				}
-//			}
-//
-//			droneLocBW.close();
+			droneLocFile = new File(outputFolder, filePrefix + "_DRONES_LOCATIONS.csv");
+			droneLocFW = new FileWriter(droneLocFile, true);
+			droneLocBW = new BufferedWriter(droneLocFW);
+			appendToFile(droneLocBW, "host_id" + SimSettings.DELIMITER + "time" + SimSettings.DELIMITER + "x" + SimSettings.DELIMITER + "y" + SimSettings.DELIMITER + "wlan");
+			for (DroneLocationLogItem entry : droneLocationList) {
+				if (fileLogEnabled && SimSettings.getInstance().getVmLoadLogInterval() != 0)
+					appendToFile(droneLocBW, entry.toString());
+			}
+			droneLocBW.close();
+
 			for (int i = 0; i < numOfAppTypes + 1; i++) {
 
 				if (i < numOfAppTypes) {
@@ -602,176 +604,90 @@ public class SimLogger {
 						: (gsmDelay[i] / (double) gsmUsage[i]);
 				
 				// write generic results
-				String genericResult1 = Integer.toString(completedTask[i]) + SimSettings.DELIMITER
-						+ Integer.toString(failedTask[i]) + SimSettings.DELIMITER 
-						+ Integer.toString(uncompletedTask[i]) + SimSettings.DELIMITER 
-						+ Integer.toString(failedTaskDuetoBw[i]) + SimSettings.DELIMITER
-						+ Double.toString(_serviceTime) + SimSettings.DELIMITER 
-						+ Double.toString(_processingTime) + SimSettings.DELIMITER 
-						+ Double.toString(_networkDelay) + SimSettings.DELIMITER
-						+ Double.toString(0) + SimSettings.DELIMITER 
-						+ Double.toString(_cost) + SimSettings.DELIMITER 
-						+ Integer.toString(failedTaskDueToVmCapacity[i]) + SimSettings.DELIMITER 
-						+ Integer.toString(failedTaskDuetoMobility[i]) + SimSettings.DELIMITER 
-						+ Double.toString(_QoE1) + SimSettings.DELIMITER 
-						+ Double.toString(_QoE2) + SimSettings.DELIMITER
-						+ Integer.toString(refectedTaskDuetoWlanRange[i]);
+				appendToFile(genericBWs[i],"completedTask" + SimSettings.DELIMITER + Integer.toString(completedTask[i]));
+				appendToFile(genericBWs[i],"failedTask" + SimSettings.DELIMITER + Integer.toString(failedTask[i]));
+				appendToFile(genericBWs[i],"uncompletedTask" + SimSettings.DELIMITER + Integer.toString(uncompletedTask[i]));
+				appendToFile(genericBWs[i],"failedTaskDuetoBw" + SimSettings.DELIMITER + Integer.toString(failedTaskDuetoBw[i]));
+				appendToFile(genericBWs[i],"_serviceTime" + SimSettings.DELIMITER + Double.toString(_serviceTime));
+				appendToFile(genericBWs[i],"_processingTime" + SimSettings.DELIMITER + Double.toString(_processingTime));
+				appendToFile(genericBWs[i],"_networkDelay" + SimSettings.DELIMITER + Double.toString(_networkDelay));
+				appendToFile(genericBWs[i],"_cost" + SimSettings.DELIMITER + Double.toString(_cost));
+				appendToFile(genericBWs[i],"failedTaskDueToVmCapacity" + SimSettings.DELIMITER + Integer.toString(failedTaskDueToVmCapacity[i]));
+				appendToFile(genericBWs[i],"failedTaskDuetoMobility" + SimSettings.DELIMITER + Integer.toString(failedTaskDuetoMobility[i]));
+				appendToFile(genericBWs[i],"_QoE1" + SimSettings.DELIMITER + Double.toString(_QoE1));
+				appendToFile(genericBWs[i],"_QoE2" + SimSettings.DELIMITER + Double.toString(_QoE2));
+				appendToFile(genericBWs[i],"refectedTaskDuetoWlanRange" + SimSettings.DELIMITER + Integer.toString(refectedTaskDuetoWlanRange[i]));
 
 				// check if the divisor is zero in order to avoid division by zero problem
 				double _serviceTimeOnEdge = (completedTaskOnEdge[i] == 0) ? 0.0
 						: (serviceTimeOnEdge[i] / (double) completedTaskOnEdge[i]);
 				double _processingTimeOnEdge = (completedTaskOnEdge[i] == 0) ? 0.0
 						: (processingTimeOnEdge[i] / (double) completedTaskOnEdge[i]);
-				String genericResult2 = Integer.toString(completedTaskOnEdge[i]) + SimSettings.DELIMITER
-						+ Integer.toString(failedTaskOnEdge[i]) + SimSettings.DELIMITER
-						+ Integer.toString(uncompletedTaskOnEdge[i]) + SimSettings.DELIMITER
-						+ Integer.toString(0) + SimSettings.DELIMITER
-						+ Double.toString(_serviceTimeOnEdge) + SimSettings.DELIMITER
-						+ Double.toString(_processingTimeOnEdge) + SimSettings.DELIMITER
-						+ Double.toString(0.0) + SimSettings.DELIMITER 
-						+ Double.toString(_vmLoadOnEdge) + SimSettings.DELIMITER 
-						+ Integer.toString(failedTaskDueToVmCapacityOnEdge[i]);
+				appendToFile(genericBWs[i],"completedTaskOnEdge" + SimSettings.DELIMITER + Integer.toString(completedTaskOnEdge[i]));
+				appendToFile(genericBWs[i],"failedTaskOnEdge" + SimSettings.DELIMITER + Integer.toString(failedTaskOnEdge[i]));
+				appendToFile(genericBWs[i],"uncompletedTaskOnEdge" + SimSettings.DELIMITER + Integer.toString(uncompletedTaskOnEdge[i]));
+				appendToFile(genericBWs[i],"_serviceTimeOnEdge" + SimSettings.DELIMITER + Double.toString(_serviceTimeOnEdge));
+				appendToFile(genericBWs[i],"_processingTimeOnEdge" + SimSettings.DELIMITER + Double.toString(_processingTimeOnEdge));
+				appendToFile(genericBWs[i],"_vmLoadOnEdge" + SimSettings.DELIMITER + Double.toString(_vmLoadOnEdge));
+				appendToFile(genericBWs[i],"failedTaskDueToVmCapacityOnEdge" + SimSettings.DELIMITER + Integer.toString(failedTaskDueToVmCapacityOnEdge[i]));
 
 				// check if the divisor is zero in order to avoid division by zero problem
 				double _serviceTimeOnCloud = (completedTaskOnCloud[i] == 0) ? 0.0
 						: (serviceTimeOnCloud[i] / (double) completedTaskOnCloud[i]);
 				double _processingTimeOnCloud = (completedTaskOnCloud[i] == 0) ? 0.0
 						: (processingTimeOnCloud[i] / (double) completedTaskOnCloud[i]);
-				String genericResult3 = Integer.toString(completedTaskOnCloud[i]) + SimSettings.DELIMITER
-						+ Integer.toString(failedTaskOnCloud[i]) + SimSettings.DELIMITER
-						+ Integer.toString(uncompletedTaskOnCloud[i]) + SimSettings.DELIMITER
-						+ Integer.toString(0) + SimSettings.DELIMITER
-						+ Double.toString(_serviceTimeOnCloud) + SimSettings.DELIMITER
-						+ Double.toString(_processingTimeOnCloud) + SimSettings.DELIMITER 
-						+ Double.toString(0.0) + SimSettings.DELIMITER
-						+ Double.toString(_vmLoadOnClould) + SimSettings.DELIMITER 
-						+ Integer.toString(failedTaskDueToVmCapacityOnCloud[i]);
-				
+
+				appendToFile(genericBWs[i],"completedTaskOnCloud" + SimSettings.DELIMITER + Integer.toString(completedTaskOnCloud[i]));
+				appendToFile(genericBWs[i],	"failedTaskOnCloud" + SimSettings.DELIMITER + Integer.toString(failedTaskOnCloud[i]));
+				appendToFile(genericBWs[i],		"uncompletedTaskOnCloud" + SimSettings.DELIMITER + Integer.toString(uncompletedTaskOnCloud[i]));
+				appendToFile(genericBWs[i],	"_serviceTimeOnCloud" + SimSettings.DELIMITER + Double.toString(_serviceTimeOnCloud));
+				appendToFile(genericBWs[i],	"_processingTimeOnCloud" + SimSettings.DELIMITER + Double.toString(_processingTimeOnCloud));
+				appendToFile(genericBWs[i],	"_vmLoadOnClould" + SimSettings.DELIMITER + Double.toString(_vmLoadOnClould));
+				appendToFile(genericBWs[i],	"failedTaskDueToVmCapacityOnCloud" + SimSettings.DELIMITER + Integer.toString(failedTaskDueToVmCapacityOnCloud[i]));
+
 				// check if the divisor is zero in order to avoid division by zero problem
 				double _serviceTimeOnMobile = (completedTaskOnMobile[i] == 0) ? 0.0
 						: (serviceTimeOnMobile[i] / (double) completedTaskOnMobile[i]);
 				double _processingTimeOnMobile = (completedTaskOnMobile[i] == 0) ? 0.0
 						: (processingTimeOnMobile[i] / (double) completedTaskOnMobile[i]);
-				String genericResult4 = Integer.toString(completedTaskOnMobile[i]) + SimSettings.DELIMITER
-						+ Integer.toString(failedTaskOnMobile[i]) + SimSettings.DELIMITER
-						+ Integer.toString(uncompletedTaskOnMobile[i]) + SimSettings.DELIMITER
-						+ Integer.toString(0) + SimSettings.DELIMITER
-						+ Double.toString(_serviceTimeOnMobile) + SimSettings.DELIMITER
-						+ Double.toString(_processingTimeOnMobile) + SimSettings.DELIMITER 
-						+ Double.toString(0.0) + SimSettings.DELIMITER
-						+ Double.toString(_vmLoadOnMobile) + SimSettings.DELIMITER 
-						+ Integer.toString(failedTaskDueToVmCapacityOnMobile[i]);
+
+				appendToFile(genericBWs[i],"completedTaskOnMobile" + SimSettings.DELIMITER + Integer.toString(completedTaskOnMobile[i]));
+				appendToFile(genericBWs[i],"failedTaskOnMobile" + SimSettings.DELIMITER + Integer.toString(failedTaskOnMobile[i]));
+				appendToFile(genericBWs[i],"uncompletedTaskOnMobile" + SimSettings.DELIMITER + Integer.toString(uncompletedTaskOnMobile[i]));
+				appendToFile(genericBWs[i],"_serviceTimeOnMobile" + SimSettings.DELIMITER + Double.toString(_serviceTimeOnMobile));
+				appendToFile(genericBWs[i],"_processingTimeOnMobile" + SimSettings.DELIMITER + Double.toString(_processingTimeOnMobile));
+				appendToFile(genericBWs[i],"_vmLoadOnMobile" + SimSettings.DELIMITER + Double.toString(_vmLoadOnMobile));
+				appendToFile(genericBWs[i],"failedTaskDueToVmCapacityOnMobile" + SimSettings.DELIMITER + Integer.toString(failedTaskDueToVmCapacityOnMobile[i]));
 
 				double _serviceTimeOnDrone = (completedTaskOnDrone[i] == 0) ? 0.0
 						: (serviceTimeOnDrone[i] / (double) completedTaskOnDrone[i]);
 				double _processingTimeOnDrone = (completedTaskOnDrone[i] == 0) ? 0.0
 						: (processingTimeOnDrone[i] / (double) completedTaskOnDrone[i]);
-				String genericResult5 = Integer.toString(completedTaskOnDrone[i]) + SimSettings.DELIMITER
-						+ Integer.toString(failedTaskOnDrone[i]) + SimSettings.DELIMITER
-						+ Integer.toString(uncompletedTaskOnDrone[i]) + SimSettings.DELIMITER
-						+ Integer.toString(0) + SimSettings.DELIMITER
-						+ Double.toString(_serviceTimeOnDrone) + SimSettings.DELIMITER
-						+ Double.toString(_processingTimeOnDrone) + SimSettings.DELIMITER
-						+ Double.toString(0.0) + SimSettings.DELIMITER
-						+ Double.toString(_vmLoadOnDrone) + SimSettings.DELIMITER
-						+ Integer.toString(failedTaskDueToVmCapacityOnDrone[i]);
 
-				String genericResult6 = Double.toString(_lanDelay) + SimSettings.DELIMITER
-						+ Double.toString(_manDelay) + SimSettings.DELIMITER
-						+ Double.toString(_wanDelay) + SimSettings.DELIMITER
-						+ Double.toString(_gsmDelay) + SimSettings.DELIMITER
-						+ Integer.toString(failedTaskDuetoLanBw[i]) + SimSettings.DELIMITER
-						+ Integer.toString(failedTaskDuetoManBw[i]) + SimSettings.DELIMITER
-						+ Integer.toString(failedTaskDuetoWanBw[i]) + SimSettings.DELIMITER
-						+ Integer.toString(failedTaskDuetoGsmBw[i]);
-				
+				appendToFile(genericBWs[i],"completedTaskOnDrone" + SimSettings.DELIMITER + Integer.toString(completedTaskOnDrone[i]));
+				appendToFile(genericBWs[i],"failedTaskOnDrone" + SimSettings.DELIMITER + Integer.toString(failedTaskOnDrone[i]));
+				appendToFile(genericBWs[i],"uncompletedTaskOnDrone" + SimSettings.DELIMITER +Integer.toString(uncompletedTaskOnDrone[i]));
+				appendToFile(genericBWs[i],"_serviceTimeOnDrone" + SimSettings.DELIMITER +Double.toString(_serviceTimeOnDrone));
+				appendToFile(genericBWs[i],"_processingTimeOnDrone" + SimSettings.DELIMITER +Double.toString(_processingTimeOnDrone));
+				appendToFile(genericBWs[i],"_vmLoadOnDrone" + SimSettings.DELIMITER +Double.toString(_vmLoadOnDrone));
+				appendToFile(genericBWs[i],"failedTaskDueToVmCapacityOnDrone"+ SimSettings.DELIMITER + Integer.toString(failedTaskDueToVmCapacityOnDrone[i]));
+
+				appendToFile(genericBWs[i],"_lanDelay" + SimSettings.DELIMITER + Double.toString(_lanDelay));
+				appendToFile(genericBWs[i],"_manDelay" + SimSettings.DELIMITER + Double.toString(_manDelay));
+				appendToFile(genericBWs[i],"_wanDelay" + SimSettings.DELIMITER + Double.toString(_wanDelay));
+				appendToFile(genericBWs[i],"_gsmDelay" + SimSettings.DELIMITER + Double.toString(_gsmDelay));
+				appendToFile(genericBWs[i],"failedTaskDuetoLanBw" + SimSettings.DELIMITER + Integer.toString(failedTaskDuetoLanBw[i]));
+				appendToFile(genericBWs[i],"failedTaskDuetoManBw" + SimSettings.DELIMITER + Integer.toString(failedTaskDuetoManBw[i]));
+				appendToFile(genericBWs[i],"failedTaskDuetoWanBw" + SimSettings.DELIMITER + Integer.toString(failedTaskDuetoWanBw[i]));
+				appendToFile(genericBWs[i],"failedTaskDuetoGsmBw" + SimSettings.DELIMITER + Integer.toString(failedTaskDuetoGsmBw[i]));
+
 				//performance related values
 				double _orchestratorOverhead = orchestratorOverhead[i] / (double) (failedTask[i] + completedTask[i]);
 				
-				String genericResult7 = Long.toString((endTime-startTime)/60)  + SimSettings.DELIMITER
-						+ Double.toString(_orchestratorOverhead);
-
-
-				appendToFile(genericBWs[i],
-								"completedTask" + SimSettings.DELIMITER +
-								"failedTask" + SimSettings.DELIMITER +
-								"uncompletedTask" + SimSettings.DELIMITER +
-								"failedTaskDuetoBw" + SimSettings.DELIMITER +
-								"_serviceTime" + SimSettings.DELIMITER +
-								"_processingTime" + SimSettings.DELIMITER +
-								"_networkDelay" + SimSettings.DELIMITER +
-								"0" + SimSettings.DELIMITER +
-								"_cost" + SimSettings.DELIMITER +
-								"failedTaskDueToVmCapacity" + SimSettings.DELIMITER +
-								"failedTaskDuetoMobility" + SimSettings.DELIMITER +
-								"_QoE1" + SimSettings.DELIMITER +
-								"_QoE2" + SimSettings.DELIMITER +
-								"refectedTaskDuetoWlanRange");
-				appendToFile(genericBWs[i], genericResult1);
-
-				appendToFile(genericBWs[i],"completedTaskOnEdge" + SimSettings.DELIMITER +
-								"failedTaskOnEdge" + SimSettings.DELIMITER +
-								"uncompletedTaskOnEdge" + SimSettings.DELIMITER +
-								"0" + SimSettings.DELIMITER +
-								"_serviceTimeOnEdge" + SimSettings.DELIMITER +
-								"_processingTimeOnEdge" + SimSettings.DELIMITER +
-								"0.0" + SimSettings.DELIMITER +
-								"_vmLoadOnEdge" + SimSettings.DELIMITER +
-								"failedTaskDueToVmCapacityOnEdge");
-				appendToFile(genericBWs[i], genericResult2);
-
-				appendToFile(genericBWs[i],
-								"completedTaskOnCloud" + SimSettings.DELIMITER +
-								"failedTaskOnCloud" + SimSettings.DELIMITER +
-								"uncompletedTaskOnCloud" + SimSettings.DELIMITER +
-								"0" + SimSettings.DELIMITER +
-								"_serviceTimeOnCloud" + SimSettings.DELIMITER +
-								"_processingTimeOnCloud" + SimSettings.DELIMITER +
-								"0.0" + SimSettings.DELIMITER +
-								"_vmLoadOnClould" + SimSettings.DELIMITER +
-								"failedTaskDueToVmCapacityOnCloud");
-				appendToFile(genericBWs[i], genericResult3);
-
-				appendToFile(genericBWs[i],
-								"completedTaskOnMobile" + SimSettings.DELIMITER +
-								"failedTaskOnMobile" + SimSettings.DELIMITER +
-								"uncompletedTaskOnMobile" + SimSettings.DELIMITER +
-								"0" + SimSettings.DELIMITER +
-								"_serviceTimeOnMobile" + SimSettings.DELIMITER +
-								"_processingTimeOnMobile" + SimSettings.DELIMITER +
-								"0.0" + SimSettings.DELIMITER +
-								"_vmLoadOnMobile" + SimSettings.DELIMITER +
-								"failedTaskDueToVmCapacityOnMobile");
-				appendToFile(genericBWs[i], genericResult4);
-
-				appendToFile(genericBWs[i],
-						"completedTaskOnDrone" + SimSettings.DELIMITER +
-						"failedTaskOnDrone" + SimSettings.DELIMITER +
-						"uncompletedTaskOnDrone" + SimSettings.DELIMITER +
-						"0" + SimSettings.DELIMITER +
-						"_serviceTimeOnDrone" + SimSettings.DELIMITER +
-						"_processingTimeOnDrone" + SimSettings.DELIMITER +
-						"0.0" + SimSettings.DELIMITER +
-						"_vmLoadOnDrone" + SimSettings.DELIMITER +
-						"failedTaskDueToVmCapacityOnDrone");
-				appendToFile(genericBWs[i], genericResult5);
-
-				appendToFile(genericBWs[i],
-								"_lanDelay" + SimSettings.DELIMITER +
-								"_manDelay" + SimSettings.DELIMITER +
-								"_wanDelay" + SimSettings.DELIMITER +
-								"_gsmDelay" + SimSettings.DELIMITER +
-								"failedTaskDuetoLanBw" + SimSettings.DELIMITER +
-								"failedTaskDuetoManBw" + SimSettings.DELIMITER +
-								"failedTaskDuetoWanBw" + SimSettings.DELIMITER +
-								"failedTaskDuetoGsmBw");
-				appendToFile(genericBWs[i], genericResult6);
-
 				//append performance related values only to ALL_ALLPS file
 				if(i == numOfAppTypes) {
-					appendToFile(genericBWs[i],
-							"(endTime-startTime)/60;_orchestratorOverhead");
-					appendToFile(genericBWs[i], genericResult7);
+					appendToFile(genericBWs[i], "(endTime-startTime)/60" + SimSettings.DELIMITER + Long.toString((endTime-startTime)/60));
+					appendToFile(genericBWs[i], "_orchestratorOverhead" + SimSettings.DELIMITER + Double.toString(_orchestratorOverhead));
 				}
 				else {
 					printLine(SimSettings.getInstance().getTaskName(i));
@@ -920,6 +836,7 @@ public class SimLogger {
 		// clear related collections (map list etc.)
 		taskMap.clear();
 		vmLoadList.clear();
+		droneLocationList.clear();
 		apDelayList.clear();
 	}
 	
@@ -1074,6 +991,30 @@ class VmLoadLogItem {
 				SimSettings.DELIMITER + vmLoadOnDrone +
 				SimSettings.DELIMITER + vmLoadOnCloud +
 				SimSettings.DELIMITER + vmLoadOnMobile;
+	}
+}
+
+class DroneLocationLogItem {
+	private int host;
+	private double time;
+	private int x;
+	private int y;
+	private int wlan;
+
+	DroneLocationLogItem(int _host, double _time, int _x, int _y, int _wlan) {
+		host = _host;
+		time = _time;
+		x = _x;
+		y = _y;
+		wlan = _wlan;
+	}
+
+	public String toString() {
+		return host +
+				SimSettings.DELIMITER + time +
+				SimSettings.DELIMITER + x +
+				SimSettings.DELIMITER + y +
+				SimSettings.DELIMITER + wlan;
 	}
 }
 

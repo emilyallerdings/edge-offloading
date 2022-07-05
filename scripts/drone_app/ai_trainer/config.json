@@ -5,6 +5,6 @@
 	"min_mobile": 100,
 	"max_mobile": 1800,
 	"mobile_step_size": 100,
-	"classifier": "MultilayerPerceptron",
-	"regressor": "LinearRegression"
+	"classifier": "SMO",
+	"regressor": "SMOreg"
 } 

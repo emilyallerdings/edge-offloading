@@ -23,16 +23,16 @@ public class MyMobilityModel extends MobilityModel {
 		//randomly choose a location for each mobile device
 		location = new Location[numberOfMobileDevices];
 
-		int x_bound = (int)SimSettings.getInstance().getNorthernBound();
-		int y_bound = (int)SimSettings.getInstance().getEasternBound();
+		int y_bound = (int)SimSettings.getInstance().getNorthernBound();
+		int x_bound = (int)SimSettings.getInstance().getEasternBound();
 
 		for (int i = 0; i < numberOfMobileDevices; i++) {
-			int x_pos = SimUtils.getRandomNumber(0, x_bound);
-			int y_pos = SimUtils.getRandomNumber(0, y_bound);
+			int x_pos = SimUtils.getRandomNumber(0, x_bound-1);
+			int y_pos = SimUtils.getRandomNumber(0, y_bound-1);
 
 			//TODO: This is hard-coded! It's better to get these values from the edge device in the region.
-			int wlan_id = (x_pos-1)/1000 + ((y_pos-1)/1000) * 3 ;
-			int placeTypeIndex = (x_pos-1)/1000;
+			int wlan_id = x_pos / 400 + (y_pos / 400) * SimSettings.getInstance().getNumColumns();
+			int placeTypeIndex = SimSettings.getInstance().getPlaceTypeIndex(wlan_id);
 			location[i] = new Location(placeTypeIndex, wlan_id, x_pos, y_pos);
 		}
 	}
@@ -46,12 +46,16 @@ public class MyMobilityModel extends MobilityModel {
 	public DroneHost getClosestDrone(int mobileID) {
 		DroneHost host = null;
 		double minDist = Integer.MAX_VALUE;
+		Location deviceLoc = SimManager.getInstance().getMobilityModel().getLocation(mobileID, CloudSim.clock());
+		int j = 0;
 
 		for (int i = 0; i < SimManager.getInstance().getDroneServerManager().getDatacenterList().size(); i++) {
 			List<? extends DroneHost> list = SimManager.getInstance().getDroneServerManager().getDatacenterList().get(i).getHostList();
-			for (int j = 0; j < list.size(); j++) {
-				Location hostLoc = list.get(j).getLocation(CloudSim.clock());
-				Location deviceLoc = SimManager.getInstance().getMobilityModel().getLocation(mobileID, CloudSim.clock());
+			Location hostLoc = list.get(j).getLocation(CloudSim.clock());
+			if (SimSettings.getInstance().checkNeighborCells(hostLoc.getServingWlanId(), deviceLoc.getServingWlanId())) {
+				host = list.get(j);
+				break;
+			} else {
 				double dist = Math.sqrt(Math.pow((hostLoc.getXPos() - deviceLoc.getXPos()), 2) + Math.pow((hostLoc.getYPos() - deviceLoc.getYPos()), 2));
 				if (dist < minDist) {
 					minDist = dist;
