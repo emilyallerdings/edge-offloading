@@ -27,7 +27,7 @@ public class MyMainApp {
 		//enable console output and file output of this application
 		SimLogger.enablePrintLog();
 
-		int iterationNumber = 5;
+		int iterationNumber = 1;
 		String configFile = "";
 		String outputFolder = "";
 		String edgeDevicesFile = "";

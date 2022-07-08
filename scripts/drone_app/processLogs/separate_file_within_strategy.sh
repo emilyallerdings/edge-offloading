@@ -1,0 +1,17 @@
+cd ALL_APPS_GENERIC/;
+cat *.csv > ../ALL_APPS_GENERIC.csv;
+cd ../DANGER_ASSESSMENT_GENERIC;
+cat *.csv > ../DANGER_ASSESSMENT_GENERIC.csv;
+cd ../DEVICES_LOCATION;
+cat *.csv > ../DEVICES_LOCATION.csv;
+cd ../DEVICES_VM_LOAD;
+cat *.csv > ../DEVICES_VM_LOAD.csv;
+cd ../DOWNLOAD_DELAY;
+cat *.csv > ../DOWNLOAD_DELAY.csv;
+cd ../INFOTAINMENT_GENERIC;
+cat *.csv > ../INFOTAINMENT_GENERIC.csv;
+cd ../TRAFFIC_MANAGEMENT_GENERIC;
+cat *.csv > ../TRAFFIC_MANAGEMENT_GENERIC.csv;
+cd ../UPLOAD_DELAY;
+cat *.csv > ../UPLOAD_DELAY.csv;
+
