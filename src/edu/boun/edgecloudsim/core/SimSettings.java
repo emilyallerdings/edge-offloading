@@ -55,6 +55,14 @@ public class SimSettings {
 		return placeTypeIndex;
 	}
 
+	public boolean checkNeighborCells(int wlan1, int wlan2) {
+		int i = getNumColumns();
+		if (Math.abs((wlan1 / i) - (wlan2 / i)) <= 1 && Math.abs((wlan1 % i) - (wlan2 % i)) <= 1)
+			return true;
+		else
+			return false;
+	}
+
 	public String getDronesMovementStrategy() {
 		return DRONES_MOVEMENT_STRATEGY;
 	}
@@ -73,7 +81,7 @@ public class SimSettings {
 	public static final int DRONE_ORCHESTRATOR_ID = 1004;
 
 	//delimiter for output file.
-	public static final String DELIMITER = ";";
+	public static final String DELIMITER = ",";
 
 	private double SIMULATION_TIME; //minutes unit in properties file
 	private double WARM_UP_PERIOD; //minutes unit in properties file

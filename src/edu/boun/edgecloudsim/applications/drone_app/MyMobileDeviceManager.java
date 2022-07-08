@@ -138,8 +138,8 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 				double wlanDelay = networkModel.getDownloadDelay(delayType, task);
 				if(wlanDelay > 0)
 				{
-					Location futureLocation = host.getLocation(CloudSim.clock()+wlanDelay);
-					if(task.getSubmittedLocation().getServingWlanId() == futureLocation.getServingWlanId())
+					Location futureLocation = host.getLocation(CloudSim.clock() + wlanDelay);
+					if(SimSettings.getInstance().checkNeighborCells(task.getSubmittedLocation().getServingWlanId(), futureLocation.getServingWlanId()))
 					{
 						SimLogger.getInstance().setDownloadDelay(task.getCloudletId(), wlanDelay, delayType);
 						schedule(getId(), wlanDelay, RESPONSE_RECEIVED_BY_MOBILE_DEVICE, task);
@@ -240,12 +240,7 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 					getCloudletList().clear();
 
 					if (selectedVM instanceof DroneVM) {
-							DroneHost host = (DroneHost) (selectedVM.getHost());
-							if (host.getLocation(CloudSim.clock()).getServingWlanId() == task.getSubmittedLocation().getServingWlanId())
 								nextEvent = REQUEST_RECEIVED_BY_DRONE;
-							else
-								// if the host (drone) moves and exits the wlan which the task resides in, we should find the closest drone again.
-								nextEvent = READY_TO_SELECT_VM; //REQUEST_RECEIVED_BY_DRONE_TO_RELAY_NEIGHBOR;
 						} else if (selectedVM instanceof EdgeVM) {
 						EdgeHost host = (EdgeHost) (selectedVM.getHost());
 						//if nearest edge device is selected
@@ -352,8 +347,8 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 				String taskName = SimSettings.getInstance().getTaskName(task.getTaskType());
 				double taskProperty[] = SimSettings.getInstance().getTaskProperties(taskName);
 				double serviceTime = CloudSim.clock() - task.getCreationTime();
-				double delaySensitivity = taskProperty[12];
-				double maxDelayRequirement = taskProperty[13];
+				double delaySensitivity = taskProperty[13];
+				double maxDelayRequirement = taskProperty[14];
 
 				double QoE = 100;
 				if (serviceTime > maxDelayRequirement) {

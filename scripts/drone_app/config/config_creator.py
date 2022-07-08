@@ -68,7 +68,7 @@ for config in ["edge_devices", "drones"]:
     root = ET.Element(config)
     for i in range(count[config]):
         # place 2 drones in each wlan
-        for j in range(2 if config == "drones" else 1):
+        # for j in range(2 if config == "drones" else 1):
             doc = ET.SubElement(root, "drone" if config ==
                                 "drones" else "datacenter", arch=ARCH[config], os=OS[config], vmm=VMM[config])
             for c in ["costPerBw", "costPerSec", "costPerMem", "costPerStorage"]:

@@ -225,7 +225,8 @@ public class SimManager extends SimEntity {
 
 		// Creation of drone moves
 		// change 100 to change the movement interval
-		schedule(getId(), SimSettings.getInstance().getSimulationTime() / 100, MOVE_DRONES);
+		if(SimSettings.getInstance().getDronesMovementStrategy() != "NONE")
+			schedule(getId(), SimSettings.getInstance().getSimulationTime() / 100, MOVE_DRONES);
 
 		//Periodic event loops starts from here!
 		schedule(getId(), 5, CHECK_ALL_VM);
