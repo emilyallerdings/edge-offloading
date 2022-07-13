@@ -27,7 +27,7 @@ public class MyMainApp {
 		//enable console output and file output of this application
 		SimLogger.enablePrintLog();
 
-		int iterationNumber = 4;
+		int iterationNumber = 1;
 		String configFile = "";
 		String outputFolder = "";
 		String edgeDevicesFile = "";
@@ -48,7 +48,6 @@ public class MyMainApp {
 			applicationsFile = "scripts/drone_app/config/" + configName + "/applications.xml";
 			edgeDevicesFile = "scripts/drone_app/config/" + configName + "/edge_devices.xml";
 			dronesFile = "scripts/drone_app/config/" + configName + "/drones.xml";
-			outputFolder = "sim_results/ite" + iterationNumber;
 		}
 
 		//load settings from configuration file
@@ -56,11 +55,6 @@ public class MyMainApp {
 		if(SS.initialize(configFile, edgeDevicesFile, dronesFile, applicationsFile) == false) {
 			SimLogger.printLine("cannot initialize simulation settings!");
 			System.exit(1);
-		}
-
-		if(SS.getFileLoggingEnabled()){
-			SimUtils.cleanOutputFolder(outputFolder);
-			SimLogger.enableFileLog();
 		}
 
 		DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -73,26 +67,20 @@ public class MyMainApp {
 			String wekaModelsFolder = "scripts/drone_app/config/weka/";
 			WekaWrapper.getInstance().initialize("MultilayerPerceptron", "LinearRegression", wekaModelsFolder);
 //			WekaWrapper.getInstance().initialize("NaiveBayes", "LinearRegression", wekaModelsFolder);
-//			WekaWrapper.getInstance().initialize("SMO", "LinearRegression", wekaModelsFolder);
-//			WekaWrapper.getInstance().initialize("MultilayerPerceptron", "SMOreg", wekaModelsFolder);
-//			WekaWrapper.getInstance().initialize("NaiveBayes", "SMOreg", wekaModelsFolder);
-//			WekaWrapper.getInstance().initialize("SMO", "SMOreg", wekaModelsFolder);
 		}
 
-		for(int i=SS.getMinNumOfMobileDev(); i<=SS.getMaxNumOfMobileDev(); i+=SS.getMobileDevCounterSize())
-			for(int s=0; s<SS.getSimulationScenarios().length; s++)
-				for(int p=0; p<SS.getOrchestratorPolicies().length; p++)
-					mainHelper(outputFolder, SS.getSimulationScenarios()[s], SS.getOrchestratorPolicies()[p], iterationNumber, i);
-
 //      To run the experiments in a loop for all iterations
-		
-//		for(int it=1; it<=iterationNumber; it++) {
-//			outputFolder = "sim_results/ite" + it;
-//			for(int i=SS.getMinNumOfMobileDev(); i<=SS.getMaxNumOfMobileDev(); i+=SS.getMobileDevCounterSize())
-//				for(int s=0; s<SS.getSimulationScenarios().length; s++)
-//					for(int p=0; p<SS.getOrchestratorPolicies().length; p++) 
-//						mainHelper(outputFolder, SS.getSimulationScenarios()[s], SS.getOrchestratorPolicies()[p], it, i);
-//					}
+		for (iterationNumber = 1; iterationNumber <= 4; iterationNumber++) {
+			outputFolder = "sim_results/ite" + iterationNumber;
+			if(SS.getFileLoggingEnabled()){
+				SimUtils.cleanOutputFolder(outputFolder);
+				SimLogger.enableFileLog();
+			}
+			for (int i = SS.getMinNumOfMobileDev(); i <= SS.getMaxNumOfMobileDev(); i += SS.getMobileDevCounterSize())
+				for (int s = 0; s < SS.getSimulationScenarios().length; s++)
+					for (int p = 0; p < SS.getOrchestratorPolicies().length; p++)
+						mainHelper(outputFolder, SS.getSimulationScenarios()[s], SS.getOrchestratorPolicies()[p], iterationNumber, i);
+		}
 
 		Date SimulationEndDate = Calendar.getInstance().getTime();
 		now = df.format(SimulationEndDate);

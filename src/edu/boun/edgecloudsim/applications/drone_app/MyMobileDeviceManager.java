@@ -38,6 +38,8 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 	private static final int RESPONSE_RECEIVED_BY_EDGE_DEVICE_TO_RELAY_MOBILE_DEVICE = BASE + 11;
 
 	private static final int REQUEST_RECEIVED_BY_DRONE = BASE + 12;
+	private static final int REQUEST_RECEIVED_BY_DRONE_TO_RELAY_NEIGHBOR = BASE + 13;
+	private static final int RESPONSE_RECEIVED_BY_DRONE_TO_RELAY_MOBILE_DEVICE = BASE + 14;
 
 	private static final double MM1_QUEUE_MODEL_UPDATE_INTERVAL = 0.5; //seconds
 	private int taskIdCounter=0;
@@ -131,8 +133,8 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 		}
 		else if(task.getAssociatedDatacenterId() == MyEdgeOrchestrator.DRONE_DATACENTER) {
 			DroneHost host = (DroneHost) SimManager.getInstance().getDroneServerManager().getDatacenterList().get(task.getAssociatedHostId()).getHostList().get(0);
-			Location currentLocation = host.getLocation();
-			if(task.getSubmittedLocation().getServingWlanId() == currentLocation.getServingWlanId())
+			Location currentLocation = host.getLocation(CloudSim.clock());
+			if(SimSettings.getInstance().checkNeighborCells(task.getSubmittedLocation().getServingWlanId(), currentLocation.getServingWlanId()))
 			{
 				NETWORK_DELAY_TYPES delayType = NETWORK_DELAY_TYPES.WLAN_DELAY;
 				double wlanDelay = networkModel.getDownloadDelay(delayType, task);
@@ -147,9 +149,22 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 					else
 					{
 						SimLogger.getInstance().failedDueToMobility(task.getCloudletId(), CloudSim.clock());
-						//no need to record failed task due to the mobility
 						//edgeOrchestrator.taskFailed(task);
 					}
+				}
+				else
+				{
+					SimLogger.getInstance().failedDueToBandwidth(task.getCloudletId(), CloudSim.clock(), delayType);
+					edgeOrchestrator.taskFailed(task);
+				}
+			}
+			else {
+				NETWORK_DELAY_TYPES delayType = NETWORK_DELAY_TYPES.MAN_DELAY;
+				double manDelay = networkModel.getDownloadDelay(delayType, task);
+				if(manDelay > 0)
+				{
+					SimLogger.getInstance().setDownloadDelay(task.getCloudletId(), manDelay, delayType);
+					schedule(getId(), manDelay, RESPONSE_RECEIVED_BY_DRONE_TO_RELAY_MOBILE_DEVICE, task);
 				}
 				else
 				{
@@ -240,8 +255,14 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 					getCloudletList().clear();
 
 					if (selectedVM instanceof DroneVM) {
-								nextEvent = REQUEST_RECEIVED_BY_DRONE;
-						} else if (selectedVM instanceof EdgeVM) {
+						DroneHost host = (DroneHost) (selectedVM.getHost());
+						// if nearest drone is selected
+						if (host.getLocation(CloudSim.clock()).getServingWlanId() == task.getSubmittedLocation().getServingWlanId())
+							nextEvent = REQUEST_RECEIVED_BY_DRONE;
+						else
+						// if the drone moves and exits the wlan which the mobile device resides in, we should relay the task to the cloud.
+							nextEvent = REQUEST_RECEIVED_BY_DRONE_TO_RELAY_NEIGHBOR;
+					} else if (selectedVM instanceof EdgeVM) {
 						EdgeHost host = (EdgeHost) (selectedVM.getHost());
 						//if nearest edge device is selected
 						if (host.getLocation().getServingWlanId() == task.getSubmittedLocation().getServingWlanId())
@@ -300,6 +321,26 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 				}
 				break;
 			}
+			case REQUEST_RECEIVED_BY_DRONE_TO_RELAY_NEIGHBOR: {
+				Task task = (Task) ev.getData();
+				NETWORK_DELAY_TYPES delayType = NETWORK_DELAY_TYPES.MAN_DELAY;
+
+				double manDelay = networkModel.getUploadDelay(delayType, task);
+				if (manDelay > 0) {
+					SimLogger.getInstance().setUploadDelay(task.getCloudletId(), manDelay, delayType);
+					schedule(getId(), manDelay, REQUEST_RECEIVED_BY_DRONE, task);
+				} else {
+					//SimLogger.printLine("Task #" + task.getCloudletId() + " cannot assign to any VM");
+					SimLogger.getInstance().rejectedDueToBandwidth(
+							task.getCloudletId(),
+							CloudSim.clock(),
+							VM_TYPES.DRONE_VM.ordinal(),
+							delayType);
+
+					edgeOrchestrator.taskFailed(task);
+				}
+				break;
+			}
 			case REQUEST_RECEIVED_BY_EDGE_DEVICE_TO_RELAY_NEIGHBOR: {
 				Task task = (Task) ev.getData();
 				NETWORK_DELAY_TYPES delayType = NETWORK_DELAY_TYPES.MAN_DELAY;
@@ -325,6 +366,7 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 				scheduleNow(getId(), RESPONSE_RECEIVED_BY_EDGE_DEVICE_TO_RELAY_MOBILE_DEVICE, task);
 				break;
 			}
+			case RESPONSE_RECEIVED_BY_DRONE_TO_RELAY_MOBILE_DEVICE:
 			case RESPONSE_RECEIVED_BY_EDGE_DEVICE_TO_RELAY_MOBILE_DEVICE: {
 				Task task = (Task) ev.getData();
 				NETWORK_DELAY_TYPES delayType = NETWORK_DELAY_TYPES.WLAN_DELAY;

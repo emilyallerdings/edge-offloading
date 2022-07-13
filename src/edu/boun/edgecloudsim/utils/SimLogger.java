@@ -35,12 +35,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
-import edu.boun.edgecloudsim.applications.drone_app.DroneHost;
 import edu.boun.edgecloudsim.core.SimManager;
 import edu.boun.edgecloudsim.core.SimSettings;
 import edu.boun.edgecloudsim.core.SimSettings.NETWORK_DELAY_TYPES;
@@ -138,7 +136,7 @@ public class SimLogger {
 	private int[] failedTaskDuetoWanBw = null;
 	private int[] failedTaskDuetoGsmBw = null;
 	private int[] failedTaskDuetoMobility = null;
-	private int[] refectedTaskDuetoWlanRange = null;
+	private int[] rejectedTaskDuetoWlanRange = null;
 	
 	private double[] orchestratorOverhead = null;
 
@@ -298,7 +296,7 @@ public class SimLogger {
 		failedTaskDuetoWanBw = new int[numOfAppTypes + 1];
 		failedTaskDuetoGsmBw = new int[numOfAppTypes + 1];
 		failedTaskDuetoMobility = new int[numOfAppTypes + 1];
-		refectedTaskDuetoWlanRange = new int[numOfAppTypes + 1];
+		rejectedTaskDuetoWlanRange = new int[numOfAppTypes + 1];
 
 		orchestratorOverhead = new double[numOfAppTypes + 1];
 	}
@@ -372,9 +370,9 @@ public class SimLogger {
 			vmLoadList.add(new VmLoadLogItem(time, loadOnEdge, loadOnDrone, loadOnCloud, loadOnMobile));
 	}
 
-	public void addDroneLocationLog(int host, double time, int x, int y, int wlan) {
+	public void addDroneLocationLog(int host, double time, int x, int y, int wlan, double vmutil) {
 		if(SimSettings.getInstance().getLocationLogInterval() != 0)
-			droneLocationList.add(new DroneLocationLogItem(host, time, x, y, wlan));
+			droneLocationList.add(new DroneLocationLogItem(host, time, x, y, wlan, vmutil));
 	}
 
 	public void addApDelayLog(double time, double[] apUploadDelays, double[] apDownloadDelays) {
@@ -441,7 +439,7 @@ public class SimLogger {
 					"app[2]");
 		}
 
-		//the tasks in the map is not completed yet!
+		//the tasks in the map are not completed yet!
 		for (Map.Entry<Integer, LogItem> entry : taskMap.entrySet()) {
 			LogItem value = entry.getValue();
 
@@ -512,7 +510,7 @@ public class SimLogger {
 		failedTaskDuetoManBw[numOfAppTypes] = IntStream.of(failedTaskDuetoManBw).sum();
 		failedTaskDuetoLanBw[numOfAppTypes] = IntStream.of(failedTaskDuetoLanBw).sum();
 		failedTaskDuetoMobility[numOfAppTypes] = IntStream.of(failedTaskDuetoMobility).sum();
-		refectedTaskDuetoWlanRange[numOfAppTypes] = IntStream.of(refectedTaskDuetoWlanRange).sum();
+		rejectedTaskDuetoWlanRange[numOfAppTypes] = IntStream.of(rejectedTaskDuetoWlanRange).sum();
 
 		orchestratorOverhead[numOfAppTypes] = DoubleStream.of(orchestratorOverhead).sum();
 		
@@ -566,7 +564,7 @@ public class SimLogger {
 			droneLocFile = new File(outputFolder, filePrefix + "_DRONES_LOCATIONS.csv");
 			droneLocFW = new FileWriter(droneLocFile, true);
 			droneLocBW = new BufferedWriter(droneLocFW);
-			appendToFile(droneLocBW, "host_id" + SimSettings.DELIMITER + "time" + SimSettings.DELIMITER + "x" + SimSettings.DELIMITER + "y" + SimSettings.DELIMITER + "wlan");
+			appendToFile(droneLocBW, "host_id" + SimSettings.DELIMITER + "time" + SimSettings.DELIMITER + "x" + SimSettings.DELIMITER + "y" + SimSettings.DELIMITER + "wlan" + SimSettings.DELIMITER + "vmutil");
 			for (DroneLocationLogItem entry : droneLocationList) {
 				if (fileLogEnabled && SimSettings.getInstance().getVmLoadLogInterval() != 0)
 					appendToFile(droneLocBW, entry.toString());
@@ -616,7 +614,7 @@ public class SimLogger {
 				appendToFile(genericBWs[i],"failedTaskDuetoMobility" + SimSettings.DELIMITER + Integer.toString(failedTaskDuetoMobility[i]));
 				appendToFile(genericBWs[i],"_QoE1" + SimSettings.DELIMITER + Double.toString(_QoE1));
 				appendToFile(genericBWs[i],"_QoE2" + SimSettings.DELIMITER + Double.toString(_QoE2));
-				appendToFile(genericBWs[i],"refectedTaskDuetoWlanRange" + SimSettings.DELIMITER + Integer.toString(refectedTaskDuetoWlanRange[i]));
+				appendToFile(genericBWs[i],"rejectedTaskDuetoWlanRange" + SimSettings.DELIMITER + Integer.toString(rejectedTaskDuetoWlanRange[i]));
 
 				// check if the divisor is zero in order to avoid division by zero problem
 				double _serviceTimeOnEdge = (completedTaskOnEdge[i] == 0) ? 0.0
@@ -775,7 +773,7 @@ public class SimLogger {
 		
 		printLine("# of failed tasks due to Mobility/WLAN Range/Network(WLAN/MAN/WAN/GSM): "
 				+ failedTaskDuetoMobility[numOfAppTypes]
-				+ "/" + refectedTaskDuetoWlanRange[numOfAppTypes]
+				+ "/" + rejectedTaskDuetoWlanRange[numOfAppTypes]
 				+ "/" + failedTaskDuetoBw[numOfAppTypes] 
 				+ "(" + failedTaskDuetoLanBw[numOfAppTypes] 
 				+ "/" + failedTaskDuetoManBw[numOfAppTypes] 
@@ -867,8 +865,12 @@ public class SimLogger {
 				failedTaskOnMobile[value.getTaskType()]++;
 			else if (value.getVmType() == SimSettings.VM_TYPES.EDGE_VM.ordinal())
 				failedTaskOnEdge[value.getTaskType()]++;
-			else
+			else if (value.getVmType() == SimSettings.VM_TYPES.DRONE_VM.ordinal())
 				failedTaskOnDrone[value.getTaskType()]++;
+			else {
+				//unknown vm type
+				int i = 1;
+			}
 		}
 
 		if (value.getStatus() == SimLogger.TASK_STATUS.COMLETED) {
@@ -936,7 +938,7 @@ public class SimLogger {
 		} else if (value.getStatus() == SimLogger.TASK_STATUS.UNFINISHED_DUE_TO_MOBILITY) {
 			failedTaskDuetoMobility[value.getTaskType()]++;
 		} else if (value.getStatus() == SimLogger.TASK_STATUS.REJECTED_DUE_TO_WLAN_COVERAGE) {
-			refectedTaskDuetoWlanRange[value.getTaskType()]++;;
+			rejectedTaskDuetoWlanRange[value.getTaskType()]++;;
         }
 		
 		//if deep file logging is enabled, record every task result
@@ -1000,13 +1002,15 @@ class DroneLocationLogItem {
 	private int x;
 	private int y;
 	private int wlan;
+	private double vmutil;
 
-	DroneLocationLogItem(int _host, double _time, int _x, int _y, int _wlan) {
+	DroneLocationLogItem(int _host, double _time, int _x, int _y, int _wlan, double _vmutil) {
 		host = _host;
 		time = _time;
 		x = _x;
 		y = _y;
 		wlan = _wlan;
+		vmutil = _vmutil;
 	}
 
 	public String toString() {
@@ -1014,7 +1018,8 @@ class DroneLocationLogItem {
 				SimSettings.DELIMITER + time +
 				SimSettings.DELIMITER + x +
 				SimSettings.DELIMITER + y +
-				SimSettings.DELIMITER + wlan;
+				SimSettings.DELIMITER + wlan +
+				SimSettings.DELIMITER + vmutil;
 	}
 }
 

@@ -33,7 +33,10 @@ public class DroneHost extends Host {
     public void setPlace(Location _location) {
         location = _location;
         this.destination = _location.getServingWlanId();
-        SimLogger.getInstance().addDroneLocationLog(this.getId(), CloudSim.clock(), location.getXPos(), location.getYPos(), location.getServingWlanId());
+        double vmutil = 0;
+        if (this.getVmList().size() > 0)
+            vmutil = this.getVmList().get(0).getTotalUtilizationOfCpu(CloudSim.clock()) + this.getVmList().get(1).getTotalUtilizationOfCpu(CloudSim.clock());
+        SimLogger.getInstance().addDroneLocationLog(this.getId(), CloudSim.clock(), location.getXPos(), location.getYPos(), location.getServingWlanId(), vmutil);
     }
 
     public void setDestination(int _destination) {
@@ -55,9 +58,12 @@ public class DroneHost extends Host {
                 int Wlan = x / 400 + (y / 400) * SimSettings.getInstance().getNumColumns();
                 int placeTypeIndex = SimSettings.getInstance().getPlaceTypeIndex(Wlan);
                 location = new Location(placeTypeIndex, Wlan, x, y);
-                SimLogger.getInstance().addDroneLocationLog(this.getId(), CloudSim.clock(), location.getXPos(), location.getYPos(), location.getServingWlanId());
             }
         }
+        double vmutil = 0;
+        if (this.getVmList().size() > 0)
+            vmutil = this.getVmList().get(0).getTotalUtilizationOfCpu(CloudSim.clock()) + this.getVmList().get(1).getTotalUtilizationOfCpu(CloudSim.clock());
+        SimLogger.getInstance().addDroneLocationLog(this.getId(), CloudSim.clock(), location.getXPos(), location.getYPos(), location.getServingWlanId(), vmutil);
         return location;
     }
 

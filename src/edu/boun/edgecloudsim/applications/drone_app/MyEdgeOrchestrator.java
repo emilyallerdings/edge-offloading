@@ -183,39 +183,15 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 			}
 
 			trainerLogger.addOffloadStat(result - 1);
-		}
-		else if (policy.equals("RANDOM")) {
-			double probabilities[] = null;
-			probabilities = new double[]{0.25, 0.25, 0.25, 0.25};
-
-			double randomNumber = SimUtils.getRandomDoubleNumber(0, 1);
-			double lastPercentagte = 0;
-			boolean resultFound = false;
-			for (int i = 0; i < probabilities.length; i++) {
-				if (randomNumber <= probabilities[i] + lastPercentagte) {
-					result = options[i];
-					resultFound = true;
-
-					break;
-				}
-				lastPercentagte += probabilities[i];
-			}
-
-			if (!resultFound) {
-				SimLogger.printLine("Unexpected probability calculation for AI based orchestrator! Terminating simulation...");
-				System.exit(1);
-			}
-		}
-		
-		else if (policy.equals("AI_TRAINER")) {
+		} else if (policy.equals("AI_TRAINER")) {
 			double probabilities[] = null;
 			if (task.getTaskType() == 0)
 				// TODO: dunno where these numbers come from. changed them randomly
-				probabilities = new double[]{0.50, 0.20, 0.17, 0.13};
+				probabilities = new double[]{0.37, 0.13, 0.13, 0.37};
 			else if (task.getTaskType() == 1)
-				probabilities = new double[]{0.25, 0.43, 0.16, 0.16};
+				probabilities = new double[]{0.13, 0.61, 0.13, 0.13};
 			else
-				probabilities = new double[]{0.20, 0.50, 0.15, 0.15};
+				probabilities = new double[]{0.18, 0.50, 0.13, 0.19};
 
 			double randomNumber = SimUtils.getRandomDoubleNumber(0, 1);
 			double lastPercentagte = 0;
@@ -387,11 +363,13 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 			int numOfDroneVMs = SimSettings.getInstance().getNumOfDroneVMs();
 			int numOfDroneHosts = SimSettings.getInstance().getNumOfDroneHosts();
 			int vmPerHost = numOfDroneVMs / numOfDroneHosts;
+
+			int hostIndex = (droneVmCounter / vmPerHost) % numOfDroneHosts;
 			int vmIndex = droneVmCounter % vmPerHost;
 
-			DroneHost host = ((MyMobilityModel) (SimManager.getInstance().getMobilityModel())).getClosestDrone(task.getMobileDeviceId());
+//			DroneHost host = ((MyMobilityModel) (SimManager.getInstance().getMobilityModel())).getClosestDrone(task.getMobileDeviceId());
 
-			selectedVM = SimManager.getInstance().getDroneServerManager().getVmList(host.getId()).get(vmIndex);
+			selectedVM = SimManager.getInstance().getDroneServerManager().getVmList(hostIndex).get(vmIndex);
 
 			droneVmCounter++;
 			droneVmCounter = droneVmCounter % numOfDroneVMs;
