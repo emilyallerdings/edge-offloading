@@ -1,3 +1,6 @@
+#models
+scripts/drone_app/config/weka/*.model
+
 # Compiled class file
 *.class
 
