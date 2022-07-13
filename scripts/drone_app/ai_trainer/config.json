@@ -5,11 +5,6 @@
 	"min_mobile": 100,
 	"max_mobile": 1800,
 	"mobile_step_size": 100,
-<<<<<<< HEAD
 	"classifier": "NaiveBayes",
 	"regressor": "LinearRegression"
-=======
-	"classifier": "SMO",
-	"regressor": "SMOreg"
->>>>>>> 9a04c8c14197410ae19baca7428e444fd34b8f3d
 } 
