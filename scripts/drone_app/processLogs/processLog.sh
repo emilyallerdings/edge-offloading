@@ -1,3 +1,6 @@
+# Run this from inside the sim_result/iteX folder:
+# e.g., bash ../../scripts/drone_app/processLogs/processLog.sh
+
 mkdir AI_Based
 mkdir MAB
 mkdir Predictive
