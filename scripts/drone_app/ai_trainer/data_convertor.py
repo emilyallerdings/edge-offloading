@@ -17,7 +17,7 @@ datatype = sys.argv[4]
 print("conversion started with args " + target + ", " + method + ", " + datatype)
 
 sim_result_folder = data["sim_result_folder"]
-statFilePath = sim_result_folder +"/stat.txt"
+statFilePath = "../config/weka/stat.txt"
  
 num_iterations = data["num_iterations"]
 train_data_ratio = data["train_data_ratio"]

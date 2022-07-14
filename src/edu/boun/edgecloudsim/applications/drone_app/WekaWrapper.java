@@ -105,7 +105,7 @@ public class WekaWrapper {
 //			System.exit(1);
 //		}
 		String dataPath = "./sim_results";
-		statFilePath = dataPath + "/stat.txt";
+		statFilePath = "scripts/drone_app/config/weka/stat.txt";
 
 		
 		arrays.add(EDGE_CLASSIFIER_MEAN_VALS);

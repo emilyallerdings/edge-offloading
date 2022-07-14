@@ -70,7 +70,7 @@ public class MyMainApp {
 		}
 
 //      To run the experiments in a loop for all iterations
-		for (iterationNumber = 1; iterationNumber <= 4; iterationNumber++) {
+		for (iterationNumber = 1; iterationNumber <= 5; iterationNumber++) {
 			outputFolder = "sim_results/ite" + iterationNumber;
 			if(SS.getFileLoggingEnabled()){
 				SimUtils.cleanOutputFolder(outputFolder);

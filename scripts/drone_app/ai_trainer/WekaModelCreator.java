@@ -5,8 +5,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-//import org.json.simple.JSONObject;
-//import org.json.simple.parser.JSONParser;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayes;
@@ -25,52 +25,40 @@ public class WekaModelCreator {
 		String classifier = "";
 		String regressor = "";
 		
-//		JSONParser parser = new JSONParser();
-//        try
-//        {
-//            Object object = parser.parse(new FileReader(args[0]));
-//            
-//            //convert Object to JSONObject
-//            JSONObject jsonObject = (JSONObject)object;
-//            
-//            //Reading the String
-//            dataPath = (String) jsonObject.get("sim_result_folder");
-//            classifier = (String) jsonObject.get("classifier");
-//            regressor = (String) jsonObject.get("regressor");
-//        }
-//        catch(Exception e)
-//        {
-//            e.printStackTrace();
-//            System.exit(1);
-//        }
-		
-		dataPath = "/Users/yasamanamannejad/workspace_all/research/edge-offloading/sim_results";
-		classifier = "NaiveBayes";
-		regressor = "LinearRegression";
-
+		JSONParser parser = new JSONParser();
+        try
+        {
+            Object object = parser.parse(new FileReader(args[0]));
+            
+            //convert Object to JSONObject
+            JSONObject jsonObject = (JSONObject)object;
+            
+            //Reading the String
+            dataPath = (String) jsonObject.get("sim_result_folder");
+            classifier = (String) jsonObject.get("classifier");
+            regressor = (String) jsonObject.get("regressor");
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            System.exit(1);
+        }
         
-//		System.out.println("######### TRAINING FOR " + dataPath + " #########");
-//		for(int i=0; i<targets.length; i++) {
-//			handleRegression("train", targets[i], regressor, dataPath);
-//			
-//		}
-//		
-//		System.out.println("######### EVALUATION FOR " + dataPath + " #########");
-//		for(int i=0; i<targets.length; i++) {
-//			handleRegression("evaluate", targets[i], regressor, dataPath);
-//		}
-	
+		System.out.println("######### TRAINING FOR " + dataPath + " #########");
 		for(int i=0; i<targets.length; i++) {
-			handleClassify("train", targets[i], classifier, dataPath);
+			if(classifier.length() != 0)
+				handleClassify("train", targets[i], classifier, dataPath);
+			if(regressor.length() != 0)
+				handleRegression("train", targets[i], regressor, dataPath);
 		}
-		
 
 		System.out.println("######### EVALUATION FOR " + dataPath + " #########");
 		for(int i=0; i<targets.length; i++) {
-			handleClassify("evaluate", targets[i], classifier, dataPath);
+			if(classifier.length() != 0)
+				handleClassify("evaluate", targets[i], classifier, dataPath);
+			if(regressor.length() != 0)
+				handleRegression("evaluate", targets[i], regressor, dataPath);
 		}
-		
-		
 	}
 	
 	public static void handleRegression(String action, String target, String method, String dataFolder) throws Exception {
