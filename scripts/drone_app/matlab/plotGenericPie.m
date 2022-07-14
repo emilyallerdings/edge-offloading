@@ -1,5 +1,5 @@
 function [] = plotGenericPie(vmType, appType, threshold)
-    folderPath = "D:\git-repos\PhD\EdgeCloudSim\sim_results";
+    folderPath = "./sim_results";
     scenarioType = getConfiguration(5);
     startOfMobileDeviceLoop = 2000;
     stepOfMobileDeviceLoop = 2000;

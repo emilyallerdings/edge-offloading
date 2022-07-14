@@ -4,7 +4,7 @@
 %--------------------------------------------------------------
 function [ret_val] = getConfiguration(argType)
     if(argType == 1)
-        ret_val = 'D:\sim_results';
+        ret_val = './sim_results';
     elseif(argType == 2)
         ret_val = 60; %simulation time (in minutes)
     elseif(argType == 3)
