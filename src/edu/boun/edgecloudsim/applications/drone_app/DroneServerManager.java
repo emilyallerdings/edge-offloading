@@ -1,8 +1,13 @@
 package edu.boun.edgecloudsim.applications.drone_app;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import edu.boun.edgecloudsim.core.SimManager;
 import edu.boun.edgecloudsim.utils.TaskProperty;
@@ -26,243 +31,332 @@ import edu.boun.edgecloudsim.core.SimSettings;
 import edu.boun.edgecloudsim.utils.Location;
 
 public class DroneServerManager {
-    private int hostIdCounter;
-    protected List<List<DroneVM>> vmList;
-    protected List<Datacenter> localDatacenters;
+	private int hostIdCounter;
+	protected List<List<DroneVM>> vmList;
+	protected List<Datacenter> localDatacenters;
 
-    public DroneServerManager() {
-        localDatacenters=new ArrayList<Datacenter>();
-        vmList = new ArrayList<List<DroneVM>>();
-    }
+	public DroneServerManager() {
+		localDatacenters = new ArrayList<Datacenter>();
+		vmList = new ArrayList<List<DroneVM>>();
+	}
 
-    public List<DroneVM> getVmList(int hostId){
-        return vmList.get(hostId);
-    }
+	public List<DroneVM> getVmList(int hostId) {
+		return vmList.get(hostId);
+	}
 
-    public List<Datacenter> getDatacenterList(){
-        return localDatacenters;
-    }
+	public List<Datacenter> getDatacenterList() {
+		return localDatacenters;
+	}
 
+	public void initialize() {
+	}
 
-    public void initialize() {
-    }
+	public VmAllocationPolicy getVmAllocationPolicy(List<? extends Host> hostList, int dataCenterIndex) {
+		return new DroneVmAllocationPolicy(hostList, dataCenterIndex);
+	}
 
-    public VmAllocationPolicy getVmAllocationPolicy(List<? extends Host> hostList, int dataCenterIndex) {
-        return new DroneVmAllocationPolicy(hostList,dataCenterIndex);
-    }
+	public void startDatacenters() throws Exception {
+		Document doc = SimSettings.getInstance().getDronesDocument();
+		NodeList datacenterList = doc.getElementsByTagName("drone");
+		for (int i = 0; i < datacenterList.getLength(); i++) {
+			Node datacenterNode = datacenterList.item(i);
+			Element datacenterElement = (Element) datacenterNode;
+			localDatacenters.add(createDatacenter(i, datacenterElement));
+		}
+	}
 
-    public void startDatacenters() throws Exception {
-        Document doc = SimSettings.getInstance().getDronesDocument();
-        NodeList datacenterList = doc.getElementsByTagName("drone");
-        for (int i = 0; i < datacenterList.getLength(); i++) {
-            Node datacenterNode = datacenterList.item(i);
-            Element datacenterElement = (Element) datacenterNode;
-            localDatacenters.add(createDatacenter(i, datacenterElement));
-        }
-    }
+	public void createVmList(int brockerId) {
+		int hostCounter = 0;
+		int vmCounter = SimSettings.getInstance().getNumOfEdgeVMs();
 
-    public void createVmList(int brockerId){
-        int hostCounter=0;
-        int vmCounter=SimSettings.getInstance().getNumOfEdgeVMs();
+		// Create VMs for each hosts
+		Document doc = SimSettings.getInstance().getDronesDocument();
+		NodeList datacenterList = doc.getElementsByTagName("drone");
+		for (int i = 0; i < datacenterList.getLength(); i++) {
+			Node datacenterNode = datacenterList.item(i);
+			Element datacenterElement = (Element) datacenterNode;
+			NodeList hostNodeList = datacenterElement.getElementsByTagName("host");
+			for (int j = 0; j < hostNodeList.getLength(); j++) {
 
-        //Create VMs for each hosts
-        Document doc = SimSettings.getInstance().getDronesDocument();
-        NodeList datacenterList = doc.getElementsByTagName("drone");
-        for (int i = 0; i < datacenterList.getLength(); i++) {
-            Node datacenterNode = datacenterList.item(i);
-            Element datacenterElement = (Element) datacenterNode;
-            NodeList hostNodeList = datacenterElement.getElementsByTagName("host");
-            for (int j = 0; j < hostNodeList.getLength(); j++) {
+				vmList.add(hostCounter, new ArrayList<DroneVM>());
 
-                vmList.add(hostCounter, new ArrayList<DroneVM>());
+				Node hostNode = hostNodeList.item(j);
+				Element hostElement = (Element) hostNode;
+				NodeList vmNodeList = hostElement.getElementsByTagName("VM");
+				for (int k = 0; k < vmNodeList.getLength(); k++) {
+					Node vmNode = vmNodeList.item(k);
+					Element vmElement = (Element) vmNode;
 
-                Node hostNode = hostNodeList.item(j);
-                Element hostElement = (Element) hostNode;
-                NodeList vmNodeList = hostElement.getElementsByTagName("VM");
-                for (int k = 0; k < vmNodeList.getLength(); k++) {
-                    Node vmNode = vmNodeList.item(k);
-                    Element vmElement = (Element) vmNode;
+					String vmm = vmElement.getAttribute("vmm");
+					int numOfCores = Integer.parseInt(vmElement.getElementsByTagName("core").item(0).getTextContent());
+					double mips = Double.parseDouble(vmElement.getElementsByTagName("mips").item(0).getTextContent());
+					int ram = Integer.parseInt(vmElement.getElementsByTagName("ram").item(0).getTextContent());
+					long storage = Long.parseLong(vmElement.getElementsByTagName("storage").item(0).getTextContent());
+					long bandwidth = SimSettings.getInstance().getWlanBandwidth()
+							/ (hostNodeList.getLength() + vmNodeList.getLength());
 
-                    String vmm = vmElement.getAttribute("vmm");
-                    int numOfCores = Integer.parseInt(vmElement.getElementsByTagName("core").item(0).getTextContent());
-                    double mips = Double.parseDouble(vmElement.getElementsByTagName("mips").item(0).getTextContent());
-                    int ram = Integer.parseInt(vmElement.getElementsByTagName("ram").item(0).getTextContent());
-                    long storage = Long.parseLong(vmElement.getElementsByTagName("storage").item(0).getTextContent());
-                    long bandwidth = SimSettings.getInstance().getWlanBandwidth() / (hostNodeList.getLength()+vmNodeList.getLength());
+					// VM Parameters
+					DroneVM vm = new DroneVM(vmCounter, brockerId, mips, numOfCores, ram, bandwidth, storage, vmm,
+							new CloudletSchedulerTimeShared());
+					vmList.get(hostCounter).add(vm);
+					vmCounter++;
+				}
 
-                    //VM Parameters
-                    DroneVM vm = new DroneVM(vmCounter, brockerId, mips, numOfCores, ram, bandwidth, storage, vmm, new CloudletSchedulerTimeShared());
-                    vmList.get(hostCounter).add(vm);
-                    vmCounter++;
-                }
+				hostCounter++;
+			}
+		}
+	}
 
-                hostCounter++;
-            }
-        }
-    }
+	public void terminateDatacenters() {
+		for (Datacenter datacenter : localDatacenters) {
+			datacenter.shutdownEntity();
+		}
+	}
 
-    public void terminateDatacenters() {
-        for (Datacenter datacenter : localDatacenters) {
-            datacenter.shutdownEntity();
-        }
-    }
+	// average utilization of all VMs
+	public double getAvgUtilization() {
+		double totalUtilization = 0;
+		int hostCounter = 0;
+		int vmCounter = 0;
 
-    //average utilization of all VMs
-    public double getAvgUtilization() {
-        double totalUtilization = 0;
-        int hostCounter = 0;
-        int vmCounter = 0;
+		// for each datacenter...
+		for (int i = 0; i < localDatacenters.size(); i++) {
+			List<? extends Host> list = localDatacenters.get(i).getHostList();
+			// for each host...
+			for (int hostIndex = 0; hostIndex < list.size(); hostIndex++) {
+				List<DroneVM> vmArray = SimManager.getInstance().getDroneServerManager().getVmList(hostCounter);
+				// for each vm...
+				for (int vmIndex = 0; vmIndex < vmArray.size(); vmIndex++) {
+					totalUtilization += vmArray.get(vmIndex).getCloudletScheduler()
+							.getTotalUtilizationOfCpu(CloudSim.clock());
+					vmCounter++;
+				}
+				hostCounter++;
+			}
+		}
+		return totalUtilization / (double) vmCounter;
+	}
 
-        // for each datacenter...
-        for (int i = 0; i < localDatacenters.size(); i++) {
-            List<? extends Host> list = localDatacenters.get(i).getHostList();
-            // for each host...
-            for (int hostIndex=0; hostIndex < list.size(); hostIndex++) {
-                List<DroneVM> vmArray = SimManager.getInstance().getDroneServerManager().getVmList(hostCounter);
-                //for each vm...
-                for (int vmIndex = 0; vmIndex < vmArray.size(); vmIndex++) {
-                    totalUtilization += vmArray.get(vmIndex).getCloudletScheduler().getTotalUtilizationOfCpu(CloudSim.clock());
-                    vmCounter++;
-                }
-                hostCounter++;
-            }
-        }
-        return totalUtilization / (double) vmCounter;
-    }
+	private Datacenter createDatacenter(int index, Element datacenterElement) throws Exception {
+		String arch = datacenterElement.getAttribute("arch");
+		String os = datacenterElement.getAttribute("os");
+		String vmm = datacenterElement.getAttribute("vmm");
+		double costPerBw = Double
+				.parseDouble(datacenterElement.getElementsByTagName("costPerBw").item(0).getTextContent());
+		double costPerSec = Double
+				.parseDouble(datacenterElement.getElementsByTagName("costPerSec").item(0).getTextContent());
+		double costPerMem = Double
+				.parseDouble(datacenterElement.getElementsByTagName("costPerMem").item(0).getTextContent());
+		double costPerStorage = Double
+				.parseDouble(datacenterElement.getElementsByTagName("costPerStorage").item(0).getTextContent());
 
-    private Datacenter createDatacenter(int index, Element datacenterElement) throws Exception {
-        String arch = datacenterElement.getAttribute("arch");
-        String os = datacenterElement.getAttribute("os");
-        String vmm = datacenterElement.getAttribute("vmm");
-        double costPerBw = Double.parseDouble(datacenterElement.getElementsByTagName("costPerBw").item(0).getTextContent());
-        double costPerSec = Double.parseDouble(datacenterElement.getElementsByTagName("costPerSec").item(0).getTextContent());
-        double costPerMem = Double.parseDouble(datacenterElement.getElementsByTagName("costPerMem").item(0).getTextContent());
-        double costPerStorage = Double.parseDouble(datacenterElement.getElementsByTagName("costPerStorage").item(0).getTextContent());
+		List<DroneHost> hostList = createHosts(datacenterElement);
 
-        List<DroneHost> hostList = createHosts(datacenterElement);
+		String name = "DroneDatacenter_" + Integer.toString(index);
+		double time_zone = 3.0; // time zone this resource located
+		LinkedList<Storage> storageList = new LinkedList<Storage>(); // we are not adding SAN devices by now
 
-        String name = "DroneDatacenter_" + Integer.toString(index);
-        double time_zone = 3.0;         // time zone this resource located
-        LinkedList<Storage> storageList = new LinkedList<Storage>();    //we are not adding SAN devices by now
+		// 5. Create a DatacenterCharacteristics object that stores the
+		// properties of a data center: architecture, OS, list of
+		// Machines, allocation policy: time- or space-shared, time zone
+		// and its price (G$/Pe time unit).
+		DatacenterCharacteristics characteristics = new DatacenterCharacteristics(arch, os, vmm, hostList, time_zone,
+				costPerSec, costPerMem, costPerStorage, costPerBw);
 
-        // 5. Create a DatacenterCharacteristics object that stores the
-        //    properties of a data center: architecture, OS, list of
-        //    Machines, allocation policy: time- or space-shared, time zone
-        //    and its price (G$/Pe time unit).
-        DatacenterCharacteristics characteristics = new DatacenterCharacteristics(
-                arch, os, vmm, hostList, time_zone, costPerSec, costPerMem, costPerStorage, costPerBw);
+		// 6. Finally, we need to create a PowerDatacenter object.
+		Datacenter datacenter = null;
 
-        // 6. Finally, we need to create a PowerDatacenter object.
-        Datacenter datacenter = null;
+		VmAllocationPolicy vm_policy = getVmAllocationPolicy(hostList, index);
+		datacenter = new Datacenter(name, characteristics, vm_policy, storageList, 0);
 
-        VmAllocationPolicy vm_policy = getVmAllocationPolicy(hostList, index);
-        datacenter = new Datacenter(name, characteristics, vm_policy, storageList, 0);
+		return datacenter;
+	}
 
-        return datacenter;
-    }
+	private List<DroneHost> createHosts(Element datacenterElement) {
+		// Here are the steps needed to create a PowerDatacenter:
+		// 1. We need to create a list to store one or more Machines
+		List<DroneHost> hostList = new ArrayList<DroneHost>();
 
-    private List<DroneHost> createHosts(Element datacenterElement) {
-        // Here are the steps needed to create a PowerDatacenter:
-        // 1. We need to create a list to store one or more Machines
-        List<DroneHost> hostList = new ArrayList<DroneHost>();
+		Element location = (Element) datacenterElement.getElementsByTagName("location").item(0);
+		String attractiveness = location.getElementsByTagName("attractiveness").item(0).getTextContent();
+		int wlan_id = Integer.parseInt(location.getElementsByTagName("wlan_id").item(0).getTextContent());
+		int x_pos = Integer.parseInt(location.getElementsByTagName("x_pos").item(0).getTextContent());
+		int y_pos = Integer.parseInt(location.getElementsByTagName("y_pos").item(0).getTextContent());
+		int placeTypeIndex = Integer.parseInt(attractiveness);
 
-        Element location = (Element) datacenterElement.getElementsByTagName("location").item(0);
-        String attractiveness = location.getElementsByTagName("attractiveness").item(0).getTextContent();
-        int wlan_id = Integer.parseInt(location.getElementsByTagName("wlan_id").item(0).getTextContent());
-        int x_pos = Integer.parseInt(location.getElementsByTagName("x_pos").item(0).getTextContent());
-        int y_pos = Integer.parseInt(location.getElementsByTagName("y_pos").item(0).getTextContent());
-        int placeTypeIndex = Integer.parseInt(attractiveness);
+		NodeList hostNodeList = datacenterElement.getElementsByTagName("host");
+		for (int j = 0; j < hostNodeList.getLength(); j++) {
+			Node hostNode = hostNodeList.item(j);
 
-        NodeList hostNodeList = datacenterElement.getElementsByTagName("host");
-        for (int j = 0; j < hostNodeList.getLength(); j++) {
-            Node hostNode = hostNodeList.item(j);
+			Element hostElement = (Element) hostNode;
+			int numOfCores = Integer.parseInt(hostElement.getElementsByTagName("core").item(0).getTextContent());
+			double mips = Double.parseDouble(hostElement.getElementsByTagName("mips").item(0).getTextContent());
+			int ram = Integer.parseInt(hostElement.getElementsByTagName("ram").item(0).getTextContent());
+			long storage = Long.parseLong(hostElement.getElementsByTagName("storage").item(0).getTextContent());
+			long bandwidth = SimSettings.getInstance().getWlanBandwidth() / hostNodeList.getLength();
+			int droneSpeed = Integer.parseInt(datacenterElement.getElementsByTagName("speed").item(0).getTextContent());
 
-            Element hostElement = (Element) hostNode;
-            int numOfCores = Integer.parseInt(hostElement.getElementsByTagName("core").item(0).getTextContent());
-            double mips = Double.parseDouble(hostElement.getElementsByTagName("mips").item(0).getTextContent());
-            int ram = Integer.parseInt(hostElement.getElementsByTagName("ram").item(0).getTextContent());
-            long storage = Long.parseLong(hostElement.getElementsByTagName("storage").item(0).getTextContent());
-            long bandwidth = SimSettings.getInstance().getWlanBandwidth() / hostNodeList.getLength();
-            int droneSpeed = Integer.parseInt(datacenterElement.getElementsByTagName("speed").item(0).getTextContent());
+			// 2. A Machine contains one or more PEs or CPUs/Cores. Therefore, should
+			// create a list to store these PEs before creating
+			// a Machine.
+			List<Pe> peList = new ArrayList<Pe>();
 
-            // 2. A Machine contains one or more PEs or CPUs/Cores. Therefore, should
-            //    create a list to store these PEs before creating
-            //    a Machine.
-            List<Pe> peList = new ArrayList<Pe>();
+			// 3. Create PEs and add these into the list.
+			// for a quad-core machine, a list of 4 PEs is required:
+			for (int i = 0; i < numOfCores; i++) {
+				peList.add(new Pe(i, new PeProvisionerSimple(mips))); // need to store Pe id and MIPS Rating
+			}
 
-            // 3. Create PEs and add these into the list.
-            //for a quad-core machine, a list of 4 PEs is required:
-            for (int i = 0; i < numOfCores; i++) {
-                peList.add(new Pe(i, new PeProvisionerSimple(mips))); // need to store Pe id and MIPS Rating
-            }
+			// 4. Create Hosts with its id and list of PEs and add them to the list of
+			// machines
+			DroneHost host = new DroneHost(hostIdCounter, new RamProvisionerSimple(ram),
+					new BwProvisionerSimple(bandwidth), // kbps
+					storage, peList, new VmSchedulerSpaceShared(peList), droneSpeed);
 
-            //4. Create Hosts with its id and list of PEs and add them to the list of machines
-            DroneHost host = new DroneHost(
-                    hostIdCounter,
-                    new RamProvisionerSimple(ram),
-                    new BwProvisionerSimple(bandwidth), //kbps
-                    storage,
-                    peList,
-                    new VmSchedulerSpaceShared(peList),
-                    droneSpeed
-            );
+			host.setPlace(new Location(placeTypeIndex, wlan_id, x_pos, y_pos));
+			hostList.add(host);
+			hostIdCounter++;
+		}
 
-            host.setPlace(new Location(placeTypeIndex, wlan_id, x_pos, y_pos));
-            hostList.add(host);
-            hostIdCounter++;
-        }
+		return hostList;
+	}
 
-        return hostList;
-    }
+	public void moveDronesToPopulatedAreas() {
+		// get the most populated area
+		List<TaskProperty> tasks = SimManager.getInstance().getLoadGeneratorModel().getTaskList();
+		int taskCount[] = new int[SimSettings.getInstance().getNumColumns() * SimSettings.getInstance().getNumRows()];
 
-    public void moveDronesToPopulatedAreas() {
-        // get the most populated area
-        List<TaskProperty> tasks = SimManager.getInstance().getLoadGeneratorModel().getTaskList();
-        int taskCount[] = new int[SimSettings.getInstance().getNumColumns() * SimSettings.getInstance().getNumRows()];
-        for (int i = 0; i < tasks.size(); i++){
-            Location loc = SimManager.getInstance().getMobilityModel().
-                    getLocation(tasks.get(i).getMobileDeviceId(), CloudSim.clock());
-            int WlanId = loc.getServingWlanId();
-            taskCount[WlanId]++;
-        }
-        int maxTaskCount = 0;
-        int maxWlan = 0;
-        int minWlan = 0;
-        for(int i=0; i<taskCount.length; i++)
-        {
-            minWlan = taskCount[i] < taskCount[minWlan] ? i : minWlan;
-            maxWlan = taskCount[i] > taskCount[maxWlan] ? i : maxWlan;
-            maxTaskCount = taskCount[maxWlan];
-        }
+		int droneCount[] = new int[SimSettings.getInstance().getNumColumns() * SimSettings.getInstance().getNumRows()];
+		int density[] = new int[SimSettings.getInstance().getNumColumns() * SimSettings.getInstance().getNumRows()];
+		// int density[] = new int[SimSettings.getInstance().getNumColumns() *
+		// SimSettings.getInstance().getNumRows()];
 
-        // get the number of drones inside the area
-        int dronesCount = 0;
-        for(int i=0; i<getDatacenterList().size(); i++)
-        {
-            int wlanId = ((DroneHost)(getDatacenterList().get(i).getHostList().get(0))).getLocation(CloudSim.clock()).getServingWlanId();
-            if(wlanId == maxWlan)
-                dronesCount++;
-        }
+		for (int i = 0; i < tasks.size(); i++) {
+			Location loc = SimManager.getInstance().getMobilityModel().getLocation(tasks.get(i).getMobileDeviceId(),
+					CloudSim.clock());
+			int WlanId = loc.getServingWlanId();
+			taskCount[WlanId]++;
+		}
 
-        // if there is fewer drones than one per ten tasks, move other drones here
-        //TODO: try other strategies
-        if(SimSettings.getInstance().getDronesMovementStrategy().equals("COUNT")) {
-            if (dronesCount < maxTaskCount / 50) {
-                // get least-populated area and move drone from there to here
-                for (int i = 0; i < getDatacenterList().size(); i++) {
-                    DroneHost host = (DroneHost) (getDatacenterList().get(i).getHostList().get(0));
-                    int wlanId = host.getLocation(CloudSim.clock()).getServingWlanId();
-                    double p = 0.5;
-                    // move neighbour drones to the maxWlan
-                    if(SimSettings.getInstance().checkNeighborCells(wlanId, minWlan))
-                        p = 0.8;
-                    else if (wlanId == minWlan)
-                        p = 0.7;
-                    host.moveToWlan(p, maxWlan);
-                }
-            }
-        } else if(SimSettings.getInstance().getDronesMovementStrategy().equals("UTILIZATION")) {
+		int maxTaskCount = 0;
+		int maxWlan = 0;
+		int minWlan = 0;
+		for (int i = 0; i < taskCount.length; i++) {
+			minWlan = taskCount[i] < taskCount[minWlan] ? i : minWlan;
+			maxWlan = taskCount[i] > taskCount[maxWlan] ? i : maxWlan;
+			maxTaskCount = taskCount[maxWlan];
+		}
 
-        }
-    }
+		// get the number of drones inside the area
+		int dronesCountInMaxWlan = 0;
+		for (int i = 0; i < getDatacenterList().size(); i++) {
+			int wlanId = ((DroneHost) (getDatacenterList().get(i).getHostList().get(0))).getLocation(CloudSim.clock())
+					.getServingWlanId();
+			if (wlanId == maxWlan)
+				dronesCountInMaxWlan++;
+		}
+
+		// --------------------------For Density ---------------------------------------
+		for (int i = 0; i < getDatacenterList().size(); i++) {
+			int wlanId = ((DroneHost) (getDatacenterList().get(i).getHostList().get(0))).getLocation(CloudSim.clock())
+					.getServingWlanId();
+			if ((wlanId >= 0) && (wlanId < droneCount.length)) {
+				droneCount[wlanId]++;
+			}
+		}
+
+		for (int i = 0; i < density.length; i++) {
+			if (taskCount[i] == 0) {
+				density[i] = 0;
+			} else {
+				if (droneCount[i] == 0) {
+					density[i] = (int) Double.POSITIVE_INFINITY;
+				} else {
+					density[i] = taskCount[i] / droneCount[i];
+				}
+			}
+		}
+
+		// -----------------------------------------------------------------------------
+
+		// if there is fewer drones than one per 50 tasks, move other drones here
+		// TODO: try other strategies
+		if (SimSettings.getInstance().getDronesMovementStrategy().equalsIgnoreCase("COUNT")) {
+			if (dronesCountInMaxWlan < maxTaskCount / 50) {
+				// get least-populated area and move drone from there to here
+				for (int i = 0; i < getDatacenterList().size(); i++) {
+					DroneHost host = (DroneHost) (getDatacenterList().get(i).getHostList().get(0));
+					int wlanId = host.getLocation(CloudSim.clock()).getServingWlanId();
+					double p = 0.5;
+					// move neighbour drones to the maxWlan
+					if (SimSettings.getInstance().checkNeighborCells(wlanId, minWlan))
+						p = 0.8;
+					else if (wlanId == minWlan)
+						p = 0.7;
+					host.moveToWlan(p, maxWlan);
+				}
+			}
+		} else if (SimSettings.getInstance().getDronesMovementStrategy().equalsIgnoreCase("DENSITY")) {
+
+			
+			int toMove = SimSettings.getInstance().getNumberofDronesToMove();//DRONES_TO_MOVE;
+			System.err.println(toMove + "================================");
+
+			int[] indexesOfTops = indexesOfTopN(density, toMove);
+			int[] indexesOfBottoms = indexesOfBottomN(density, toMove);
+
+			for (int j = 0; j < toMove; j++) {
+				for (int i = 0; i < getDatacenterList().size(); i++) {
+					DroneHost host = (DroneHost) (getDatacenterList().get(i).getHostList().get(0));
+					int wlanId = host.getLocation(CloudSim.clock()).getServingWlanId();
+
+					if (wlanId == indexesOfBottoms[j]) {
+						host.moveToWlan(1, indexesOfTops[j]);
+						System.err.println("moving from " + indexesOfBottoms[j] + "=============to===================" + indexesOfTops[j]);
+						break;
+					}
+				}
+			}
+
+		}
+	}
+
+//    public static void main(String[] args) {
+//        int[] arr = {1, 9, 5, 7, 9, 2, 4, 6, 8, 10};
+//        int[] indexes = indexesOfTopElements(arr,3);
+//        
+//        for(int i = 0; i < indexes.length; i++) {
+//            int index = indexes[i];
+//            System.out.println(index + " " + arr[index]);
+//        }
+//        
+//        int[] b = bottomN(arr, 3);
+//        for(int i = 0; i < b.length; i++) {
+//            int index = b[i];
+//            System.out.println(index + " " + arr[index]);
+//        }
+//    }
+
+	static int[] indexesOfTopN(final int[] input, final int n) {
+		int[] copy = Arrays.copyOf(input, input.length);
+		Arrays.sort(copy);
+
+		int[] honey = Arrays.copyOfRange(copy, copy.length - n, copy.length);
+		int[] result = new int[n];
+		int resultPos = 0;
+		for (int i = 0; i < input.length; i++) {
+			int onTrial = input[i];
+			int index = Arrays.binarySearch(honey, onTrial);
+			if (index < 0)
+				continue;
+			result[resultPos++] = i;
+		}
+		return result;
+	}
+
+	public static int[] indexesOfBottomN(final int[] input, final int n) {
+		return IntStream.range(0, input.length).boxed().sorted(Comparator.comparing(i -> input[i])).mapToInt(i -> i)
+				.limit(n).toArray();
+	}
+
 }
