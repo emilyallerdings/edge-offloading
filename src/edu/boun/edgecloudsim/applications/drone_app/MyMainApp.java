@@ -43,7 +43,7 @@ public class MyMainApp {
 		}
 		else {
 			SimLogger.printLine("Simulation setting file, output folder and iteration number are not provided! Using default ones...");
-			String configName = "default";
+			String configName = "weaker_drones";
 			configFile = "scripts/drone_app/config/" + configName + "/config.properties";
 			applicationsFile = "scripts/drone_app/config/" + configName + "/applications.xml";
 			edgeDevicesFile = "scripts/drone_app/config/" + configName + "/edge_devices.xml";
