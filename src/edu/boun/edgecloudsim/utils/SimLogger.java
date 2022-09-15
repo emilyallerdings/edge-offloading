@@ -429,6 +429,7 @@ public class SimLogger {
 			locationBW.write("time");
 			for (int jj = 0; jj < SimSettings.getInstance().getNumOfEdgeDatacenters(); jj++)
 				locationBW.write(SimSettings.DELIMITER + "num users in WLAN " + String.valueOf(jj));
+			locationBW.write("\n");
 			appendToFile(apUploadDelayBW, "time" + SimSettings.DELIMITER +
 					"app[0]" + SimSettings.DELIMITER +
 					"app[1]" + SimSettings.DELIMITER +

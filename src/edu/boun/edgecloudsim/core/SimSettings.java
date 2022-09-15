@@ -66,6 +66,10 @@ public class SimSettings {
 	public String getDronesMovementStrategy() {
 		return DRONES_MOVEMENT_STRATEGY;
 	}
+	
+	public int getNumberofDronesToMove() {
+		return DRONES_TO_MOVE;
+	}
 
 	//enumarations for the VM types
 	public static enum VM_TYPES { MOBILE_VM, EDGE_VM, CLOUD_VM, DRONE_VM }
@@ -135,6 +139,7 @@ public class SimSettings {
 	private int NUM_ROWS;
 
 	private String DRONES_MOVEMENT_STRATEGY;
+	private int DRONES_TO_MOVE;
 
 	// mean waiting time (minute) is stored for each place types
 	private double[] mobilityLookUpTable;
@@ -233,6 +238,7 @@ public class SimSettings {
 			NUM_ROWS = Integer.parseInt(prop.getProperty("num_rows", "0"));
 
 			DRONES_MOVEMENT_STRATEGY = prop.getProperty("drones_movement_strategy");
+			DRONES_TO_MOVE = Integer.parseInt(prop.getProperty("drones_to_move", "0")); ;
 
 			//avg waiting time in a place (min)
 			double place1_mean_waiting_time = Double.parseDouble(prop.getProperty("attractiveness_L1_mean_waiting_time"));

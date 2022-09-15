@@ -299,8 +299,8 @@ public class DroneServerManager {
 		} else if (SimSettings.getInstance().getDronesMovementStrategy().equalsIgnoreCase("DENSITY")) {
 
 			
-			int toMove = SimSettings.getInstance().getNumberofDronesToMove();//DRONES_TO_MOVE;
-			System.err.println(toMove + "================================");
+			int toMove = SimSettings.getInstance().getNumberofDronesToMove();
+//			System.err.println(toMove + "================================");
 
 			int[] indexesOfTops = indexesOfTopN(density, toMove);
 			int[] indexesOfBottoms = indexesOfBottomN(density, toMove);
@@ -312,7 +312,7 @@ public class DroneServerManager {
 
 					if (wlanId == indexesOfBottoms[j]) {
 						host.moveToWlan(1, indexesOfTops[j]);
-						System.err.println("moving from " + indexesOfBottoms[j] + "=============to===================" + indexesOfTops[j]);
+//						System.err.println("moving from " + indexesOfBottoms[j] + "=============to===================" + indexesOfTops[j]);
 						break;
 					}
 				}
