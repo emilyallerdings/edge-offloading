@@ -321,21 +321,6 @@ public class DroneServerManager {
 		}
 	}
 
-//    public static void main(String[] args) {
-//        int[] arr = {1, 9, 5, 7, 9, 2, 4, 6, 8, 10};
-//        int[] indexes = indexesOfTopElements(arr,3);
-//        
-//        for(int i = 0; i < indexes.length; i++) {
-//            int index = indexes[i];
-//            System.out.println(index + " " + arr[index]);
-//        }
-//        
-//        int[] b = bottomN(arr, 3);
-//        for(int i = 0; i < b.length; i++) {
-//            int index = b[i];
-//            System.out.println(index + " " + arr[index]);
-//        }
-//    }
 
 	static int[] indexesOfTopN(final int[] input, final int n) {
 		int[] copy = Arrays.copyOf(input, input.length);
