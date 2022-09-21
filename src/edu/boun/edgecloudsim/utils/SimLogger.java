@@ -370,9 +370,9 @@ public class SimLogger {
 			vmLoadList.add(new VmLoadLogItem(time, loadOnEdge, loadOnDrone, loadOnCloud, loadOnMobile));
 	}
 
-	public void addDroneLocationLog(int host, double time, int x, int y, int wlan, double vmutil) {
+	public void addDroneLocationLog(int host, double time, int x, int y, int wlan) {
 		if(SimSettings.getInstance().getLocationLogInterval() != 0)
-			droneLocationList.add(new DroneLocationLogItem(host, time, x, y, wlan, vmutil));
+			droneLocationList.add(new DroneLocationLogItem(host, time, x, y, wlan));
 	}
 
 	public void addApDelayLog(double time, double[] apUploadDelays, double[] apDownloadDelays) {
@@ -567,7 +567,7 @@ public class SimLogger {
 			droneLocBW = new BufferedWriter(droneLocFW);
 			appendToFile(droneLocBW, "host_id" + SimSettings.DELIMITER + "time" + SimSettings.DELIMITER + "x" + SimSettings.DELIMITER + "y" + SimSettings.DELIMITER + "wlan" + SimSettings.DELIMITER + "vmutil");
 			for (DroneLocationLogItem entry : droneLocationList) {
-				if (fileLogEnabled && SimSettings.getInstance().getVmLoadLogInterval() != 0)
+				if (fileLogEnabled && SimSettings.getInstance().getLocationLogInterval() != 0)
 					appendToFile(droneLocBW, entry.toString());
 			}
 			droneLocBW.close();
@@ -1003,15 +1003,13 @@ class DroneLocationLogItem {
 	private int x;
 	private int y;
 	private int wlan;
-	private double vmutil;
 
-	DroneLocationLogItem(int _host, double _time, int _x, int _y, int _wlan, double _vmutil) {
+	DroneLocationLogItem(int _host, double _time, int _x, int _y, int _wlan) {
 		host = _host;
 		time = _time;
 		x = _x;
 		y = _y;
 		wlan = _wlan;
-		vmutil = _vmutil;
 	}
 
 	public String toString() {
@@ -1019,8 +1017,7 @@ class DroneLocationLogItem {
 				SimSettings.DELIMITER + time +
 				SimSettings.DELIMITER + x +
 				SimSettings.DELIMITER + y +
-				SimSettings.DELIMITER + wlan +
-				SimSettings.DELIMITER + vmutil;
+				SimSettings.DELIMITER + wlan;
 	}
 }
 
