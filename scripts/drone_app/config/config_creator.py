@@ -4,6 +4,7 @@ import pandas as pd
 NUM_AREAS = 40
 NUM_ROWS = 5
 NUM_COLUMNS = 8
+NUM_DRONES_IN_AREA = 2
 NUM_VMS_PER_DEVICE = {"drones": 2, "edge_devices": 2}
 ARCH = {"drones": "x86", "edge_devices": "x86"}
 OS = {"drones": "Linux", "edge_devices": "Linux"}
@@ -15,7 +16,7 @@ ATTRACTIVNESS = {0: [0, 1, 2, 3, 4, 5, 6, 7, 8, 15, 16, 23, 24, 31, 32, 33, 34, 
                  2: [18, 19, 20, 21]}
 
 
-def getLocationInfo(col, idx):
+def getLocationInfo(idx):
     info = {}
 
     info["x_pos"] = (idx % NUM_COLUMNS) * 400 + 200
@@ -29,7 +30,7 @@ def getLocationInfo(col, idx):
         info["attractiveness"] = 1
     else:
         info["attractiveness"] = 2
-    return info[col]
+    return info
 
 
 count = {"edge_devices": NUM_AREAS, "drones": NUM_AREAS}
@@ -67,16 +68,17 @@ values.loc["drones"] = {
 for config in ["edge_devices", "drones"]:
     root = ET.Element(config)
     for i in range(count[config]):
-        # place 2 drones in each wlan
-        # for j in range(2 if config == "drones" else 1):
-            doc = ET.SubElement(root, "drone" if config ==
-                                "drones" else "datacenter", arch=ARCH[config], os=OS[config], vmm=VMM[config])
+        # place NUM_DRONES_IN_AREA drones in each wlan
+        for j in range(NUM_DRONES_IN_AREA if config == "drones" else 1):
+            doc = ET.SubElement(root, "drone" if config == "drones" else "datacenter", 
+                            arch=ARCH[config], os=OS[config], vmm=VMM[config])
             for c in ["costPerBw", "costPerSec", "costPerMem", "costPerStorage"]:
                 ET.SubElement(doc, c).text = str(values.loc[config][c])
 
             location = ET.SubElement(doc, 'location')
+            loc_info = getLocationInfo(i)
             for c in ["x_pos", "y_pos", "wlan_id", "attractiveness"]:
-                ET.SubElement(location, c).text = str(getLocationInfo(c, i))
+                ET.SubElement(location, c).text = str(loc_info[c])
 
             if config == "drones":
                 ET.SubElement(doc, 'speed').text = str(
