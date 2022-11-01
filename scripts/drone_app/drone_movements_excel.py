@@ -1,6 +1,7 @@
-import pandas as pd
-import time
 import os
+import csv
+import time
+import pandas as pd
 from tqdm import tqdm 
 
 CONFIG = 'default'
@@ -23,16 +24,9 @@ def get_drone(i, j, drones):
         str: string representation of a drone or an obstacle
     """
     output = ""
-    drone_cnt = 0
     for d in drones:
         if i > d['position'][0] and i-100 < d['position'][0] and j > d['position'][1] and j - 100 < d['position'][1]:
-            if drone_cnt:
-                output += ","
-            output += '{0:<2}'.format(int(d['id']))
-            drone_cnt += 1
-    if drone_cnt == 0:
-        output = '  '
-    
+            output += '#{}'.format(int(d['id']))
     return output
 
 def get_task(i, j, tasks):
@@ -50,29 +44,26 @@ def get_task(i, j, tasks):
         w = i // 400 + (j // 400) * NUM_COLUMNS
         return '~{0:<2}'.format(int(tasks[f'num users in WLAN {w}']))
     else:
-        return '   '
+        return ''
 
-def print_all(drones, tasks):
+def get_all(drones, tasks):
     """function for printing the whole board with the drones
 
     Args:
         drones (list): list of drones
     """
-    result = ""
+    
+    result = []
     for j in range(1, Y_BOUND+1, 100):
-        if (j-1) % 400 == 0:
-            result += 194 * "-"
+        row = []
         for i in range(1, X_BOUND+1, 100):
-            result += get_drone(i, j, drones) + get_task(i, j, tasks)
-            if (i-1) % 400 == 0:
-                result += "|"
-        result += "\n"
-    result += "\n"
+            row.append(get_drone(i, j, drones) + get_task(i, j, tasks))
+        result.append(row)
     return result
 
 
 iteration_folder = "ite1"
-for i in range(1800,1900,100):
+for i in range(100,1900,100):
     output = []
 
     drones_file = f"../../sim_results/{iteration_folder}/SIMRESULT_ITS_SCENARIO_AI_BASED_{i}DEVICES_DRONES_LOCATIONS.csv"
@@ -99,18 +90,16 @@ for i in range(1800,1900,100):
             else:
                 drones.append({'id':row['host_id'], 'position': [row['x'],row['y']]})
         
-        output.append({'time':t, 'resutl':print_all(drones, tasks)})
+        output.append({'time':t, 'result':get_all(drones, tasks)})
         drones_values = drones_values.loc[drones_values['time'] > t].copy()
 
-    for o in output:
-        print("time:", o['time'])
-        print("num devices:", i)
 
-        print(o['resutl'])
+    with open(f'output_{i:d}_devices.csv','w') as f:
+        f.write('time\n')
+        for o in output:
+            f.write(str(o['time']))
+            f.write('\n')
 
-        time.sleep(0.3)  # wait for 0.1 seconds so the printed board is visible
-        # clear the screan each time so the movements seem continuous. Use os.system('clear') for linux and macos and os.system('cls') for windows
-        # input()
-        # os.system('clear') #os.system('cls')
-    
-    # input(f"Finished for {i} devices! Press any key for {i+100} devices:")
+            for l in o['result']:
+                f.write(",".join(l))
+                f.write('\n')
