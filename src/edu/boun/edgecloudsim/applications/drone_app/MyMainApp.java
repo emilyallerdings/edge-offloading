@@ -20,7 +20,7 @@ public class MyMainApp {
 	/**
 	 * Creates main() to run this example
 	 */
-	static String configName = "default";
+	static String configName = "more_drones";
 	static String  wekaModelsFolder = "scripts/drone_app/config/weka/" + configName + "/";
 	
 	public static void main(String[] args) {
@@ -48,8 +48,7 @@ public class MyMainApp {
 		}
 		else {
 			SimLogger.printLine("Simulation setting file, output folder and iteration number are not provided! Using default ones...");
-//			String configName = "weaker_drones";
-			
+
 			configFile = "scripts/drone_app/config/" + configName + "/config.properties";
 			applicationsFile = "scripts/drone_app/config/" + configName + "/applications.xml";
 			edgeDevicesFile = "scripts/drone_app/config/" + configName + "/edge_devices.xml";
@@ -71,17 +70,17 @@ public class MyMainApp {
 
 		if (Arrays.asList(SS.getOrchestratorPolicies()).contains("AI_BASED")) {
 			
-			WekaWrapper.getInstance().initialize("MultilayerPerceptron", "LinearRegression", wekaModelsFolder);
+			WekaWrapper.getInstance().initialize("MultilayerPerceptron", "LinearRegression", wekaModelsFolder, configName);
 //			WekaWrapper.getInstance().initialize("NaiveBayes", "LinearRegression", wekaModelsFolder);
 //			WekaWrapper.getInstance(wekaModelsFolder).initialize("SMO", "LinearRegression", wekaModelsFolder);
 		}
 
 //      To run the experiments in a loop for all iterations
-		for (int itNum = 1; itNum <= iterationNumber; iterationNumber++) {
-			//outputFolder = "sim_results/ite" + itNum;
+		for (int itNum = 1; itNum <= iterationNumber; itNum++) {
+			outputFolder = "sim_results/ite" + itNum;
 			if(SS.getFileLoggingEnabled()){
-//				SimUtils.cleanOutputFolder(outputFolder);
-//				SimLogger.enableFileLog();
+				SimUtils.cleanOutputFolder(outputFolder);
+				SimLogger.enableFileLog();
 			}
 			for (int i = SS.getMinNumOfMobileDev(); i <= SS.getMaxNumOfMobileDev(); i += SS.getMobileDevCounterSize())
 				for (int s = 0; s < SS.getSimulationScenarios().length; s++)
