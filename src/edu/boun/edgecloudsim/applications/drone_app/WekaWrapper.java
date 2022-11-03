@@ -84,15 +84,14 @@ public class WekaWrapper {
 	public static WekaWrapper getInstance() {
 		if(singleton == null) {
 			singleton = new WekaWrapper();
-			readStat();
 			return singleton;
-		}else{
+		} else {
 			return singleton;
 		}
 		
 	}
 
-	private static void readStat() {
+	private static void readStat(String config) {
 //		String dataPath = "";
 //		String statFilePath = "";
 //		JSONParser parser = new JSONParser();
@@ -105,7 +104,7 @@ public class WekaWrapper {
 //			System.exit(1);
 //		}
 		String dataPath = "./sim_results";
-		statFilePath = "scripts/drone_app/config/weka/stat.txt";
+		statFilePath = "scripts/drone_app/config/weka/" + config + "/stat.txt";
 
 		
 		arrays.add(EDGE_CLASSIFIER_MEAN_VALS);
@@ -154,8 +153,9 @@ public class WekaWrapper {
 	 * 
 	 * Possible Values for RegressionType: - LinearRegression - SMOreg
 	 */
-	public void initialize(String ClassifierType, String RegressionType, String ModelFolder) {
+	public void initialize(String ClassifierType, String RegressionType, String ModelFolder, String config) {
 		try {
+			readStat(config);
 			if (ClassifierType.equals("NaiveBayes")) {
 				classifier_edge = (NaiveBayes) weka.core.SerializationHelper.read(ModelFolder + "nb_edge.model");
 				classifier_drone = (NaiveBayes) weka.core.SerializationHelper.read(ModelFolder + "nb_drone.model");

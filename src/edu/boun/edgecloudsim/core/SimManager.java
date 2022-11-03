@@ -223,16 +223,16 @@ public class SimManager extends SimEntity {
 		for (int i = 0; i < loadGeneratorModel.getTaskList().size(); i++)
 			schedule(getId(), loadGeneratorModel.getTaskList().get(i).getStartTime(), CREATE_TASK, loadGeneratorModel.getTaskList().get(i));
 
-		// Creation of drone moves
-		// change 100 to change the movement interval
-		if(!SimSettings.getInstance().getDronesMovementStrategy().equalsIgnoreCase("NONE"))
-			schedule(getId(), SimSettings.getInstance().getSimulationTime() / 100, MOVE_DRONES);
-
 		//Periodic event loops starts from here!
 		schedule(getId(), 5, CHECK_ALL_VM);
 		schedule(getId(), SimSettings.getInstance().getSimulationTime() / 100, PRINT_PROGRESS);
 		schedule(getId(), SimSettings.getInstance().getVmLoadLogInterval(), GET_LOAD_LOG);
 		schedule(getId(), SimSettings.getInstance().getSimulationTime(), STOP_SIMULATION);
+
+		// Creation of drone moves
+		// change 100 to change the movement interval
+		if(!SimSettings.getInstance().getDronesMovementStrategy().equalsIgnoreCase("NONE"))
+			schedule(getId(), SimSettings.getInstance().getSimulationTime() / 100, MOVE_DRONES);
 
 		SimLogger.printLine("Done.");
 	}
@@ -272,6 +272,11 @@ public class SimManager extends SimEntity {
 
 					schedule(getId(), SimSettings.getInstance().getVmLoadLogInterval(), GET_LOAD_LOG);
 					break;
+				case MOVE_DRONES:
+					getInstance().getDroneServerManager().moveDronesToPopulatedAreas();
+					if (CloudSim.clock() < SimSettings.getInstance().getSimulationTime())
+						schedule(getId(), SimSettings.getInstance().getSimulationTime() / 100, MOVE_DRONES);
+					break;
 				case PRINT_PROGRESS:
 					int progress = (int) ((CloudSim.clock() * 100) / SimSettings.getInstance().getSimulationTime());
 					if (progress % 10 == 0)
@@ -281,9 +286,6 @@ public class SimManager extends SimEntity {
 					if (CloudSim.clock() < SimSettings.getInstance().getSimulationTime())
 						schedule(getId(), SimSettings.getInstance().getSimulationTime() / 100, PRINT_PROGRESS);
 
-					break;
-				case MOVE_DRONES:
-					getInstance().getDroneServerManager().moveDronesToPopulatedAreas();
 					break;
 				case STOP_SIMULATION:
 					SimLogger.printLine("100");
