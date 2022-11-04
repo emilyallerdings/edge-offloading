@@ -431,13 +431,13 @@ public class SimLogger {
 				locationBW.write(SimSettings.DELIMITER + "num users in WLAN " + String.valueOf(jj));
 			locationBW.write("\n");
 			appendToFile(apUploadDelayBW, "time" + SimSettings.DELIMITER +
-					"app[0]" + SimSettings.DELIMITER +
-					"app[1]" + SimSettings.DELIMITER +
-					"app[2]");
+					"attr=0" + SimSettings.DELIMITER +
+					"attr=1" + SimSettings.DELIMITER +
+					"attr=2");
 			appendToFile(apDownloadDelayBW, "time" + SimSettings.DELIMITER +
-					"app[0]" + SimSettings.DELIMITER +
-					"app[1]" + SimSettings.DELIMITER +
-					"app[2]");
+					"attr=0" + SimSettings.DELIMITER +
+					"attr=1" + SimSettings.DELIMITER +
+					"attr=2");
 		}
 
 		//the tasks in the map are not completed yet!

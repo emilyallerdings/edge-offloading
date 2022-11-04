@@ -22,6 +22,7 @@ import java.util.Properties;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import edu.boun.edgecloudsim.utils.SimUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -38,16 +39,14 @@ public class SimSettings {
 
 	public int getPlaceTypeIndex(int Wlan) {
 		int placeTypeIndex = 0;
-		// int[] att0 = new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 15, 16, 23, 24, 31, 32, 33, 34, 35, 36, 37, 38, 39};
-		int[] att1 = new int[]{9, 10, 11, 12, 13, 14, 17, 22, 23, 24, 25, 26, 27, 28, 29, 30};
-		int[] att2 = new int[]{18, 19, 20, 21};
-		for (int i = 0; i < att1.length; i++)
-			if (Wlan == att1[i]) {
+
+		for (int i = 0; i < ATTRACTIVENESS_1_INDICES.length; i++)
+			if (Wlan == ATTRACTIVENESS_1_INDICES[i]) {
 				placeTypeIndex = 1;
 				break;
 			}
-		for (int i = 0; i < att2.length; i++)
-			if (Wlan == att2[i]) {
+		for (int i = 0; i < ATTRACTIVENESS_2_INDICES.length; i++)
+			if (Wlan == ATTRACTIVENESS_2_INDICES[i]) {
 				placeTypeIndex = 2;
 				break;
 			}
@@ -144,6 +143,10 @@ public class SimSettings {
 	// mean waiting time (minute) is stored for each place types
 	private double[] mobilityLookUpTable;
 
+	private int[] ATTRACTIVENESS_0_INDICES;
+	private int[] ATTRACTIVENESS_1_INDICES;
+	private int[] ATTRACTIVENESS_2_INDICES;
+
 	// following values are stored for each applications defined in applications.xml
 	// [0] usage percentage (%)
 	// [1] prob. of selecting cloud (%)
@@ -239,6 +242,21 @@ public class SimSettings {
 
 			DRONES_MOVEMENT_STRATEGY = prop.getProperty("drones_movement_strategy");
 			DRONES_TO_MOVE = Integer.parseInt(prop.getProperty("drones_to_move", "0")); ;
+
+			String[] attrs = prop.getProperty("att0").split(",");
+			ATTRACTIVENESS_0_INDICES = new int[attrs.length];
+			for(int j=0; j<attrs.length; j++)
+				ATTRACTIVENESS_0_INDICES[j] = Integer.valueOf(attrs[j]);
+
+			attrs = prop.getProperty("att1").split(",");
+			ATTRACTIVENESS_1_INDICES = new int[attrs.length];
+			for(int j=0; j<attrs.length; j++)
+				ATTRACTIVENESS_1_INDICES[j] = Integer.valueOf(attrs[j]);
+
+			attrs = prop.getProperty("att2").split(",");
+			ATTRACTIVENESS_2_INDICES = new int[attrs.length];
+			for(int j=0; j<attrs.length; j++)
+				ATTRACTIVENESS_2_INDICES[j] = Integer.valueOf(attrs[j]);
 
 			//avg waiting time in a place (min)
 			double place1_mean_waiting_time = Double.parseDouble(prop.getProperty("attractiveness_L1_mean_waiting_time"));
@@ -851,5 +869,14 @@ public class SimSettings {
 			e.printStackTrace();
 			System.exit(1);
 		}
+	}
+
+	public int[] getRandomAttrIndices() {
+		int[] indices = new int[3];
+		indices[0] = ATTRACTIVENESS_0_INDICES[SimUtils.getRandomNumber(0, ATTRACTIVENESS_0_INDICES.length - 1)];
+		indices[1] = ATTRACTIVENESS_1_INDICES[SimUtils.getRandomNumber(0, ATTRACTIVENESS_1_INDICES.length - 1)];
+		indices[2] = ATTRACTIVENESS_2_INDICES[SimUtils.getRandomNumber(0, ATTRACTIVENESS_2_INDICES.length - 1)];
+
+		return indices;
 	}
 }

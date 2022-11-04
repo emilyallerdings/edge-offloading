@@ -198,7 +198,7 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 				break;
 			}
 			case SET_DELAY_LOG: {
-				int[] indices = {0, 4, 8};
+				int[] indices = SimSettings.getInstance().getRandomAttrIndices();
 				double apUploadDelays[] = new double[indices.length];
 				double apDownloadDelays[] = new double[indices.length];
 				for (int i = 0; i < indices.length; i++) {

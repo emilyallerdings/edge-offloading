@@ -25,7 +25,7 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 
 	private int cloudVmCounter;
 	private int edgeVmCounter;
-	private int droneVmCounter;
+//	private int droneVmCounter;
 	private int numOfMobileDevice;
 
 	private OrchestratorStatisticLogger statisticLogger;
@@ -43,7 +43,7 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 	public void initialize() {
 		cloudVmCounter = 0;
 		edgeVmCounter = 0;
-		droneVmCounter = 0;
+//		droneVmCounter = 0;
 
 		statisticLogger = new OrchestratorStatisticLogger();
 		trainerLogger = new OrchestratorTrainerLogger();
@@ -360,19 +360,19 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 			edgeVmCounter++;
 			edgeVmCounter = edgeVmCounter % numOfEdgeVMs;
 		} else if (deviceId == DRONE_DATACENTER) {
-			int numOfDroneVMs = SimSettings.getInstance().getNumOfDroneVMs();
-			int numOfDroneHosts = SimSettings.getInstance().getNumOfDroneHosts();
-			int vmPerHost = numOfDroneVMs / numOfDroneHosts;
+//			int numOfDroneVMs = SimSettings.getInstance().getNumOfDroneVMs();
+//			int numOfDroneHosts = SimSettings.getInstance().getNumOfDroneHosts();
+//			int vmPerHost = numOfDroneVMs / numOfDroneHosts;
+//
+//			int hostIndex = (droneVmCounter / vmPerHost) % numOfDroneHosts;
+//			int vmIndex = droneVmCounter % vmPerHost;
 
-			int hostIndex = (droneVmCounter / vmPerHost) % numOfDroneHosts;
-			int vmIndex = droneVmCounter % vmPerHost;
+			DroneHost host = ((MyMobilityModel) (SimManager.getInstance().getMobilityModel())).getClosestDrone(task.getMobileDeviceId());
 
-//			DroneHost host = ((MyMobilityModel) (SimManager.getInstance().getMobilityModel())).getClosestDrone(task.getMobileDeviceId());
+			selectedVM = host.getVmList().get(0);
 
-			selectedVM = SimManager.getInstance().getDroneServerManager().getVmList(hostIndex).get(vmIndex);
-
-			droneVmCounter++;
-			droneVmCounter = droneVmCounter % numOfDroneVMs;
+//			droneVmCounter++;
+//			droneVmCounter = droneVmCounter % numOfDroneVMs;
 		} else {
 			SimLogger.printLine("Unknow device id! Terminating simulation...");
 			System.exit(1);

@@ -52,14 +52,24 @@ public class MyMobilityModel extends MobilityModel {
 		for (int i = 0; i < SimManager.getInstance().getDroneServerManager().getDatacenterList().size(); i++) {
 			List<? extends DroneHost> list = SimManager.getInstance().getDroneServerManager().getDatacenterList().get(i).getHostList();
 			Location hostLoc = list.get(j).getLocation(CloudSim.clock());
-			if (SimSettings.getInstance().checkNeighborCells(hostLoc.getServingWlanId(), deviceLoc.getServingWlanId())) {
+			if (hostLoc.getServingWlanId() == deviceLoc.getServingWlanId()) {
 				host = list.get(j);
 				break;
-			} else {
-				double dist = Math.sqrt(Math.pow((hostLoc.getXPos() - deviceLoc.getXPos()), 2) + Math.pow((hostLoc.getYPos() - deviceLoc.getYPos()), 2));
-				if (dist < minDist) {
-					minDist = dist;
+			}
+		}
+		if(host == null) {
+			for (int i = 0; i < SimManager.getInstance().getDroneServerManager().getDatacenterList().size(); i++) {
+				List<? extends DroneHost> list = SimManager.getInstance().getDroneServerManager().getDatacenterList().get(i).getHostList();
+				Location hostLoc = list.get(j).getLocation(CloudSim.clock());
+				if (SimSettings.getInstance().checkNeighborCells(hostLoc.getServingWlanId(), deviceLoc.getServingWlanId())) {
 					host = list.get(j);
+					break;
+				} else {
+					double dist = Math.sqrt(Math.pow((hostLoc.getXPos() - deviceLoc.getXPos()), 2) + Math.pow((hostLoc.getYPos() - deviceLoc.getYPos()), 2));
+					if (dist < minDist) {
+						minDist = dist;
+						host = list.get(j);
+					}
 				}
 			}
 		}
