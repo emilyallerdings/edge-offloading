@@ -7,9 +7,9 @@ mobile_device_counter_size=100
 
 echo "=========================================="
 echo "Here are the configuration parameters used in this script. If needed, please update them:"
-echo "min_number_of_mobile_devices: "$min_number_of_mobile_devices
-echo "max_number_of_mobile_devices: "$max_number_of_mobile_devices
-echo "mobile_device_counter_size: "$mobile_device_counter_size
+echo "min_number_of_mobile_devices: 100"$min_number_of_mobile_devices
+echo "max_number_of_mobile_devices: 1800"$max_number_of_mobile_devices
+echo "mobile_device_counter_size: 100"$mobile_device_counter_size
 echo "------------------------------------------"
 echo "WARNING: The concatenated files except for ALL_APPS_GENERIC.csv are not in order."
 echo "=========================================="

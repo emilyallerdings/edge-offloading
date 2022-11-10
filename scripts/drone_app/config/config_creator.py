@@ -1,9 +1,9 @@
 import xml.etree.cElementTree as ET
 import pandas as pd
 
-NUM_AREAS = 40
-NUM_ROWS = 5
-NUM_COLUMNS = 8
+NUM_AREAS = 4
+NUM_ROWS = 2
+NUM_COLUMNS = 2
 NUM_DRONES_IN_AREA = 2
 NUM_VMS_PER_DEVICE = {"drones": 2, "edge_devices": 2}
 ARCH = {"drones": "x86", "edge_devices": "x86"}

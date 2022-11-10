@@ -34,7 +34,7 @@ public class WekaModelCreator {
             JSONObject jsonObject = (JSONObject)object;
             
             //Reading the String
-            dataPath = (String) jsonObject.get("sim_result_folder");
+            dataPath = (String) jsonObject.get("arff_foder") + (String) jsonObject.get("config_name");
             classifier = (String) jsonObject.get("classifier");
             regressor = (String) jsonObject.get("regressor");
         }

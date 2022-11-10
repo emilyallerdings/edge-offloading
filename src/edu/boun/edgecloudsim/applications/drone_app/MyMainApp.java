@@ -30,7 +30,7 @@ public class MyMainApp {
 		//enable console output and file output of this application
 		SimLogger.enablePrintLog();
 
-		int iterationNumber = 1;
+		int iterationNumber = 5;
 		String configFile = "";
 		String outputFolder = "";
 		String edgeDevicesFile = "";
@@ -71,11 +71,10 @@ public class MyMainApp {
 		if (Arrays.asList(SS.getOrchestratorPolicies()).contains("AI_BASED")) {
 			
 			WekaWrapper.getInstance().initialize("MultilayerPerceptron", "LinearRegression", wekaModelsFolder, configName);
-//			WekaWrapper.getInstance().initialize("NaiveBayes", "LinearRegression", wekaModelsFolder);
-//			WekaWrapper.getInstance(wekaModelsFolder).initialize("SMO", "LinearRegression", wekaModelsFolder);
+//			WekaWrapper.getInstance().initialize("NaiveBayes", "SMOreg", wekaModelsFolder, configName);
 		}
 
-//      To run the experiments in a loop for all iterations
+		// To run the experiments in a loop for all iterations
 		for (int itNum = 1; itNum <= iterationNumber; itNum++) {
 			outputFolder = "sim_results/ite" + itNum;
 			if(SS.getFileLoggingEnabled()){
@@ -100,7 +99,7 @@ public class MyMainApp {
 		SimSettings SS = SimSettings.getInstance();
 
 		SimLogger.printLine("Scenario started at " + now);
-		SimLogger.printLine("Scenario: " + simulationScenario + " - Policy: " + orchestratorPolicy + " - #iteration: " + iterationNumber);
+		SimLogger.printLine("Scenario: " + simulationScenario + " - Policy: " + orchestratorPolicy + " - #iteration: " + iterationNumber + " - Drones movement strategy: " + SimSettings.getInstance().getDronesMovementStrategy());
 		SimLogger.printLine("Duration: " + SS.getSimulationTime()/60 + " min (warm up period: "+ SS.getWarmUpPeriod()/60 +" min) - #devices: " + numOfMobileDevice);
 		SimLogger.getInstance().simStarted(outputFolder, "SIMRESULT_" + simulationScenario + "_"  + orchestratorPolicy + "_" + numOfMobileDevice + "DEVICES");
 

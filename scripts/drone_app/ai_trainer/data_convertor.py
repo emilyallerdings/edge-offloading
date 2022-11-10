@@ -16,8 +16,10 @@ datatype = sys.argv[4]
 
 print("conversion started with args " + target + ", " + method + ", " + datatype)
 
+output_path = data['arff_foder'] + data['config_name'] + "/"
+
 sim_result_folder = data["sim_result_folder"]
-statFilePath = "../config/weka/stat.txt"
+statFilePath = output_path + "stat.txt"
  
 num_iterations = data["num_iterations"]
 train_data_ratio = data["train_data_ratio"]
@@ -134,7 +136,7 @@ for column in targetColumns:
     else:
         df[column] = znorm(data_set[column])
 
-f = open(sim_result_folder + "/" + target + "_" + method + "_" + datatype + ".arff", 'w')
+f = open(output_path + target + "_" + method + "_" + datatype + ".arff", 'w')
 f.write('@relation ' + target + '\n\n')
 for column in targetColumns:
     if column == 'Result':

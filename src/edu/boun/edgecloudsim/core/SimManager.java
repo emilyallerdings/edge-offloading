@@ -275,7 +275,7 @@ public class SimManager extends SimEntity {
 				case MOVE_DRONES:
 					getInstance().getDroneServerManager().moveDronesToPopulatedAreas();
 					if (CloudSim.clock() < SimSettings.getInstance().getSimulationTime())
-						schedule(getId(), SimSettings.getInstance().getSimulationTime() / 100, MOVE_DRONES);
+						schedule(getId(), SimSettings.getInstance().getSimulationTime() / 20, MOVE_DRONES);
 					break;
 				case PRINT_PROGRESS:
 					int progress = (int) ((CloudSim.clock() * 100) / SimSettings.getInstance().getSimulationTime());

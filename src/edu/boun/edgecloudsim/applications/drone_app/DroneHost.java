@@ -63,9 +63,9 @@ public class DroneHost extends Host {
 
     public int moveToWlan(double prob, int wlan) {
         if(SimUtils.getRandomDoubleNumber(0,1) < prob) {
-            System.err.println("moving from " + this.getLocation().getServingWlanId() + " to " + wlan + " with probability " + prob);
+//            System.err.println("\n" + this.getLocation().getServingWlanId() + " --> " + wlan);
             this.destination = wlan;
-            return wlan;
+            return this.location.getServingWlanId();
         }
         else
             return -1;
