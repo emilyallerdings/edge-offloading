@@ -227,9 +227,6 @@ public class DroneServerManager {
 		List<TaskProperty> tasks = SimManager.getInstance().getLoadGeneratorModel().getTaskList();
 		int taskCount[] = new int[SimSettings.getInstance().getNumColumns() * SimSettings.getInstance().getNumRows()];
 
-		int droneCount[] = new int[SimSettings.getInstance().getNumColumns() * SimSettings.getInstance().getNumRows()];
-		int density[] = new int[SimSettings.getInstance().getNumColumns() * SimSettings.getInstance().getNumRows()];
-
 		for (int i = 0; i < tasks.size(); i++) {
 			Location loc = SimManager.getInstance().getMobilityModel().getLocation(tasks.get(i).getMobileDeviceId(),
 					CloudSim.clock());
@@ -237,26 +234,7 @@ public class DroneServerManager {
 			taskCount[WlanId]++;
 		}
 
-		for (int i = 0; i < getDatacenterList().size(); i++) {
 
-			int wlanId = ((DroneHost) (getDatacenterList().get(i).getHostList().get(0))).getLocation(CloudSim.clock())
-					.getServingWlanId();
-			if ((wlanId >= 0) && (wlanId < droneCount.length)) {
-				droneCount[wlanId]++;
-			}
-		}
-
-		for (int i = 0; i < density.length; i++) {
-			if (taskCount[i] == 0) {
-				density[i] = 0;
-			} else {
-				if (droneCount[i] == 0) {
-					density[i] = (int) Double.POSITIVE_INFINITY;
-				} else {
-					density[i] = taskCount[i] / droneCount[i];
-				}
-			}
-		}
 		// if there is fewer drones than one per 50 tasks, move other drones here
 		if (SimSettings.getInstance().getDronesMovementStrategy().equalsIgnoreCase("COUNT")) {
 			int maxWlan = 0;
@@ -285,13 +263,34 @@ public class DroneServerManager {
 				}
 			}
 		} else if (SimSettings.getInstance().getDronesMovementStrategy().equalsIgnoreCase("DENSITY")) {
+			int droneCount[] = new int[SimSettings.getInstance().getNumColumns() * SimSettings.getInstance().getNumRows()];
+			int density[] = new int[SimSettings.getInstance().getNumColumns() * SimSettings.getInstance().getNumRows()];
 
+			for (int i = 0; i < getDatacenterList().size(); i++) {
+
+				int wlanId = ((DroneHost) (getDatacenterList().get(i).getHostList().get(0))).getLocation(CloudSim.clock())
+						.getServingWlanId();
+				if ((wlanId >= 0) && (wlanId < droneCount.length)) {
+					droneCount[wlanId]++;
+				}
+			}
+
+			for (int i = 0; i < density.length; i++) {
+				if (taskCount[i] == 0) {
+					density[i] = 0;
+				} else {
+					if (droneCount[i] == 0) {
+						density[i] = (int) Double.POSITIVE_INFINITY;
+					} else {
+						density[i] = taskCount[i] / droneCount[i];
+					}
+				}
+			}
 			int toMove = SimSettings.getInstance().getNumberofDronesToMove();
 			int[] indexesOfTops;
 			int[] indexesOfBottoms;
 
 			indexesOfTops = indexesOfTopN(density, toMove);
-//			indexesOfBottoms = indexesOfBottomN(density, toMove);
 			indexesOfBottoms = indexesOfBottomNWithPositiveDroneCount(density, 0, droneCount, toMove);
 
 
@@ -303,8 +302,6 @@ public class DroneServerManager {
 
 					if (wlanId == indexesOfBottoms[j]) {
 						host.moveToWlan(1, indexesOfTops[j]);
-
-//						System.err.println("Moving from " + indexesOfBottoms[j] + "=============to==================="+ indexesOfTops[j]);
 						break;
 					}
 				}
@@ -336,13 +333,13 @@ public class DroneServerManager {
 	public static int[] indexesOfBottomNWithPositiveDroneCount(int[] density, int limit, int[] droneCount, final int n) {
 		//finds n areas with the lowest density. Areas must have at least 'limit' number of drones to be selected.
 
-		int[] res = {-1, -1};
-		int tmp = -1;
+		int[] res = new int[n];
+		int tmp;
 		int[] densityCopy = Arrays.copyOf(density, density.length);
 		int[] droneCopy = Arrays.copyOf(droneCount, droneCount.length);
 
 		for (int i = 0; i < n; i++) {
-			tmp = -1;
+			res[i] = -1;
 			tmp = posOfSmallestElementGtOeT(densityCopy, limit, droneCopy);
 			if ((tmp > -1) && (tmp < density.length)) {
 				if (densityCopy[tmp] != Integer.MAX_VALUE) {
