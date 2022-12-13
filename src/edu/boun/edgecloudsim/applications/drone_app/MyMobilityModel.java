@@ -49,6 +49,7 @@ public class MyMobilityModel extends MobilityModel {
 		Location deviceLoc = SimManager.getInstance().getMobilityModel().getLocation(mobileID, CloudSim.clock());
 		int j = 0;
 
+		//TODO: choose host randomly within a wlan
 		for (int i = 0; i < SimManager.getInstance().getDroneServerManager().getDatacenterList().size(); i++) {
 			List<? extends DroneHost> list = SimManager.getInstance().getDroneServerManager().getDatacenterList().get(i).getHostList();
 			Location hostLoc = list.get(j).getLocation(CloudSim.clock());

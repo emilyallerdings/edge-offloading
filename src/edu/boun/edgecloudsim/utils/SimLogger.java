@@ -370,9 +370,9 @@ public class SimLogger {
 			vmLoadList.add(new VmLoadLogItem(time, loadOnEdge, loadOnDrone, loadOnCloud, loadOnMobile));
 	}
 
-	public void addDroneLocationLog(int host, double time, int x, int y, int wlan) {
+	public void addDroneLocationLog(int host, double time, int x, int y, int wlan, double util) {
 		if(SimSettings.getInstance().getLocationLogInterval() != 0)
-			droneLocationList.add(new DroneLocationLogItem(host, time, x, y, wlan));
+			droneLocationList.add(new DroneLocationLogItem(host, time, x, y, wlan, util));
 	}
 
 	public void addApDelayLog(double time, double[] apUploadDelays, double[] apDownloadDelays) {
@@ -1003,13 +1003,15 @@ class DroneLocationLogItem {
 	private int x;
 	private int y;
 	private int wlan;
+	private double util;
 
-	DroneLocationLogItem(int _host, double _time, int _x, int _y, int _wlan) {
+	DroneLocationLogItem(int _host, double _time, int _x, int _y, int _wlan, double _util) {
 		host = _host;
 		time = _time;
 		x = _x;
 		y = _y;
 		wlan = _wlan;
+		util = _util;
 	}
 
 	public String toString() {
@@ -1017,7 +1019,8 @@ class DroneLocationLogItem {
 				SimSettings.DELIMITER + time +
 				SimSettings.DELIMITER + x +
 				SimSettings.DELIMITER + y +
-				SimSettings.DELIMITER + wlan;
+				SimSettings.DELIMITER + wlan +
+				SimSettings.DELIMITER + util;
 	}
 }
 

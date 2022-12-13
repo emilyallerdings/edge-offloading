@@ -25,7 +25,6 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 
 	private int cloudVmCounter;
 	private int edgeVmCounter;
-//	private int droneVmCounter;
 	private int numOfMobileDevice;
 
 	private OrchestratorStatisticLogger statisticLogger;
@@ -43,7 +42,6 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 	public void initialize() {
 		cloudVmCounter = 0;
 		edgeVmCounter = 0;
-//		droneVmCounter = 0;
 
 		statisticLogger = new OrchestratorStatisticLogger();
 		trainerLogger = new OrchestratorTrainerLogger();
@@ -134,7 +132,6 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 						new double[]{task.getCloudletLength(), avgEdgeUtilization});
 
 			if (predictedResultForDrone)
-				//TODO: should create model again after changing the VM specs for drones.
 				predictedServiceTimeForDrone = weka.handleRegression(DRONE_DATACENTER,
 						new double[]{task.getCloudletLength(), avgDroneUtilization});
 
@@ -215,7 +212,8 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 				SimLogger.printLine("Unexpected probability calculation for AI based orchestrator! Terminating simulation...");
 				System.exit(1);
 			}
-		} else if(policy.equals("RANDOM")){
+		}
+		else if(policy.equals("RANDOM")){
 			double probabilities[] = {0.25, 0.25, 0.25, 0.25};
 
 			double randomNumber = SimUtils.getRandomDoubleNumber(0, 1);
@@ -238,7 +236,7 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 		}
 		else if (policy.equals("MAB")) {
 			if (!MAB.isInitialized()) {
-				double expectedProcessingDealyOnCloud = task.getCloudletLength() /
+				double expectedProcessingDelayOnCloud = task.getCloudletLength() /
 						SimSettings.getInstance().getMipsForCloudVM();
 
 				//All Edge VMs are identical, just get MIPS value from the first VM
@@ -251,8 +249,8 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 
 				double[] expectedDelays = {
 						wlanUploadDelay + wlanDownloadDelay + expectedProcessingDelayOnEdge,
-						wanUploadDelay + wanDownloadDelay + expectedProcessingDealyOnCloud,
-						gsmUploadDelay + gsmDownloadDelay + expectedProcessingDealyOnCloud,
+						wanUploadDelay + wanDownloadDelay + expectedProcessingDelayOnCloud,
+						gsmUploadDelay + gsmDownloadDelay + expectedProcessingDelayOnCloud,
 						wlanUploadDelay + wlanDownloadDelay + expectedProcessingDelayOnDrone
 				};
 
@@ -260,7 +258,58 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 			}
 
 			result = options[MAB.runUCB(task.getCloudletLength())];
-		} else if (policy.equals("PREDICTIVE")) {
+		}
+		else if (policy.equals("GAME_THEORY")) {
+			//expected processing delay on Edge
+			double expectedProcessingDelayOnEdge = task.getCloudletLength() /
+					SimManager.getInstance().getEdgeServerManager().getVmList(0).get(0).getMips();
+
+			expectedProcessingDelayOnEdge *= 100 / (100 - avgEdgeUtilization);
+
+			double expectedEdgeDelay = expectedProcessingDelayOnEdge +
+					wlanUploadDelay + wlanDownloadDelay;
+
+			//expected processing delay on Drone
+			double expectedProcessingDelayOnDrone = task.getCloudletLength() /
+					SimManager.getInstance().getDroneServerManager().getVmList(0).get(0).getMips();
+
+			expectedProcessingDelayOnDrone *= 100 / (100 - avgEdgeUtilization);
+
+			double expectedDroneDelay = expectedProcessingDelayOnDrone +
+					wlanUploadDelay + wlanDownloadDelay;
+
+			//expected processing delay on Cloud
+			double expectedProcessingDelayOnCloud = task.getCloudletLength() /
+					SimSettings.getInstance().getMipsForCloudVM();
+
+			expectedProcessingDelayOnCloud *= 100 / (100 - avgCloudUtilization);
+
+			boolean isGsmFaster = SimUtils.getRandomDoubleNumber(0, 1) < 0.5;
+			double expectedCloudDelay = expectedProcessingDelayOnCloud +
+					(isGsmFaster ? gsmUploadDelay : wanUploadDelay) +
+					(isGsmFaster ? gsmDownloadDelay : wanDownloadDelay);
+
+			double taskArrivalRate = SimSettings.getInstance().getTaskLookUpTable()[task.getTaskType()][2];
+			double maxDelay = SimSettings.getInstance().getTaskLookUpTable()[task.getTaskType()][13] * (double)6;
+
+			double Pi_1 = GTH.getPi(task.getMobileDeviceId(), taskArrivalRate, expectedEdgeDelay, expectedCloudDelay, maxDelay);
+			double Pi_2 = GTH.getPi(task.getMobileDeviceId(), taskArrivalRate, expectedDroneDelay, expectedEdgeDelay, maxDelay);
+
+			double randomNumber = SimUtils.getRandomDoubleNumber(0, 1);
+
+			if(Pi_1 > Pi_2)
+				if(Pi_1 > randomNumber)
+					result = EDGE_DATACENTER;
+				else
+					result = (isGsmFaster ? CLOUD_DATACENTER_VIA_GSM : CLOUD_DATACENTER_VIA_RSU);
+			else
+				if(Pi_2 > randomNumber)
+					result = DRONE_DATACENTER;
+				else
+					result = EDGE_DATACENTER;
+		}
+
+		else if (policy.equals("PREDICTIVE")) {
 			//initial probability of different computing paradigms
 			double probabilities[] = {0.25, 0.25, 0.25, 0.25};
 
@@ -360,19 +409,15 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 			edgeVmCounter++;
 			edgeVmCounter = edgeVmCounter % numOfEdgeVMs;
 		} else if (deviceId == DRONE_DATACENTER) {
-//			int numOfDroneVMs = SimSettings.getInstance().getNumOfDroneVMs();
-//			int numOfDroneHosts = SimSettings.getInstance().getNumOfDroneHosts();
-//			int vmPerHost = numOfDroneVMs / numOfDroneHosts;
-//
-//			int hostIndex = (droneVmCounter / vmPerHost) % numOfDroneHosts;
-//			int vmIndex = droneVmCounter % vmPerHost;
-
 			DroneHost host = ((MyMobilityModel) (SimManager.getInstance().getMobilityModel())).getClosestDrone(task.getMobileDeviceId());
-
-			selectedVM = host.getVmList().get(0);
-
-//			droneVmCounter++;
-//			droneVmCounter = droneVmCounter % numOfDroneVMs;
+			double min_util = 100;
+			for(int i = 0; i < host.getVmList().size(); i++){
+				Vm vm = host.getVmList().get(i);
+				if(vm.getTotalUtilizationOfCpu(CloudSim.clock()) < min_util) {
+					min_util = vm.getTotalUtilizationOfCpu(CloudSim.clock());
+					selectedVM = vm;
+				}
+			}
 		} else {
 			SimLogger.printLine("Unknow device id! Terminating simulation...");
 			System.exit(1);

@@ -2,14 +2,11 @@ package edu.boun.edgecloudsim.applications.drone_app;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import edu.boun.edgecloudsim.core.SimManager;
+import edu.boun.edgecloudsim.utils.SimLogger;
 import edu.boun.edgecloudsim.utils.TaskProperty;
 import org.cloudbus.cloudsim.CloudletSchedulerTimeShared;
 import org.cloudbus.cloudsim.Datacenter;
@@ -240,7 +237,6 @@ public class DroneServerManager {
 			int maxWlan = 0;
 			int minWlan = 0;
 			List<Integer> movingWlanIds = new ArrayList<Integer>();
-			int k;
 
 			for (int i = 0; i < taskCount.length; i++) {
 				minWlan = taskCount[i] < taskCount[minWlan] ? i : minWlan;
@@ -248,10 +244,14 @@ public class DroneServerManager {
 			}
 
 			for (int i = 0; i < getDatacenterList().size(); i++) {
-				k = -1;
+				int k = -1;
 				DroneHost host = (DroneHost) (getDatacenterList().get(i).getHostList().get(0));
 				int wlanId = host.getLocation(CloudSim.clock()).getServingWlanId();
-				if (wlanId != maxWlan && !movingWlanIds.contains(wlanId)) {
+
+				//if the host is not in wlan with max tasks,
+				// and is not already moving to some destination,
+				// and no drone is moving from this wlan to the destination
+				if (wlanId != maxWlan && !movingWlanIds.contains(wlanId) && host.getDestination() == wlanId) {
 					// move neighbour drones to the maxWlan
 					if (SimSettings.getInstance().checkNeighborCells(wlanId, minWlan))
 						k = host.moveToWlan(0.7, maxWlan);
@@ -307,6 +307,51 @@ public class DroneServerManager {
 				}
 			}
 
+		} else if (SimSettings.getInstance().getDronesMovementStrategy().equalsIgnoreCase("UTIL")) {
+			List<DroneHost> highlyUtilizedWlans = new ArrayList<DroneHost>();
+			List<Integer> movingWlanIds = new ArrayList<Integer>();
+
+			for (int i = 0; i < getDatacenterList().size(); i++) {
+				DroneHost host = (DroneHost) (getDatacenterList().get(i).getHostList().get(0));
+
+				int wlanId = host.getLocation(CloudSim.clock()).getServingWlanId();
+				double util = 0;
+				Location loc = host.getLocation(CloudSim.clock());
+				for (int j = 0; j < 2; j++) {
+					double util_i = host.getVmList().get(j).getTotalUtilizationOfCpu(CloudSim.clock());
+					util += util_i;
+					SimLogger.getInstance().addDroneLocationLog(host.getId(), CloudSim.clock(), loc.getXPos(), loc.getYPos(), wlanId, util_i);
+				}
+				util /= 2;
+				// System.err.println("\n" + host.getId() + ", " + wlanId + ", " + util);
+				if (util > 20) {
+					highlyUtilizedWlans.add(host);
+				}
+			}
+
+			for (int i = 0; i < highlyUtilizedWlans.size(); i++) {
+				DroneHost host = highlyUtilizedWlans.get(i);
+				int wlanId = host.getLocation(CloudSim.clock()).getServingWlanId();
+
+				for (int j = 0; j < getDatacenterList().size(); j++) {
+					DroneHost hostToMove = (DroneHost) (getDatacenterList().get(j).getHostList().get(0));
+					int wlanToMove = hostToMove.getLocation(CloudSim.clock()).getServingWlanId();
+					int k = -1;
+
+					// if host is not highly utilized already,
+					// and is not moving to a destination
+					if (wlanToMove != wlanId
+							&& !movingWlanIds.contains(wlanToMove)
+							&& wlanToMove == hostToMove.getDestination()
+							&& !highlyUtilizedWlans.contains(hostToMove)) {
+						if (SimSettings.getInstance().checkNeighborCells(wlanToMove, wlanId)) {
+							k = hostToMove.moveToWlan(0.8, wlanId);
+							if (k > -1)
+								movingWlanIds.add(k);
+						}
+					}
+				}
+			}
 		}
 	}
 
