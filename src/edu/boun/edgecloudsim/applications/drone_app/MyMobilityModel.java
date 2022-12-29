@@ -9,6 +9,7 @@ import edu.boun.edgecloudsim.mobility.MobilityModel;
 import edu.boun.edgecloudsim.utils.Location;
 import edu.boun.edgecloudsim.utils.SimUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MyMobilityModel extends MobilityModel {
@@ -44,40 +45,41 @@ public class MyMobilityModel extends MobilityModel {
 	}
 
 	public DroneHost getClosestDrone(int mobileID) {
-		DroneHost host = null;
+		List<Integer> hosts = new ArrayList<Integer>();
 		double minDist = Integer.MAX_VALUE;
 		Location deviceLoc = SimManager.getInstance().getMobilityModel().getLocation(mobileID, CloudSim.clock());
-		int j = 0;
 
 		//TODO: choose host randomly within a wlan
 		for (int i = 0; i < SimManager.getInstance().getDroneServerManager().getDatacenterList().size(); i++) {
 			List<? extends DroneHost> list = SimManager.getInstance().getDroneServerManager().getDatacenterList().get(i).getHostList();
-			Location hostLoc = list.get(j).getLocation(CloudSim.clock());
-			if (hostLoc.getServingWlanId() == deviceLoc.getServingWlanId()) {
-				host = list.get(j);
-				break;
+			Location hostLoc = list.get(0).getLocation(CloudSim.clock());
+			if (hostLoc.getServingWlanId() == deviceLoc.getServingWlanId() &&
+					list.get(0).getDestination() == hostLoc.getServingWlanId()) {
+				hosts.add(i);
 			}
 		}
-		if(host == null) {
+		if(hosts.size() == 0) {
 			for (int i = 0; i < SimManager.getInstance().getDroneServerManager().getDatacenterList().size(); i++) {
 				List<? extends DroneHost> list = SimManager.getInstance().getDroneServerManager().getDatacenterList().get(i).getHostList();
-				Location hostLoc = list.get(j).getLocation(CloudSim.clock());
-				if (SimSettings.getInstance().checkNeighborCells(hostLoc.getServingWlanId(), deviceLoc.getServingWlanId())) {
-					host = list.get(j);
-					break;
+				Location hostLoc = list.get(0).getLocation(CloudSim.clock());
+				if (list.get(0).getDestination() == hostLoc.getServingWlanId() &&
+						SimSettings.getInstance().checkNeighborCells(hostLoc.getServingWlanId(), deviceLoc.getServingWlanId())) {
+					hosts.add(i);
 				} else {
 					double dist = Math.sqrt(Math.pow((hostLoc.getXPos() - deviceLoc.getXPos()), 2) + Math.pow((hostLoc.getYPos() - deviceLoc.getYPos()), 2));
 					if (dist < minDist) {
 						minDist = dist;
-						host = list.get(j);
+						hosts.add(i);
 					}
 				}
 			}
 		}
-		if (host == null) {
+		if(hosts.size() == 0) {
 			SimLogger.printLine("Could not find closest drone! Terminating simulation...");
 			System.exit(1);
 		}
+		int rand = SimUtils.getRandomNumber(0, hosts.size()-1);
+		DroneHost host = (DroneHost)(SimManager.getInstance().getDroneServerManager().getDatacenterList().get(rand).getHostList().get(0));
 		return host;
 	}
 }

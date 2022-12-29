@@ -121,12 +121,11 @@ public class MyNetworkModel extends NetworkModel {
 		SimSettings SS = SimSettings.getInstance();
 
 		int numOfApp = SimSettings.getInstance().getTaskLookUpTable().length;
-		int numOfAccessPoint = SimSettings.getInstance().getNumOfEdgeDatacenters();
+		int numOfAccessPoint = SimSettings.getInstance().getNumOfEdgeDatacenters() + SimSettings.getInstance().getNumOfDroneDatacenters();
 
 		wlanMMPPForDownload = new MMPPWrapper[numOfAccessPoint];
 		wlanMMPPForUpload = new MMPPWrapper[numOfAccessPoint];
 		for(int apIndex=0; apIndex<numOfAccessPoint; apIndex++) {
-			//TODO: we need wlanMMPP for drones as well as edges
 			wlanMMPPForDownload[apIndex] = new MMPPWrapper();
 			wlanMMPPForUpload[apIndex] = new MMPPWrapper();
 		}
@@ -395,7 +394,7 @@ public class MyNetworkModel extends NetworkModel {
 	}
 
 	public void updateMM1QueeuModel(){
-		int numOfAccessPoint = SimSettings.getInstance().getNumOfEdgeDatacenters();
+		int numOfAccessPoint = SimSettings.getInstance().getNumOfEdgeDatacenters() + SimSettings.getInstance().getNumOfDroneDatacenters();
 
 		double lastInterval = CloudSim.clock() - lastMM1QueeuUpdateTime;
 		lastMM1QueeuUpdateTime = CloudSim.clock();

@@ -273,7 +273,7 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 			double expectedProcessingDelayOnDrone = task.getCloudletLength() /
 					SimManager.getInstance().getDroneServerManager().getVmList(0).get(0).getMips();
 
-			expectedProcessingDelayOnDrone *= 100 / (100 - avgEdgeUtilization);
+			expectedProcessingDelayOnDrone *= 100 / (100 - avgDroneUtilization);
 
 			double expectedDroneDelay = expectedProcessingDelayOnDrone +
 					wlanUploadDelay + wlanDownloadDelay;
