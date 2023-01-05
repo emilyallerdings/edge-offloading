@@ -410,6 +410,8 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 			edgeVmCounter = edgeVmCounter % numOfEdgeVMs;
 		} else if (deviceId == DRONE_DATACENTER) {
 			DroneHost host = ((MyMobilityModel) (SimManager.getInstance().getMobilityModel())).getClosestDrone(task.getMobileDeviceId());
+			if(host == null)
+				return null;
 			double min_util = 100;
 			for(int i = 0; i < host.getVmList().size(); i++){
 				Vm vm = host.getVmList().get(i);
@@ -474,6 +476,9 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 	public void taskFailed(Task task) {
 		if (policy.equals("AI_TRAINER"))
 			trainerLogger.addFailStat(task);
+
+		if(policy.equals("PREDICTIVE"))
+			statisticLogger.addFailStat(task);
 
 		if (policy.equals("MAB"))
 			MAB.updateUCB(task, 0);

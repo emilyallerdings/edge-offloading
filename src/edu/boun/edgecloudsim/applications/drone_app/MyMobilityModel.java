@@ -3,7 +3,6 @@ package edu.boun.edgecloudsim.applications.drone_app;
 // in our use case (drone app) task sources are not mobile
 import edu.boun.edgecloudsim.core.SimManager;
 import edu.boun.edgecloudsim.core.SimSettings;
-import edu.boun.edgecloudsim.utils.SimLogger;
 import org.cloudbus.cloudsim.core.CloudSim;
 import edu.boun.edgecloudsim.mobility.MobilityModel;
 import edu.boun.edgecloudsim.utils.Location;
@@ -49,7 +48,7 @@ public class MyMobilityModel extends MobilityModel {
 		double minDist = Integer.MAX_VALUE;
 		Location deviceLoc = SimManager.getInstance().getMobilityModel().getLocation(mobileID, CloudSim.clock());
 
-		//TODO: choose host randomly within a wlan
+		// Check if there is a drone inside the same wlan which is not moving to another
 		for (int i = 0; i < SimManager.getInstance().getDroneServerManager().getDatacenterList().size(); i++) {
 			List<? extends DroneHost> list = SimManager.getInstance().getDroneServerManager().getDatacenterList().get(i).getHostList();
 			Location hostLoc = list.get(0).getLocation(CloudSim.clock());
@@ -58,6 +57,9 @@ public class MyMobilityModel extends MobilityModel {
 				hosts.add(i);
 			}
 		}
+
+		/*
+		// If there is no host in the same wlan, check neighbor wlans
 		if(hosts.size() == 0) {
 			for (int i = 0; i < SimManager.getInstance().getDroneServerManager().getDatacenterList().size(); i++) {
 				List<? extends DroneHost> list = SimManager.getInstance().getDroneServerManager().getDatacenterList().get(i).getHostList();
@@ -65,7 +67,9 @@ public class MyMobilityModel extends MobilityModel {
 				if (list.get(0).getDestination() == hostLoc.getServingWlanId() &&
 						SimSettings.getInstance().checkNeighborCells(hostLoc.getServingWlanId(), deviceLoc.getServingWlanId())) {
 					hosts.add(i);
-				} else {
+				}
+				// if there is no host in neighbor wlans choose the closest host
+				else {
 					double dist = Math.sqrt(Math.pow((hostLoc.getXPos() - deviceLoc.getXPos()), 2) + Math.pow((hostLoc.getYPos() - deviceLoc.getYPos()), 2));
 					if (dist < minDist) {
 						minDist = dist;
@@ -74,12 +78,17 @@ public class MyMobilityModel extends MobilityModel {
 				}
 			}
 		}
-		if(hosts.size() == 0) {
-			SimLogger.printLine("Could not find closest drone! Terminating simulation...");
-			System.exit(1);
+		*/
+//		if(hosts.size() == 0) {
+//			SimLogger.printLine("Could not find closest drone! Terminating simulation...");
+//			System.exit(1);
+//		}
+		if(hosts.size() != 0) {
+			int rand = SimUtils.getRandomNumber(0, hosts.size() - 1);
+			DroneHost host = (DroneHost) (SimManager.getInstance().getDroneServerManager().getDatacenterList().get(rand).getHostList().get(0));
+			return host;
 		}
-		int rand = SimUtils.getRandomNumber(0, hosts.size()-1);
-		DroneHost host = (DroneHost)(SimManager.getInstance().getDroneServerManager().getDatacenterList().get(rand).getHostList().get(0));
-		return host;
+		else
+			return null;
 	}
 }

@@ -239,6 +239,7 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 					System.exit(1);
 				}
 
+				// TODO: iterate over netxHopId which is array of offload devices
 				//The VM on the host which is closest to the task (based on location for Drones, and WLAN Id for Edge devices)
 				Vm selectedVM = SimManager.getInstance().getEdgeOrchestrator().getVmToOffload(task, nextHopId);
 
@@ -485,7 +486,6 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 		{
 			//SimLogger.printLine("Task #" + task.getCloudletId() + " cannot assign to any VM");
 			SimLogger.getInstance().rejectedDueToBandwidth(task.getCloudletId(), CloudSim.clock(), vmType.ordinal(), delayType);
-
 			edgeOrchestrator.taskFailed(task);
 		}
 	}
@@ -546,6 +546,7 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 		double requiredCapacity = ((MyCpuUtilizationModel) task.getUtilizationModelCpu()).predictUtilization(vmType);
 
 		if (requiredCapacity > targetVmCapacity) {
+			// TODO: iterate over netxHopId which is array of offload devices
 			SimLogger.getInstance().rejectedDueToVMCapacity(task.getCloudletId(), CloudSim.clock(), vmType.ordinal());
 			edgeOrchestrator.taskFailed(task);
 		} else {
