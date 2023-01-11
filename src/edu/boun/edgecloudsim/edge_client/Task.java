@@ -25,6 +25,7 @@ public class Task extends Cloudlet {
 	private int hostIndex;
 	private int vmIndex;
 	private int datacenterId;
+	private int[] datacenters;
 
 	public Task(int _mobileDeviceId, int cloudletId, long cloudletLength, int pesNumber,
 			long cloudletFileSize, long cloudletOutputSize,
@@ -37,9 +38,20 @@ public class Task extends Cloudlet {
 		
 		mobileDeviceId = _mobileDeviceId;
 		creationTime = CloudSim.clock();
+		datacenters = new int[]{-1, -1, -1, -1};
+		datacenterId = -1;
 	}
 
-	
+	public void setDatacenters(int[] datacenters_){
+		for(int i=0; i<4; i++){
+			datacenters[i] = datacenters_[i];
+		}
+	}
+
+	public int[] getDatacenters(){
+		return datacenters;
+	}
+
 	public void setSubmittedLocation(Location _submittedLocation){
 		submittedLocation =_submittedLocation;
 	}

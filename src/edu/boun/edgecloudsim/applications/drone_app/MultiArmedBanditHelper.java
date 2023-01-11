@@ -3,6 +3,9 @@ package edu.boun.edgecloudsim.applications.drone_app;
 import edu.boun.edgecloudsim.edge_client.Task;
 import edu.boun.edgecloudsim.utils.SimLogger;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MultiArmedBanditHelper {
     private static final double Beta = 1;
 
@@ -40,7 +43,7 @@ public class MultiArmedBanditHelper {
      * This method is used to find the best choice via Upper Confidence Bound algorithm.
      *
      * @param taskLength  task length
-     * @return int selected datacenter type; 0=EDGE_DATACENTER, 1=CLOUD_DATACENTER_VIA_RSU, 2=CLOUD_DATACENTER_VIA_GSM
+     * @return int selected datacenter type; 0=EDGE_DATACENTER, 1=CLOUD_DATACENTER_VIA_RSU, 2=CLOUD_DATACENTER_VIA_GSM, 3=DRONE_DATACENTER
      */
     public synchronized int runUCB(double taskLength) {
         int result = 0;
@@ -56,6 +59,26 @@ public class MultiArmedBanditHelper {
 
         return result;
     }
+
+    public synchronized int[] runUCBs(double taskLength) {
+        int[] result = {0,0,0,0};
+        double minUtilityFunctionValue = Double.MAX_VALUE;
+        List<Integer> indices = new ArrayList<Integer>();
+
+        for(int r=0; r<4; r++) {
+            for (int i = 0; i < K_tn.length; i++) {
+                double U_t = U_tn[i] - Math.sqrt((Beta * (1 - normalizeTaskLength(taskLength)) * Math.log(t)) / K_tn[i]);
+                if (U_t < minUtilityFunctionValue && !indices.contains(i)) {
+                    minUtilityFunctionValue = U_t;
+                    result[r] = i;
+                    indices.add(i);
+                }
+            }
+
+        }
+        return result;
+    }
+
 
     /**
      * This method is used to find the best choice via Upper Confidence Bound algorithm.

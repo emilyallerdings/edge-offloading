@@ -36,6 +36,7 @@ public class DroneServerManager {
 	public DroneServerManager() {
 		localDatacenters = new ArrayList<Datacenter>();
 		vmList = new ArrayList<List<DroneVM>>();
+		hostIdCounter = 0;
 	}
 
 	public List<DroneVM> getVmList(int hostId) {

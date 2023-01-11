@@ -215,6 +215,9 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 				Task task = (Task) ev.getData();
 
 				// The task has already an associated datacenter which is decided based on delays and orchestration strategy (AssociatedDatacenterId is set in getDeviceToOffload function in MyEdgeOrchestrator)
+				//The VM on the host which is closest to the task (based on location for Drones, and WLAN Id for Edge devices)
+				Vm selectedVM = SimManager.getInstance().getEdgeOrchestrator().getVmToOffload(task, task.getAssociatedDatacenterId());
+
 				int nextHopId = task.getAssociatedDatacenterId();
 				int nextEvent = 0;
 				VM_TYPES vmType = null;
@@ -238,10 +241,6 @@ public class MyMobileDeviceManager extends MobileDeviceManager {
 					SimLogger.printLine("Unknown nextHopId! Terminating simulation...");
 					System.exit(1);
 				}
-
-				// TODO: iterate over netxHopId which is array of offload devices
-				//The VM on the host which is closest to the task (based on location for Drones, and WLAN Id for Edge devices)
-				Vm selectedVM = SimManager.getInstance().getEdgeOrchestrator().getVmToOffload(task, nextHopId);
 
 				if (selectedVM != null) {
 					//set related host id
