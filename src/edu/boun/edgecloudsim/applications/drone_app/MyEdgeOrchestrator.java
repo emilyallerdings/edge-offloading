@@ -207,6 +207,8 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 				if (randomNumber <= probabilities[i] + lastPercentagte) {
 					results[r++] = options[i];
 					resultFound = true;
+				} else {
+					results[3] =  options[i];
 				}
 				lastPercentagte += probabilities[i];
 			}
@@ -232,6 +234,8 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 				if(randomNumber <= probabilities[i] + lastPercentagte) {
 					results[r++] = options[i];
 					resultFound = true;
+				} else {
+					results[3] =  options[i];
 				}
 				lastPercentagte += probabilities[i];
 			}
@@ -424,14 +428,17 @@ public class MyEdgeOrchestrator extends EdgeOrchestrator {
 			double randomNumber = SimUtils.getRandomDoubleNumber(0.01, 0.99);
 			double lastPercentagte = 0;
 			boolean resultFound = false;
+			int r = 0;
 			for(int i=0; i<probabilities.length; i++) {
 				if(randomNumber <= probabilities[i] + lastPercentagte) {
-					result = options[i];
+					results[r++] = options[i];
 					resultFound = true;
-					break;
+				} else {
+					results[3] =  options[i];
 				}
 				lastPercentagte += probabilities[i];
 			}
+			result = results[0];
 
 			if(!resultFound) {
 				SimLogger.printLine("Unexpected probability calculation for predictive orchestrator! Terminating simulation...");
