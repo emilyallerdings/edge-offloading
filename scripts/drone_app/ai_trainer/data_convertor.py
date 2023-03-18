@@ -40,25 +40,33 @@ def getDecisionColumnName(target):
 
 def getClassifierColumns(target):
     if target == "edge":
-        result  = ["NumOffloadedTask", "TaskLength", "WLANUploadDelay", "WLANDownloadDelay", "AvgEdgeUtilization", "Result"]
+        result  = ["ServiceTime","TaskLength","TaskInput","TaskOutput",
+                    "WLANUploadDelay","WLANDownloadDelay","AvgEdgeUtilization","NumOffloadedTask", "Result"]
     elif target == "cloud_rsu":
-        result  = ["NumOffloadedTask", "WANUploadDelay", "WANDownloadDelay", "Result"]
+        result  = ["ServiceTime","TaskLength","TaskInput","TaskOutput","WANUploadDelay","WANDownloadDelay",
+                   "AvgCloudUtilization","NumOffloadedTask", "Result"]
     elif target == "cloud_gsm":
-        result  = ["NumOffloadedTask", "GSMUploadDelay", "GSMDownloadDelay", "Result"]
+        result  = ["ServiceTime","TaskLength","TaskInput","TaskOutput","GSMUploadDelay","GSMDownloadDelay",
+                   "AvgCloudUtilization","NumOffloadedTask", "Result"]
     elif target == "drone":
-        result  = ["NumOffloadedTask", "TaskLength", "WLANUploadDelay", "WLANDownloadDelay", "AvgDroneUtilization", "Result"]
+        result  = ["ServiceTime","TaskLength","TaskInput","TaskOutput",
+                    "WLANUploadDelay","WLANDownloadDelay","AvgDroneUtilization","NumOffloadedTask", "Result"]
     return result
 
 def getRegressionColumns(target):
-    if target == "edge":
-        result = ["TaskLength", "AvgEdgeUtilization", "ServiceTime"]
-    elif target == "cloud_rsu":
-        result = ["TaskLength", "WANUploadDelay", "WANDownloadDelay", "ServiceTime"]
-    elif target == "cloud_gsm":
-        result = ["TaskLength", "GSMUploadDelay", "GSMDownloadDelay", "ServiceTime"]
-    elif target == "drone":
-        result = ["TaskLength", "AvgDroneUtilization", "ServiceTime"]
-    return result
+        if target == "edge":
+            result  = ["ServiceTime","TaskLength","TaskInput","TaskOutput",
+                        "WLANUploadDelay","WLANDownloadDelay","AvgEdgeUtilization","NumOffloadedTask"]
+        elif target == "cloud_rsu":
+            result  = ["ServiceTime","TaskLength","TaskInput","TaskOutput","WANUploadDelay","WANDownloadDelay",
+                       "AvgCloudUtilization","NumOffloadedTask"]
+        elif target == "cloud_gsm":
+            result  = ["ServiceTime","TaskLength","TaskInput","TaskOutput","GSMUploadDelay","GSMDownloadDelay",
+                       "AvgCloudUtilization","NumOffloadedTask"]
+        elif target == "drone":
+            result  = ["ServiceTime","TaskLength","TaskInput","TaskOutput",
+                        "WLANUploadDelay","WLANDownloadDelay","AvgDroneUtilization","NumOffloadedTask"]
+        return result
 
 def znorm(column):
     column = (column - column.mean()) / column.std()
@@ -66,19 +74,22 @@ def znorm(column):
 
 data_set =  []
 
-testDataStartIndex = (train_data_ratio * num_iterations) / 100
-
 for ite in range(num_iterations):
     for mobile in range(min_mobile, max_mobile+1, mobile_step_size):
-        if (datatype == "train" and ite < testDataStartIndex) or (datatype == "test" and ite >= testDataStartIndex):
+        # if (datatype == "train" and ite < testDataStartIndex) or (datatype == "test" and ite >= testDataStartIndex):
             file_name = sim_result_folder + "/ite" + str(ite + 1) + "/" + str(mobile) + "_learnerOutputFile.csv"
             df = [pd.read_csv(file_name, na_values = "?", comment='\t', sep=",")]
             df[0]['MobileCount'] = mobile
-            #print(file_name)
+            # print(file_name)
             data_set += df
 
 data_set = pd.concat(data_set, ignore_index=True)
 data_set = data_set[data_set['Decision'] == getDecisionColumnName(target)]
+
+if datatype == "train":
+    data_set = data_set.sample(frac=train_data_ratio/100)
+else:
+    data_set = data_set.sample(frac=1-train_data_ratio/100)
 
 if method == "classifier":
     targetColumns = getClassifierColumns(target)
