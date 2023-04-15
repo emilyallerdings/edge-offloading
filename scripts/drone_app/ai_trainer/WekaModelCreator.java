@@ -192,8 +192,8 @@ public class WekaModelCreator {
 
 		long diffInMilli = TimeUnit.MILLISECONDS.toMillis(duration);
 		long diffInSeconds = TimeUnit.MILLISECONDS.toSeconds(duration);
-		long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(duration);
-		long diffInHours = TimeUnit.MILLISECONDS.toHours(duration);
+		// long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(duration);
+		// long diffInHours = TimeUnit.MILLISECONDS.toHours(duration);
 		long diffInDays = TimeUnit.MILLISECONDS.toDays(duration);
 		
 		if(diffInDays>0)
