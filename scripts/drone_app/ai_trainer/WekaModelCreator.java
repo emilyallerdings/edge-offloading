@@ -198,11 +198,6 @@ public class WekaModelCreator {
 		
 		if(diffInDays>0)
 			result += diffInDays + ((diffInDays>1 == true) ? " Days " : " Day ");
-		if(diffInHours>0)
-			result += diffInHours % 24 + ((diffInHours>1 == true) ? " Hours " : " Hour ");
-		if(diffInMinutes>0)
-			result += diffInMinutes % 60 + ((diffInMinutes>1 == true) ? " Minutes " : " Minute ");
-		if(diffInSeconds>0)
 			result += diffInSeconds % 60 + ((diffInSeconds>1 == true) ? " Seconds" : " Second");
 		if(diffInMilli>0 && result.isEmpty())
 			result += diffInMilli + ((diffInMilli>1 == true) ? " Milli Seconds" : " Milli Second");
