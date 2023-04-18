@@ -20,7 +20,7 @@ public class MyMainApp {
 	/**
 	 * Creates main() to run this example
 	 */
-	static String configName = "more_drones";
+	static String configName = "default";
 	static String  wekaModelsFolder = "scripts/drone_app/config/weka/" + configName + "/";
 	
 	public static void main(String[] args) {

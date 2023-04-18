@@ -36,7 +36,8 @@ public class WekaModelCreator {
             JSONObject jsonObject = (JSONObject)object;
             
             //Reading the String
-            dataPath = (String) jsonObject.get("arff_foder") + (String) jsonObject.get("config_name");
+            //dataPath = (String) jsonObject.get("arff_foder") + (String) jsonObject.get("config_name");
+			dataPath = "C:/GIT Repo/edge-offloading/sim_results/arff/";
             classifier = (String) jsonObject.get("classifier");
             regressor = (String) jsonObject.get("regressor");
         }
@@ -194,8 +195,8 @@ public class WekaModelCreator {
 
 		long diffInMilli = TimeUnit.MILLISECONDS.toMillis(duration);
 		long diffInSeconds = TimeUnit.MILLISECONDS.toSeconds(duration);
-		// long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(duration);
-		// long diffInHours = TimeUnit.MILLISECONDS.toHours(duration);
+		long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(duration);
+		long diffInHours = TimeUnit.MILLISECONDS.toHours(duration);
 		long diffInDays = TimeUnit.MILLISECONDS.toDays(duration);
 		
 		if(diffInDays>0)

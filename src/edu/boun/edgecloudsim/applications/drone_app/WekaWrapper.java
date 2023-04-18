@@ -17,8 +17,8 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-//import org.json.simple.JSONObject;
-//import org.json.simple.parser.JSONParser;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 public class WekaWrapper {
 	public static final double MAX_WLAN_DELAY = 9; // sec
